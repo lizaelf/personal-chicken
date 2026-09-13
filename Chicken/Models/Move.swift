@@ -11,19 +11,33 @@ enum ChickenMedia: Equatable {
         return false
     }
 
-    var nudgeX: CGFloat {
+    var nudgeX: CGFloat { 0 }
+
+    /// Zoom the fitted frame so the chicken, not the cream margin, spans the phone.
+    var displayScale: CGFloat {
         switch self {
-        case .video("Sequence01"): return -14
-        case .video("Sequence04"): return -6
-        default: return 0
+        case .video("Sequence01"): return 1.42
+        case .video("Sequence04"): return 1.18
+        case .video("SequenceCharm"): return 1.12
+        default: return 1
         }
     }
 
-    var displayScale: CGFloat {
+    var frameInterval: TimeInterval {
         switch self {
-        case .video("Sequence01"): return 1.14
-        case .video("Sequence04"): return 1.22
-        case .video("SequenceCharm"): return 1.5
+        case .video("Sequence01"): return 1.0 / 9.0
+        case .video("Sequence04"): return 1.0 / 14.0
+        case .video("SequenceCharm"): return 1.0 / 10.0
+        default: return 1.0 / 10.0
+        }
+    }
+
+    /// Pixel aspect of the bundled clip after cream margins were cropped out.
+    var aspectRatio: CGFloat {
+        switch self {
+        case .video("Sequence01"): return 1174.0 / 810.0
+        case .video("Sequence04"): return 982.0 / 920.0
+        case .video("SequenceCharm"): return 762.0 / 956.0
         default: return 1
         }
     }
