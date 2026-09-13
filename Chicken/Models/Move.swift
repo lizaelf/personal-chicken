@@ -24,8 +24,8 @@ enum ChickenMedia: Equatable {
     var aspectRatio: CGFloat {
         switch self {
         case .video("Sequence01"): return 800.0 / 560.0
-        case .video("Sequence04"): return 982.0 / 920.0
-        case .video("SequenceCharm"): return 762.0 / 956.0
+        case .video("Sequence04"): return 800.0 / 748.0
+        case .video("SequenceCharm"): return 800.0 / 1009.0
         default: return 1
         }
     }
