@@ -37,21 +37,10 @@ struct WorkoutView: View {
             }
             .padding(.top, 49)
 
-            Spacer(minLength: 23)
-
-            ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
-                .id(session.currentMove.id)
-                .frame(maxWidth: .infinity)
-                .frame(height: 336)
-                .scaleEffect(session.currentMove.media.displayScale)
-                .offset(x: session.currentMove.media.nudgeX)
-                .padding(.horizontal, 16)
-                .transition(.asymmetric(
-                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal: .move(edge: .leading).combined(with: .opacity)
-                ))
-
-            Spacer(minLength: 8)
+            media
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.top, 23)
+                .padding(.bottom, 8)
 
             WorkoutControls(
                 isPaused: session.isPaused,
@@ -66,5 +55,24 @@ struct WorkoutView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 32)
         }
+    }
+
+    @ViewBuilder
+    private var media: some View {
+        let move = session.currentMove
+        GeometryReader { geo in
+            let inset: CGFloat = move.media.isVideo ? 0 : 16
+            ChickenMediaView(media: move.media, isPlaying: !session.isPaused)
+                .id(move.id)
+                .frame(width: geo.size.width - inset * 2, height: geo.size.height)
+                .scaleEffect(move.media.isVideo ? move.media.displayScale : 1)
+                .offset(x: move.media.isVideo ? move.media.nudgeX : 0)
+                .frame(width: geo.size.width, height: geo.size.height)
+        }
+        .clipped()
+        .transition(.asymmetric(
+            insertion: .move(edge: .trailing).combined(with: .opacity),
+            removal: .move(edge: .leading).combined(with: .opacity)
+        ))
     }
 }

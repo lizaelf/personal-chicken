@@ -13,17 +13,18 @@ enum ChickenMedia: Equatable {
 
     var nudgeX: CGFloat {
         switch self {
-        case .video("Sequence01"): return -14
-        case .video("Sequence04"): return -6
+        case .video("Sequence01"): return -10
+        case .video("Sequence04"): return -4
         default: return 0
         }
     }
 
+    /// Zoom so the chicken, not the empty cream margin, fills the screen width.
     var displayScale: CGFloat {
         switch self {
-        case .video("Sequence01"): return 1.14
-        case .video("Sequence04"): return 1.22
-        case .video("SequenceCharm"): return 1.5
+        case .video("Sequence01"): return 1.34
+        case .video("Sequence04"): return 1.47
+        case .video("SequenceCharm"): return 1.44
         default: return 1
         }
     }

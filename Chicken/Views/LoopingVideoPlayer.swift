@@ -15,6 +15,10 @@ struct LoopingVideoPlayer: UIViewRepresentable {
         view.playerLayer.isOpaque = false
         view.playerLayer.backgroundColor = UIColor.clear.cgColor
         view.playerLayer.videoGravity = .resizeAspect
+        view.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        view.setContentHuggingPriority(.defaultLow, for: .vertical)
+        view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
         view.load(resourceName: resourceName)
         view.setPlaying(isPlaying)
         return view
@@ -28,7 +32,9 @@ struct LoopingVideoPlayer: UIViewRepresentable {
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: PlayerView, context: Context) -> CGSize {
-        proposal.replacingUnspecifiedDimensions(by: CGSize(width: 402, height: 336))
+        let width = proposal.width ?? 402
+        let height = proposal.height ?? width * (970 / 1280)
+        return CGSize(width: width, height: height)
     }
 
     static func dismantleUIView(_ uiView: PlayerView, coordinator: ()) {
