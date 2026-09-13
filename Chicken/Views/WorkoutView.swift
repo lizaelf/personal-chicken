@@ -40,6 +40,8 @@ struct WorkoutView: View {
             ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
                 .id(session.currentMove.id)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .offset(x: session.currentMove.media.nudgeX)
+                .clipped()
                 .padding(.top, 4)
                 .padding(.bottom, 4)
                 .transition(.asymmetric(
