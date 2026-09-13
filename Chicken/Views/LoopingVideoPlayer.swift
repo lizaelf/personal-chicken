@@ -1,7 +1,9 @@
 import SwiftUI
 import UIKit
 
-/// Loops bundled JPEG frames. SwiftUI `Image` sizes reliably — unlike `AVPlayerLayer`.
+/// Loops bundled PNG/JPEG frames. PNG keeps the ProRes 4444 alpha so drop
+/// shadows stay translucent instead of flattening to black. SwiftUI `Image`
+/// sizes reliably — unlike `AVPlayerLayer`.
 /// Frame index is derived from the timeline date so we never mutate `@State`
 /// during a view update (that crashed Simulator to a white launch screen).
 struct LoopingVideoPlayer: View {
@@ -27,7 +29,7 @@ struct LoopingVideoPlayer: View {
         .clipped()
         .transaction { $0.animation = nil }
         .task(id: resourceName) {
-            frames = Self.loadJPEGs(named: resourceName)
+            frames = Self.loadFrames(named: resourceName)
         }
     }
 
@@ -68,26 +70,28 @@ struct LoopingVideoPlayer: View {
         return frames[i]
     }
 
-    private static func loadJPEGs(named resourceName: String) -> [UIImage] {
+    private static func loadFrames(named resourceName: String) -> [UIImage] {
         let bundle = Bundle.main
         let subdirectories = [
             "Frames/\(resourceName)",
             resourceName,
             "Frames",
         ]
-        for subdirectory in subdirectories {
-            if let urls = bundle.urls(forResourcesWithExtension: "jpg", subdirectory: subdirectory),
-               !urls.isEmpty {
-                let filtered: [URL]
-                if subdirectory == "Frames" {
-                    filtered = urls.filter { $0.path.contains("/\(resourceName)/") }
-                } else {
-                    filtered = urls
+        for ext in ["png", "jpg"] {
+            for subdirectory in subdirectories {
+                if let urls = bundle.urls(forResourcesWithExtension: ext, subdirectory: subdirectory),
+                   !urls.isEmpty {
+                    let filtered: [URL]
+                    if subdirectory == "Frames" {
+                        filtered = urls.filter { $0.path.contains("/\(resourceName)/") }
+                    } else {
+                        filtered = urls
+                    }
+                    let images = filtered
+                        .sorted { $0.lastPathComponent < $1.lastPathComponent }
+                        .compactMap { UIImage(contentsOfFile: $0.path) }
+                    if !images.isEmpty { return images }
                 }
-                let images = filtered
-                    .sorted { $0.lastPathComponent < $1.lastPathComponent }
-                    .compactMap { UIImage(contentsOfFile: $0.path) }
-                if !images.isEmpty { return images }
             }
         }
 
@@ -98,8 +102,9 @@ struct LoopingVideoPlayer: View {
             at: folder,
             includingPropertiesForKeys: nil
         )) ?? []
-        return contents
-            .filter { $0.pathExtension.lowercased() == "jpg" }
+        let preferred = contents.filter { $0.pathExtension.lowercased() == "png" }
+        let fallback = contents.filter { $0.pathExtension.lowercased() == "jpg" }
+        return (preferred.isEmpty ? fallback : preferred)
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
             .compactMap { UIImage(contentsOfFile: $0.path) }
     }

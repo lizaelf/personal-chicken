@@ -20,10 +20,10 @@ enum ChickenMedia: Equatable {
         }
     }
 
-    /// Pixel aspect of the bundled clip after cream margins were cropped out.
+    /// Pixel aspect of the bundled clip after empty margins were cropped out.
     var aspectRatio: CGFloat {
         switch self {
-        case .video("Sequence01"): return 1174.0 / 810.0
+        case .video("Sequence01"): return 800.0 / 560.0
         case .video("Sequence04"): return 982.0 / 920.0
         case .video("SequenceCharm"): return 762.0 / 956.0
         default: return 1
