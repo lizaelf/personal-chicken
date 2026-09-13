@@ -4,37 +4,42 @@ struct CompletionView: View {
     let onRestart: () -> Void
 
     var body: some View {
-        ZStack(alignment: .top) {
-            ChickenMediaView(media: .video("SequenceCharm"))
-                .aspectRatio(ChickenMedia.video("SequenceCharm").aspectRatio, contentMode: .fit)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 24)
-                .padding(.top, 132)
+        GeometryReader { geo in
+            let scale = geo.size.width / 402
 
-            VStack {
-                Spacer()
-                Text("I’ll charm you\ninto coming back!")
-                    .font(.workear(size: 32, relativeTo: .title))
-                    .lineSpacing(6)
-                    .foregroundStyle(Theme.charmInk)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 373)
-                    .padding(.bottom, 116)
-            }
+            ZStack(alignment: .top) {
+                ChickenMediaView(media: .video("SequenceCharm"))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.top, 100 * scale)
+                    .padding(.bottom, 160 * scale)
 
-            HStack {
-                Spacer()
-                Button(action: onRestart) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Theme.ink)
-                        .frame(width: 56, height: 56)
+                VStack {
+                    Spacer()
+                    Text("I’ll charm you\ninto coming back!")
+                        .font(.workear(size: 32 * scale, relativeTo: .title))
+                        .lineSpacing(6 * scale)
+                        .foregroundStyle(Theme.charmInk)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 16 * scale)
+                        .padding(.bottom, 100 * scale)
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Close")
+
+                HStack {
+                    Spacer()
+                    Button(action: onRestart) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16 * scale, weight: .semibold))
+                            .foregroundStyle(Theme.ink)
+                            .frame(width: 56 * scale, height: 56 * scale)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Close")
+                }
+                .padding(.top, 52 * scale)
+                .padding(.horizontal, 16 * scale)
             }
-            .padding(.top, 52)
-            .padding(.horizontal, 16)
+            .frame(width: geo.size.width, height: geo.size.height)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())

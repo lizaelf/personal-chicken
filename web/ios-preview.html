@@ -12,13 +12,13 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       height: 100%;
-      background: #1a1210;
+      background: #fcf6ea;
       font-family: "Workear Font", ui-rounded, sans-serif;
     }
-    body { display: grid; place-items: center; }
+    body { min-height: 100dvh; }
     .phone {
-      width: 402px;
-      height: 874px;
+      width: 100%;
+      height: 100dvh;
       position: relative;
       overflow: hidden;
       background: #fcf6ea;
@@ -34,24 +34,24 @@
     }
     .header {
       position: absolute;
-      top: 60px;
-      left: 16px;
-      right: 16px;
+      top: max(52px, 6vh);
+      left: 4vw;
+      right: 4vw;
       z-index: 2;
     }
-    .move-label { font-size: 12px; line-height: 14px; color: #826d5e; }
+    .move-label { font-size: clamp(12px, 3vw, 16px); line-height: 1.2; color: #826d5e; }
     .pips { display: flex; gap: 10px; margin-top: 10px; }
     .pip { flex: 1; height: 8px; border-radius: 999px; border: 1px solid #ef6856; }
     .pip.filled { background: #ef6856; }
-    .timer-block { position: absolute; top: 141px; left: 0; right: 0; text-align: center; z-index: 2; }
-    .time { font-size: 84px; line-height: 84px; }
-    .move-name { font-size: 20px; line-height: 32px; color: rgba(0,0,0,0.4); }
+    .timer-block { position: absolute; top: 16vh; left: 0; right: 0; text-align: center; z-index: 2; }
+    .time { font-size: clamp(52px, 21vw, 96px); line-height: 1; }
+    .move-name { font-size: clamp(16px, 5vw, 24px); line-height: 1.4; color: rgba(0,0,0,0.4); }
     .chicken {
       position: absolute;
       left: 0;
       right: 0;
-      top: 250px;
-      bottom: 120px;
+      top: 28vh;
+      bottom: 18vh;
       display: grid;
       place-items: center;
     }
@@ -64,16 +64,18 @@
     }
     .controls {
       position: absolute;
-      left: 16px;
-      right: 16px;
-      bottom: 32px;
+      left: 4vw;
+      right: 4vw;
+      bottom: 4vh;
       display: flex;
-      gap: 12px;
+      gap: 3vw;
       z-index: 2;
     }
     .pause {
-      width: 72px;
-      height: 72px;
+      width: 18vw;
+      height: 18vw;
+      max-width: 80px;
+      max-height: 80px;
       border: 0;
       border-radius: 25px;
       background: #fff;
@@ -81,12 +83,13 @@
     }
     .next {
       flex: 1;
-      height: 72px;
+      height: 18vw;
+      max-height: 80px;
       border: 0;
       border-radius: 25px;
       background: #ef6856;
       color: #fefcf4;
-      font: 20px/1 "Workear Font", sans-serif;
+      font: clamp(16px, 5vw, 22px)/1 "Workear Font", sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;

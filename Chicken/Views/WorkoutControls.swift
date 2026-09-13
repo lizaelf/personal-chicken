@@ -3,49 +3,55 @@ import SwiftUI
 struct WorkoutControls: View {
     let isPaused: Bool
     let isLastMove: Bool
+    var layoutScale: CGFloat = 1
     let onTogglePause: () -> Void
     let onNext: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
+        let buttonHeight = 72 * layoutScale
+        let iconSize = 32 * layoutScale
+        let corner = 25.125 * layoutScale
+
+        HStack(spacing: 12 * layoutScale) {
             Button(action: onTogglePause) {
                 Group {
                     if isPaused {
                         Image(systemName: "play.fill")
-                            .font(.system(size: 22, weight: .semibold))
+                            .font(.system(size: 22 * layoutScale, weight: .semibold))
                             .foregroundStyle(Theme.ink)
                     } else {
                         Image("IconPause")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 32, height: 32)
+                            .frame(width: iconSize, height: iconSize)
                     }
                 }
-                .frame(width: 72, height: 72)
-                .background(.white, in: RoundedRectangle(cornerRadius: 25.125, style: .continuous))
+                .frame(width: buttonHeight, height: buttonHeight)
+                .background(.white, in: RoundedRectangle(cornerRadius: corner, style: .continuous))
             }
             .buttonStyle(.plain)
-            .shadow(color: .black.opacity(0.1), radius: 1.35, x: 0, y: 0.9)
+            .shadow(color: .black.opacity(0.1), radius: 1.35 * layoutScale, x: 0, y: 0.9 * layoutScale)
             .accessibilityLabel(isPaused ? "Resume" : "Pause")
 
             Button(action: onNext) {
-                HStack(spacing: 12) {
+                HStack(spacing: 12 * layoutScale) {
                     Text(isLastMove ? "Done" : "Next")
-                        .font(.workear(size: 20, relativeTo: .title3))
+                        .font(.workear(size: 20 * layoutScale, relativeTo: .title3))
                         .foregroundStyle(Theme.buttonCream)
                     if !isLastMove {
                         Image("IconArrow")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 32, height: 32)
+                            .frame(width: iconSize, height: iconSize)
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: 72)
-                .background(Theme.coral, in: RoundedRectangle(cornerRadius: 25.125, style: .continuous))
+                .frame(height: buttonHeight)
+                .background(Theme.coral, in: RoundedRectangle(cornerRadius: corner, style: .continuous))
             }
             .buttonStyle(.plain)
-            .shadow(color: .black.opacity(0.1), radius: 1.35, x: 0, y: 0.9)
+            .shadow(color: .black.opacity(0.1), radius: 1.35 * layoutScale, x: 0, y: 0.9 * layoutScale)
         }
+        .frame(maxWidth: .infinity)
     }
 }

@@ -13,8 +13,10 @@ struct ProgressPips: View {
                         Capsule()
                             .stroke(Theme.coral, lineWidth: 1)
                     }
+                    .frame(maxWidth: .infinity)
                     .frame(height: 8)
             }
         }
+        .frame(maxWidth: .infinity)
     }
 }
