@@ -11,20 +11,16 @@ enum ChickenMedia: Equatable {
         return false
     }
 
-    var nudgeX: CGFloat {
-        switch self {
-        case .video("Sequence01"): return -10
-        case .video("Sequence04"): return -4
-        default: return 0
-        }
-    }
+    var nudgeX: CGFloat { 0 }
 
-    /// Zoom so the chicken, not the empty cream margin, fills the screen width.
-    var displayScale: CGFloat {
+    var displayScale: CGFloat { 1 }
+
+    /// Pixel aspect of the bundled clip after cream margins were cropped out.
+    var aspectRatio: CGFloat {
         switch self {
-        case .video("Sequence01"): return 1.34
-        case .video("Sequence04"): return 1.47
-        case .video("SequenceCharm"): return 1.44
+        case .video("Sequence01"): return 1174 / 810
+        case .video("Sequence04"): return 982 / 920
+        case .video("SequenceCharm"): return 762 / 956
         default: return 1
         }
     }

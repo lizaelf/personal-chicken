@@ -32,9 +32,7 @@ struct LoopingVideoPlayer: UIViewRepresentable {
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: PlayerView, context: Context) -> CGSize {
-        let width = proposal.width ?? 402
-        let height = proposal.height ?? width * (970 / 1280)
-        return CGSize(width: width, height: height)
+        proposal.replacingUnspecifiedDimensions(by: CGSize(width: 402, height: 280))
     }
 
     static func dismantleUIView(_ uiView: PlayerView, coordinator: ()) {

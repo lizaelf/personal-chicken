@@ -6,9 +6,9 @@ struct CompletionView: View {
     var body: some View {
         ZStack(alignment: .top) {
             ChickenMediaView(media: .video("SequenceCharm"))
-                .frame(width: 348, height: 432)
-                .scaleEffect(ChickenMedia.video("SequenceCharm").displayScale)
+                .aspectRatio(ChickenMedia.video("SequenceCharm").aspectRatio, contentMode: .fit)
                 .frame(maxWidth: .infinity)
+                .padding(.horizontal, 24)
                 .padding(.top, 132)
 
             VStack {
