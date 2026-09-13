@@ -15,6 +15,15 @@ enum ChickenMedia: Equatable {
 
     var displayScale: CGFloat { 1 }
 
+    var frameInterval: TimeInterval {
+        switch self {
+        case .video("Sequence01"): return 1.0 / 9.0
+        case .video("Sequence04"): return 1.0 / 14.0
+        case .video("SequenceCharm"): return 1.0 / 10.0
+        default: return 1.0 / 10.0
+        }
+    }
+
     /// Pixel aspect of the bundled clip after cream margins were cropped out.
     var aspectRatio: CGFloat {
         switch self {

@@ -27,6 +27,7 @@
 		A11VIDEOBUILD00000000004 /* Sequence01.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000004 /* Sequence01.mp4 */; };
 		A11VIDEOBUILD00000000005 /* Sequence04.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000005 /* Sequence04.mp4 */; };
 		A11VIDEOBUILD00000000006 /* SequenceCharm.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000006 /* SequenceCharm.mp4 */; };
+		A11FRAMEBUILD00000000001 /* Frames in Resources */ = {isa = PBXBuildFile; fileRef = A11FRAMEFOLDER00000000001 /* Frames */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		A11VIDEOFILE000000000004 /* Sequence01.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence01.mp4; sourceTree = "<group>"; };
 		A11VIDEOFILE000000000005 /* Sequence04.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence04.mp4; sourceTree = "<group>"; };
 		A11VIDEOFILE000000000006 /* SequenceCharm.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SequenceCharm.mp4; sourceTree = "<group>"; };
+		A11FRAMEFOLDER00000000001 /* Frames */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Frames; sourceTree = "<group>"; };
 		ED6C91918BE148E58730BAD6 /* ChickenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenApp.swift; sourceTree = "<group>"; };
 		A6EB6077B16341DE851559E2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		8207082F42834AE785EBB36E /* Move.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 				117ED6727B9F486DAB85DB37 /* Assets.xcassets */,
 				03FC146E56114C9AA8021CFC /* Fonts */,
 				A11VIDEOGROUP00000000001 /* Videos */,
+				A11FRAMEFOLDER00000000001 /* Frames */,
 				2FB77763CD9046638C58A97E /* Info.plist */,
 			);
 			path = Chicken;
@@ -207,6 +210,7 @@
 				A11VIDEOBUILD00000000004 /* Sequence01.mp4 in Resources */,
 				A11VIDEOBUILD00000000005 /* Sequence04.mp4 in Resources */,
 				A11VIDEOBUILD00000000006 /* SequenceCharm.mp4 in Resources */,
+				A11FRAMEBUILD00000000001 /* Frames in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

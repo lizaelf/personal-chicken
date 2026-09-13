@@ -37,10 +37,15 @@ struct WorkoutView: View {
             }
             .padding(.top, 49)
 
-            media
+            ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
+                .id(session.currentMove.id)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.top, 12)
                 .padding(.bottom, 8)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .move(edge: .leading).combined(with: .opacity)
+                ))
 
             WorkoutControls(
                 isPaused: session.isPaused,
@@ -56,29 +61,5 @@ struct WorkoutView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 32)
         }
-    }
-
-    @ViewBuilder
-    private var media: some View {
-        let move = session.currentMove
-        GeometryReader { geo in
-            let width = geo.size.width
-            let height: CGFloat = {
-                guard move.media.isVideo else { return geo.size.height }
-                return min(geo.size.height, width / move.media.aspectRatio)
-            }()
-            Color.clear
-                .frame(width: move.media.isVideo ? width : max(width - 32, 0), height: height)
-                .overlay {
-                    ChickenMediaView(media: move.media, isPlaying: !session.isPaused)
-                        .id(move.id)
-                }
-                .position(x: geo.size.width / 2, y: geo.size.height / 2)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .transition(.asymmetric(
-            insertion: .move(edge: .trailing).combined(with: .opacity),
-            removal: .move(edge: .leading).combined(with: .opacity)
-        ))
     }
 }
