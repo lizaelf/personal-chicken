@@ -15,6 +15,7 @@ struct CompletionView: View {
                     .padding(.top, 100 * scale)
                     .padding(.bottom, 160 * scale)
                     .clipped()
+                    .transaction { $0.animation = nil }
 
                 VStack {
                     Spacer()

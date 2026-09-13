@@ -54,10 +54,7 @@ struct WorkoutView: View {
                             .id(session.currentMove.id)
                     }
                     .clipped()
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
+                    .transaction { $0.animation = nil }
 
                 WorkoutControls(
                     isPaused: session.isPaused,

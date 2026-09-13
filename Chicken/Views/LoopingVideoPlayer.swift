@@ -21,9 +21,11 @@ struct LoopingVideoPlayer: View {
                     .scaledToFit()
                     .frame(width: size.width, height: size.height)
                     .frame(width: geo.size.width, height: geo.size.height)
+                    .transaction { $0.animation = nil }
             }
         }
         .clipped()
+        .transaction { $0.animation = nil }
         .task(id: resourceName) {
             frames = Self.loadJPEGs(named: resourceName)
         }
