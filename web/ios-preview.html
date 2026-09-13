@@ -12,6 +12,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       height: 100%;
+      overflow-x: hidden;
       background: #fcf6ea;
       font-family: "Workear Font", ui-rounded, sans-serif;
     }
@@ -54,13 +55,14 @@
       bottom: 18vh;
       display: grid;
       place-items: center;
+      overflow: hidden;
     }
     .chicken img {
       width: 100%;
+      max-width: 100%;
+      max-height: 100%;
       height: auto;
       object-fit: contain;
-      transform: scale(1.42);
-      transform-origin: center center;
     }
     .controls {
       position: absolute;

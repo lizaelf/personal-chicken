@@ -11,18 +11,6 @@ enum ChickenMedia: Equatable {
         return false
     }
 
-    var nudgeX: CGFloat { 0 }
-
-    /// Zoom the fitted frame so the chicken, not the cream margin, spans the phone.
-    var displayScale: CGFloat {
-        switch self {
-        case .video("Sequence01"): return 1.42
-        case .video("Sequence04"): return 1.18
-        case .video("SequenceCharm"): return 1.12
-        default: return 1
-        }
-    }
-
     var frameInterval: TimeInterval {
         switch self {
         case .video("Sequence01"): return 1.0 / 9.0

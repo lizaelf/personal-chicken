@@ -11,12 +11,16 @@ struct PaperBackground: View {
 /// H.264 clips still sit on the same texture as the rest of the screen.
 struct PaperOverlay: View {
     var body: some View {
-        Image("PaperTexture")
-            .resizable()
-            .scaledToFill()
+        Color.clear
+            .ignoresSafeArea()
+            .overlay {
+                Image("PaperTexture")
+                    .resizable()
+                    .scaledToFill()
+            }
+            .clipped()
             .blendMode(.multiply)
             .opacity(0.9)
-            .ignoresSafeArea()
             .allowsHitTesting(false)
     }
 }

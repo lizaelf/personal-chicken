@@ -47,10 +47,12 @@ struct WorkoutView: View {
                 }
                 .padding(.top, 36 * scale)
 
-                ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
-                    .id(session.currentMove.id)
+                Color.clear
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .offset(x: session.currentMove.media.nudgeX)
+                    .overlay {
+                        ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
+                            .id(session.currentMove.id)
+                    }
                     .clipped()
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -73,7 +75,9 @@ struct WorkoutView: View {
                 .padding(.bottom, 32 * scale)
             }
             .frame(width: width, height: geo.size.height)
+            .clipped()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
     }
 }

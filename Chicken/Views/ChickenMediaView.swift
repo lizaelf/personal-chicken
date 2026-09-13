@@ -17,11 +17,12 @@ struct ChickenMediaView: View {
                     resourceName: name,
                     isPlaying: isPlaying,
                     frameInterval: media.frameInterval,
-                    displayScale: media.displayScale,
                     aspectRatio: media.aspectRatio
                 )
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
         .accessibilityHidden(true)
     }
 }

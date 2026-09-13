@@ -8,10 +8,13 @@ struct CompletionView: View {
             let scale = geo.size.width / 402
 
             ZStack(alignment: .top) {
-                ChickenMediaView(media: .video("SequenceCharm"))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                Color.clear
+                    .overlay {
+                        ChickenMediaView(media: .video("SequenceCharm"))
+                    }
                     .padding(.top, 100 * scale)
                     .padding(.bottom, 160 * scale)
+                    .clipped()
 
                 VStack {
                     Spacer()
@@ -40,8 +43,10 @@ struct CompletionView: View {
                 .padding(.horizontal, 16 * scale)
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            .clipped()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
         .contentShape(Rectangle())
         .onTapGesture(perform: onRestart)
         .accessibilityAddTraits(.isButton)

@@ -32,6 +32,8 @@ struct RootView: View {
 
             PaperOverlay()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
     }
 }
 

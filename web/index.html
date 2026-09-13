@@ -25,6 +25,7 @@
 
     html, body {
       height: 100%;
+      overflow-x: hidden;
       background: var(--cream);
       font-family: "Workear Font", ui-rounded, "SF Pro Rounded", sans-serif;
     }
@@ -188,7 +189,7 @@
 
     .chicken-wrap img {
       width: 92%;
-      max-width: none;
+      max-width: 100%;
       max-height: 100%;
       height: auto;
       object-fit: contain;
@@ -196,21 +197,11 @@
 
     .chicken-wrap video {
       width: 100%;
-      max-width: none;
-      max-height: none;
+      max-width: 100%;
+      max-height: 100%;
       height: auto;
       object-fit: contain;
       background: transparent;
-    }
-
-    .chicken-wrap video.zoomed {
-      transform: scale(1.42);
-      transform-origin: center center;
-    }
-
-    .chicken-wrap video.larger {
-      transform: scale(1.18);
-      transform-origin: center center;
     }
 
     .controls {
@@ -306,7 +297,7 @@
       </div>
       <div class="chicken-wrap">
         <img id="chicken" class="hidden" alt="" />
-        <video id="chickenVideo" class="hidden zoomed" muted loop playsinline autoplay></video>
+        <video id="chickenVideo" class="hidden" muted loop playsinline autoplay></video>
       </div>
       </div>
       <div class="controls">
@@ -333,7 +324,7 @@
     const moves = [
       { name: "ABS", duration: 28, src: "../Chicken/Assets.xcassets/ChickenAbs.imageset/ChickenAbs.png" },
       { name: "Dumbbell shoulder press", duration: 5 * 60 + 28, src: "../Chicken/Assets.xcassets/ChickenShoulderPress.imageset/ChickenShoulderPress.png" },
-      { name: "Overhead press", duration: 45, video: "../Chicken/Videos/Sequence01.webm", zoomed: true },
+      { name: "Overhead press", duration: 45, video: "../Chicken/Videos/Sequence01.webm" },
       { name: "Dumbbell shoulder press", duration: 5 * 60 + 28, video: "../Chicken/Videos/Sequence04.webm?v=desk", larger: true },
     ];
 
@@ -370,8 +361,6 @@
       if (move.video) {
         chicken.classList.add("hidden");
         chickenVideo.classList.remove("hidden");
-        chickenVideo.classList.toggle("zoomed", Boolean(move.zoomed));
-        chickenVideo.classList.toggle("larger", Boolean(move.larger));
         chickenVideo.muted = true;
         chickenVideo.playsInline = true;
         const abs = new URL(move.video, window.location.href).href;
