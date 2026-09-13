@@ -18,7 +18,7 @@ struct LoopingVideoPlayer: View {
             let width = geo.size.width
             let fittedHeight = width / max(aspectRatio, 0.1)
             TimelineView(.animation(minimumInterval: max(frameInterval, 0.04), paused: !isPlaying)) { context in
-                frameImage(at: context.date)
+                resolvedImage(at: context.date)
                     .resizable()
                     .scaledToFit()
                     .frame(width: width, height: fittedHeight)
@@ -32,15 +32,14 @@ struct LoopingVideoPlayer: View {
         }
     }
 
-    @ViewBuilder
-    private func frameImage(at date: Date) -> Image {
+    private func resolvedImage(at date: Date) -> Image {
         if let image = image(at: date) {
-            Image(uiImage: image)
-        } else if let fallback {
-            Image(fallback)
-        } else {
-            Image(systemName: "questionmark")
+            return Image(uiImage: image)
         }
+        if let fallback {
+            return Image(fallback)
+        }
+        return Image(systemName: "photo")
     }
 
     private var fallback: String? {
