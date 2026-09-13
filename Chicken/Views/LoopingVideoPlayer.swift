@@ -4,31 +4,55 @@ import UIKit
 
 /// Loops a bundled video silently. Prefers H.264 `.mp4` so Simulator can play
 /// clips; ProRes `.mov` is a fallback for devices that decode it.
+///
+/// Returns a plain `UIView` that SwiftUI sizes, then pins the player to its
+/// edges. `UIViewRepresentable` otherwise leaves `AVPlayerLayer` at a tiny frame.
 struct LoopingVideoPlayer: UIViewRepresentable {
     let resourceName: String
     var isPlaying: Bool = true
 
-    func makeUIView(context: Context) -> PlayerView {
-        let view = PlayerView()
-        view.load(resourceName: resourceName)
-        view.setPlaying(isPlaying)
-        return view
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
     }
 
-    func updateUIView(_ uiView: PlayerView, context: Context) {
-        if uiView.resourceName != resourceName {
-            uiView.load(resourceName: resourceName)
+    func makeUIView(context: Context) -> UIView {
+        let container = UIView()
+        container.isOpaque = false
+        container.backgroundColor = .clear
+        container.clipsToBounds = true
+
+        let player = PlayerView()
+        player.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(player)
+        NSLayoutConstraint.activate([
+            player.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            player.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            player.topAnchor.constraint(equalTo: container.topAnchor),
+            player.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+        ])
+
+        context.coordinator.player = player
+        player.load(resourceName: resourceName)
+        player.setPlaying(isPlaying)
+        return container
+    }
+
+    func updateUIView(_ container: UIView, context: Context) {
+        guard let player = context.coordinator.player else { return }
+        if player.resourceName != resourceName {
+            player.load(resourceName: resourceName)
         }
-        uiView.setPlaying(isPlaying)
-        uiView.syncLayerFrame()
+        player.setPlaying(isPlaying)
+        container.setNeedsLayout()
+        player.setNeedsLayout()
     }
 
-    func sizeThatFits(_ proposal: ProposedViewSize, uiView: PlayerView, context: Context) -> CGSize {
-        proposal.replacingUnspecifiedDimensions(by: CGSize(width: 402, height: 280))
+    static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
+        coordinator.player?.tearDown()
     }
 
-    static func dismantleUIView(_ uiView: PlayerView, coordinator: ()) {
-        uiView.tearDown()
+    final class Coordinator {
+        var player: PlayerView?
     }
 
     final class PlayerView: UIView {
@@ -54,20 +78,20 @@ struct LoopingVideoPlayer: UIViewRepresentable {
 
         override func layoutSubviews() {
             super.layoutSubviews()
-            syncLayerFrame()
-        }
-
-        func syncLayerFrame() {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
             videoLayer.frame = bounds
+            CATransaction.commit()
         }
 
         func load(resourceName: String) {
             tearDown()
             self.resourceName = resourceName
-            configureAudioSession()
-            guard let url = Self.bundleURL(for: resourceName) else {
-                return
-            }
+            let session = AVAudioSession.sharedInstance()
+            try? session.setCategory(.ambient, options: .mixWithOthers)
+            try? session.setActive(true)
+
+            guard let url = Self.bundleURL(for: resourceName) else { return }
             let item = AVPlayerItem(url: url)
             let player = AVQueuePlayer()
             player.isMuted = true
@@ -75,7 +99,7 @@ struct LoopingVideoPlayer: UIViewRepresentable {
             looper = AVPlayerLooper(player: player, templateItem: item)
             queuePlayer = player
             videoLayer.player = player
-            syncLayerFrame()
+            setNeedsLayout()
             player.play()
 
             statusObserver = item.observe(\.status, options: [.new]) { [weak self] item, _ in
@@ -87,11 +111,7 @@ struct LoopingVideoPlayer: UIViewRepresentable {
         }
 
         func setPlaying(_ playing: Bool) {
-            if playing {
-                queuePlayer?.play()
-            } else {
-                queuePlayer?.pause()
-            }
+            if playing { queuePlayer?.play() } else { queuePlayer?.pause() }
         }
 
         func tearDown() {
@@ -113,14 +133,8 @@ struct LoopingVideoPlayer: UIViewRepresentable {
             looper = AVPlayerLooper(player: player, templateItem: item)
             queuePlayer = player
             videoLayer.player = player
-            syncLayerFrame()
+            setNeedsLayout()
             player.play()
-        }
-
-        private func configureAudioSession() {
-            let session = AVAudioSession.sharedInstance()
-            try? session.setCategory(.ambient, options: .mixWithOthers)
-            try? session.setActive(true)
         }
 
         static func bundleURL(for resourceName: String) -> URL? {
@@ -129,9 +143,8 @@ struct LoopingVideoPlayer: UIViewRepresentable {
 
         static func bundleURLs(for resourceName: String) -> [URL] {
             let bundle = Bundle.main
-            let extensions = ["mp4", "m4v", "mov"]
             var urls: [URL] = []
-            for ext in extensions {
+            for ext in ["mp4", "m4v", "mov"] {
                 if let url = bundle.url(forResource: resourceName, withExtension: ext)
                     ?? bundle.url(forResource: resourceName, withExtension: ext, subdirectory: "Videos") {
                     urls.append(url)

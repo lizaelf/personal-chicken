@@ -65,12 +65,14 @@ struct WorkoutView: View {
             let width = geo.size.width
             let height: CGFloat = {
                 guard move.media.isVideo else { return geo.size.height }
-                let ideal = width / move.media.aspectRatio
-                return min(ideal, geo.size.height)
+                return min(geo.size.height, width / move.media.aspectRatio)
             }()
-            ChickenMediaView(media: move.media, isPlaying: !session.isPaused)
-                .id(move.id)
-                .frame(width: move.media.isVideo ? width : width - 32, height: height)
+            Color.clear
+                .frame(width: move.media.isVideo ? width : max(width - 32, 0), height: height)
+                .overlay {
+                    ChickenMediaView(media: move.media, isPlaying: !session.isPaused)
+                        .id(move.id)
+                }
                 .position(x: geo.size.width / 2, y: geo.size.height / 2)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
