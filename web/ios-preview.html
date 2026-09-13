@@ -40,8 +40,8 @@
       z-index: 2;
     }
     .move-label { font-size: clamp(12px, 3vw, 16px); line-height: 1.2; color: #826d5e; }
-    .pips { display: flex; gap: 10px; margin-top: 10px; }
-    .pip { flex: 1; height: 8px; border-radius: 999px; border: 1px solid #ef6856; }
+    .pips { display: flex; width: 100%; gap: 10px; margin-top: 10px; }
+    .pip { flex: 1 1 0; min-width: 0; height: 8px; border-radius: 999px; border: 1px solid #ef6856; }
     .pip.filled { background: #ef6856; }
     .timer-block { position: absolute; top: 16vh; left: 0; right: 0; text-align: center; z-index: 2; }
     .time { font-size: clamp(52px, 21vw, 96px); line-height: 1; }

@@ -15,8 +15,10 @@ struct WorkoutView: View {
                         .font(.workear(size: 12 * scale, relativeTo: .caption))
                         .foregroundStyle(Theme.moveLabel)
                         .contentTransition(.numericText())
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     ProgressPips(total: session.moves.count, filled: session.completedPipCount)
+                        .frame(maxWidth: .infinity)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, gutter)

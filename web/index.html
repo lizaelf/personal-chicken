@@ -137,11 +137,13 @@
 
     .pips {
       display: flex;
+      width: 100%;
       gap: 10px;
     }
 
     .pip {
-      flex: 1;
+      flex: 1 1 0;
+      min-width: 0;
       height: 8px;
       border-radius: 999px;
       border: 1px solid var(--coral);
