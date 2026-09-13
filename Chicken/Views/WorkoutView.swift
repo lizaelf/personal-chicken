@@ -61,14 +61,22 @@ struct WorkoutView: View {
     @ViewBuilder
     private var media: some View {
         let move = session.currentMove
-        ChickenMediaView(media: move.media, isPlaying: !session.isPaused)
-            .id(move.id)
-            .aspectRatio(move.media.isVideo ? move.media.aspectRatio : nil, contentMode: .fit)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.horizontal, move.media.isVideo ? 0 : 16)
-            .transition(.asymmetric(
-                insertion: .move(edge: .trailing).combined(with: .opacity),
-                removal: .move(edge: .leading).combined(with: .opacity)
-            ))
+        GeometryReader { geo in
+            let width = geo.size.width
+            let height: CGFloat = {
+                guard move.media.isVideo else { return geo.size.height }
+                let ideal = width / move.media.aspectRatio
+                return min(ideal, geo.size.height)
+            }()
+            ChickenMediaView(media: move.media, isPlaying: !session.isPaused)
+                .id(move.id)
+                .frame(width: move.media.isVideo ? width : width - 32, height: height)
+                .position(x: geo.size.width / 2, y: geo.size.height / 2)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .transition(.asymmetric(
+            insertion: .move(edge: .trailing).combined(with: .opacity),
+            removal: .move(edge: .leading).combined(with: .opacity)
+        ))
     }
 }

@@ -10,15 +10,6 @@ struct LoopingVideoPlayer: UIViewRepresentable {
 
     func makeUIView(context: Context) -> PlayerView {
         let view = PlayerView()
-        view.isOpaque = false
-        view.backgroundColor = .clear
-        view.playerLayer.isOpaque = false
-        view.playerLayer.backgroundColor = UIColor.clear.cgColor
-        view.playerLayer.videoGravity = .resizeAspect
-        view.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        view.setContentHuggingPriority(.defaultLow, for: .vertical)
-        view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
         view.load(resourceName: resourceName)
         view.setPlaying(isPlaying)
         return view
@@ -29,6 +20,7 @@ struct LoopingVideoPlayer: UIViewRepresentable {
             uiView.load(resourceName: resourceName)
         }
         uiView.setPlaying(isPlaying)
+        uiView.syncLayerFrame()
     }
 
     func sizeThatFits(_ proposal: ProposedViewSize, uiView: PlayerView, context: Context) -> CGSize {
@@ -41,11 +33,33 @@ struct LoopingVideoPlayer: UIViewRepresentable {
 
     final class PlayerView: UIView {
         var resourceName: String?
-        override class var layerClass: AnyClass { AVPlayerLayer.self }
-        var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+        private let videoLayer = AVPlayerLayer()
         private var looper: AVPlayerLooper?
         private var queuePlayer: AVQueuePlayer?
         private var statusObserver: NSKeyValueObservation?
+
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            isOpaque = false
+            backgroundColor = .clear
+            clipsToBounds = true
+            videoLayer.backgroundColor = UIColor.clear.cgColor
+            videoLayer.videoGravity = .resizeAspectFill
+            layer.addSublayer(videoLayer)
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            syncLayerFrame()
+        }
+
+        func syncLayerFrame() {
+            videoLayer.frame = bounds
+        }
 
         func load(resourceName: String) {
             tearDown()
@@ -60,7 +74,8 @@ struct LoopingVideoPlayer: UIViewRepresentable {
             player.automaticallyWaitsToMinimizeStalling = false
             looper = AVPlayerLooper(player: player, templateItem: item)
             queuePlayer = player
-            playerLayer.player = player
+            videoLayer.player = player
+            syncLayerFrame()
             player.play()
 
             statusObserver = item.observe(\.status, options: [.new]) { [weak self] item, _ in
@@ -84,7 +99,7 @@ struct LoopingVideoPlayer: UIViewRepresentable {
             queuePlayer?.pause()
             looper = nil
             queuePlayer = nil
-            playerLayer.player = nil
+            videoLayer.player = nil
         }
 
         private func loadFallback(from failedURL: URL, resourceName: String) {
@@ -97,7 +112,8 @@ struct LoopingVideoPlayer: UIViewRepresentable {
             player.isMuted = true
             looper = AVPlayerLooper(player: player, templateItem: item)
             queuePlayer = player
-            playerLayer.player = player
+            videoLayer.player = player
+            syncLayerFrame()
             player.play()
         }
 
