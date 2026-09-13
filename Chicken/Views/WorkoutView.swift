@@ -41,7 +41,8 @@ struct WorkoutView: View {
 
             ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
                 .id(session.currentMove.id)
-                .frame(maxWidth: .infinity, maxHeight: 336)
+                .frame(maxWidth: .infinity)
+                .frame(height: 336)
                 .scaleEffect(session.currentMove.media.displayScale)
                 .offset(x: session.currentMove.media.nudgeX)
                 .padding(.horizontal, 16)

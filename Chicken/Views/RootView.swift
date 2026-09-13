@@ -29,6 +29,8 @@ struct RootView: View {
             }
             .animation(.spring(duration: 0.5, bounce: 0.08), value: session.currentIndex)
             .animation(.spring(duration: 0.5, bounce: 0.08), value: session.phase)
+
+            PaperOverlay()
         }
     }
 }

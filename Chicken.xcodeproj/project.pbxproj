@@ -24,6 +24,9 @@
 		A11VIDEOBUILD00000000001 /* Sequence01.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000001 /* Sequence01.mov */; };
 		A11VIDEOBUILD00000000002 /* Sequence04.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000002 /* Sequence04.mov */; };
 		A11VIDEOBUILD00000000003 /* SequenceCharm.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000003 /* SequenceCharm.mov */; };
+		A11VIDEOBUILD00000000004 /* Sequence01.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000004 /* Sequence01.mp4 */; };
+		A11VIDEOBUILD00000000005 /* Sequence04.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000005 /* Sequence04.mp4 */; };
+		A11VIDEOBUILD00000000006 /* SequenceCharm.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000006 /* SequenceCharm.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +37,9 @@
 		A11VIDEOFILE000000000001 /* Sequence01.mov */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence01.mov; sourceTree = "<group>"; };
 		A11VIDEOFILE000000000002 /* Sequence04.mov */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence04.mov; sourceTree = "<group>"; };
 		A11VIDEOFILE000000000003 /* SequenceCharm.mov */ = {isa = PBXFileReference; lastKnownFileType = file; path = SequenceCharm.mov; sourceTree = "<group>"; };
+		A11VIDEOFILE000000000004 /* Sequence01.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence01.mp4; sourceTree = "<group>"; };
+		A11VIDEOFILE000000000005 /* Sequence04.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence04.mp4; sourceTree = "<group>"; };
+		A11VIDEOFILE000000000006 /* SequenceCharm.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SequenceCharm.mp4; sourceTree = "<group>"; };
 		ED6C91918BE148E58730BAD6 /* ChickenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenApp.swift; sourceTree = "<group>"; };
 		A6EB6077B16341DE851559E2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		8207082F42834AE785EBB36E /* Move.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
@@ -120,6 +126,9 @@
 				A11VIDEOFILE000000000001 /* Sequence01.mov */,
 				A11VIDEOFILE000000000002 /* Sequence04.mov */,
 				A11VIDEOFILE000000000003 /* SequenceCharm.mov */,
+				A11VIDEOFILE000000000004 /* Sequence01.mp4 */,
+				A11VIDEOFILE000000000005 /* Sequence04.mp4 */,
+				A11VIDEOFILE000000000006 /* SequenceCharm.mp4 */,
 			);
 			path = Videos;
 			sourceTree = "<group>";
@@ -195,6 +204,9 @@
 				A11VIDEOBUILD00000000001 /* Sequence01.mov in Resources */,
 				A11VIDEOBUILD00000000002 /* Sequence04.mov in Resources */,
 				A11VIDEOBUILD00000000003 /* SequenceCharm.mov in Resources */,
+				A11VIDEOBUILD00000000004 /* Sequence01.mp4 in Resources */,
+				A11VIDEOBUILD00000000005 /* Sequence04.mp4 in Resources */,
+				A11VIDEOBUILD00000000006 /* SequenceCharm.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
