@@ -11,18 +11,6 @@ enum ChickenMedia: Equatable {
         return false
     }
 
-    var nudgeX: CGFloat { 0 }
-
-    /// Zoom the fitted frame so the chicken, not the cream margin, spans the phone.
-    var displayScale: CGFloat {
-        switch self {
-        case .video("Sequence01"): return 1.42
-        case .video("Sequence04"): return 1.18
-        case .video("SequenceCharm"): return 1.12
-        default: return 1
-        }
-    }
-
     var frameInterval: TimeInterval {
         switch self {
         case .video("Sequence01"): return 1.0 / 9.0
@@ -32,12 +20,12 @@ enum ChickenMedia: Equatable {
         }
     }
 
-    /// Pixel aspect of the bundled clip after cream margins were cropped out.
+    /// Pixel aspect of the bundled clip after empty margins were cropped out.
     var aspectRatio: CGFloat {
         switch self {
-        case .video("Sequence01"): return 1174.0 / 810.0
-        case .video("Sequence04"): return 982.0 / 920.0
-        case .video("SequenceCharm"): return 762.0 / 956.0
+        case .video("Sequence01"): return 800.0 / 560.0
+        case .video("Sequence04"): return 800.0 / 748.0
+        case .video("SequenceCharm"): return 800.0 / 1009.0
         default: return 1
         }
     }

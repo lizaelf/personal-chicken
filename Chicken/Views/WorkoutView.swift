@@ -47,15 +47,14 @@ struct WorkoutView: View {
                 }
                 .padding(.top, 36 * scale)
 
-                ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
-                    .id(session.currentMove.id)
+                Color.clear
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .offset(x: session.currentMove.media.nudgeX)
+                    .overlay {
+                        ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
+                            .id(session.currentMove.id)
+                    }
                     .clipped()
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
+                    .transaction { $0.animation = nil }
 
                 WorkoutControls(
                     isPaused: session.isPaused,
@@ -70,10 +69,12 @@ struct WorkoutView: View {
                 )
                 .zIndex(1)
                 .padding(.horizontal, gutter)
-                .padding(.bottom, 32 * scale)
+                .padding(.bottom, 32)
             }
             .frame(width: width, height: geo.size.height)
+            .clipped()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.container, edges: .bottom)
     }
 }

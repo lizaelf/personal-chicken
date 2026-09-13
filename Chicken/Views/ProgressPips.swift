@@ -17,10 +17,10 @@ struct ProgressPips: View {
                         .overlay {
                             Capsule().stroke(Theme.coral, lineWidth: 1)
                         }
-                        .frame(maxWidth: .infinity)
                         .frame(width: pipWidth, height: 8)
                 }
             }
+            .frame(width: geo.size.width, alignment: .leading)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 8)
