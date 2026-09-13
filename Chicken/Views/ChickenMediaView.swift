@@ -15,7 +15,9 @@ struct ChickenMediaView: View {
                 LoopingVideoPlayer(
                     resourceName: name,
                     isPlaying: isPlaying,
-                    frameInterval: media.frameInterval
+                    frameInterval: media.frameInterval,
+                    displayScale: media.displayScale,
+                    aspectRatio: media.aspectRatio
                 )
             }
         }
