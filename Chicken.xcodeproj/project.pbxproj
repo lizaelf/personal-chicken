@@ -1,0 +1,348 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		935559522CBB46D3A65C7074 /* ChickenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED6C91918BE148E58730BAD6 /* ChickenApp.swift */; };
+		04BD2F95330C496ABCF7281B /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EB6077B16341DE851559E2 /* Theme.swift */; };
+		B35F5E2B496F4B86B786A5EB /* Move.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8207082F42834AE785EBB36E /* Move.swift */; };
+		635AE1D3DDBB4CF8A0B54EE4 /* WorkoutSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 362631EE3AC44BE8969C6974 /* WorkoutSession.swift */; };
+		CB4C0AB18B714CD5938DD686 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D781FA0AF3C149089C77CA90 /* RootView.swift */; };
+		A9CEDC9779754C71ABA77E97 /* PaperBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CCE4B0CFA1F420FA9B64C06 /* PaperBackground.swift */; };
+		16AADABC6CD745E6A6074900 /* ChickenMediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C0DD10DD94A4349A46A4BC8 /* ChickenMediaView.swift */; };
+		039CD8F96B664804A6C2AE7A /* LoopingVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D125A7B67049A0B1C04BCB /* LoopingVideoPlayer.swift */; };
+		52C136288F99449D80E1B622 /* WorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68430A07FB04FAA87632F4A /* WorkoutView.swift */; };
+		53AEC853BFC84F6B99516B64 /* CompletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76E22030C69F4D9D8B12233F /* CompletionView.swift */; };
+		58B54CDCA385422C87148280 /* ProgressPips.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB8AE2095FC4445B40C7A65 /* ProgressPips.swift */; };
+		527A23BBC8A9475E913A73BB /* WorkoutControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D993AFFD4E4776BEFF37E5 /* WorkoutControls.swift */; };
+		4B2A81F2DC0B4EC7890A6CA5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 117ED6727B9F486DAB85DB37 /* Assets.xcassets */; };
+		6D7F5875484C420390E2215D /* WorkearFont-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D172FFA461974BD68D2D64FE /* WorkearFont-Regular.ttf */; };
+		A11VIDEOBUILD00000000001 /* Sequence01.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000001 /* Sequence01.mov */; };
+		A11VIDEOBUILD00000000002 /* Sequence04.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000002 /* Sequence04.mov */; };
+		A11VIDEOBUILD00000000003 /* SequenceCharm.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000003 /* SequenceCharm.mov */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		6254AF8A3CC34BE0B5B02B88 /* Chicken.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chicken.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		117ED6727B9F486DAB85DB37 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2FB77763CD9046638C58A97E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D172FFA461974BD68D2D64FE /* WorkearFont-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "WorkearFont-Regular.ttf"; sourceTree = "<group>"; };
+		A11VIDEOFILE000000000001 /* Sequence01.mov */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence01.mov; sourceTree = "<group>"; };
+		A11VIDEOFILE000000000002 /* Sequence04.mov */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence04.mov; sourceTree = "<group>"; };
+		A11VIDEOFILE000000000003 /* SequenceCharm.mov */ = {isa = PBXFileReference; lastKnownFileType = file; path = SequenceCharm.mov; sourceTree = "<group>"; };
+		ED6C91918BE148E58730BAD6 /* ChickenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenApp.swift; sourceTree = "<group>"; };
+		A6EB6077B16341DE851559E2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		8207082F42834AE785EBB36E /* Move.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
+		362631EE3AC44BE8969C6974 /* WorkoutSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSession.swift; sourceTree = "<group>"; };
+		D781FA0AF3C149089C77CA90 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		6CCE4B0CFA1F420FA9B64C06 /* PaperBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperBackground.swift; sourceTree = "<group>"; };
+		1C0DD10DD94A4349A46A4BC8 /* ChickenMediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenMediaView.swift; sourceTree = "<group>"; };
+		89D125A7B67049A0B1C04BCB /* LoopingVideoPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoopingVideoPlayer.swift; sourceTree = "<group>"; };
+		A68430A07FB04FAA87632F4A /* WorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutView.swift; sourceTree = "<group>"; };
+		76E22030C69F4D9D8B12233F /* CompletionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionView.swift; sourceTree = "<group>"; };
+		ABB8AE2095FC4445B40C7A65 /* ProgressPips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressPips.swift; sourceTree = "<group>"; };
+		06D993AFFD4E4776BEFF37E5 /* WorkoutControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutControls.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7B5062E9525F43AA83729A51 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5DED325A747B4BB08C90304E = {
+			isa = PBXGroup;
+			children = (
+				DD6C878E4F2A46579B5799DD /* Chicken */,
+				143138B42AF94A72905CB7B3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DD6C878E4F2A46579B5799DD /* Chicken */ = {
+			isa = PBXGroup;
+			children = (
+				ED6C91918BE148E58730BAD6 /* ChickenApp.swift */,
+				A6EB6077B16341DE851559E2 /* Theme.swift */,
+				D4A9443271894759982DBEB9 /* Models */,
+				340D589BD934418D82D42D4A /* Views */,
+				117ED6727B9F486DAB85DB37 /* Assets.xcassets */,
+				03FC146E56114C9AA8021CFC /* Fonts */,
+				A11VIDEOGROUP00000000001 /* Videos */,
+				2FB77763CD9046638C58A97E /* Info.plist */,
+			);
+			path = Chicken;
+			sourceTree = "<group>";
+		};
+		D4A9443271894759982DBEB9 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				8207082F42834AE785EBB36E /* Move.swift */,
+				362631EE3AC44BE8969C6974 /* WorkoutSession.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		340D589BD934418D82D42D4A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D781FA0AF3C149089C77CA90 /* RootView.swift */,
+				6CCE4B0CFA1F420FA9B64C06 /* PaperBackground.swift */,
+				1C0DD10DD94A4349A46A4BC8 /* ChickenMediaView.swift */,
+				89D125A7B67049A0B1C04BCB /* LoopingVideoPlayer.swift */,
+				A68430A07FB04FAA87632F4A /* WorkoutView.swift */,
+				76E22030C69F4D9D8B12233F /* CompletionView.swift */,
+				ABB8AE2095FC4445B40C7A65 /* ProgressPips.swift */,
+				06D993AFFD4E4776BEFF37E5 /* WorkoutControls.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		03FC146E56114C9AA8021CFC /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				D172FFA461974BD68D2D64FE /* WorkearFont-Regular.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
+		A11VIDEOGROUP00000000001 /* Videos */ = {
+			isa = PBXGroup;
+			children = (
+				A11VIDEOFILE000000000001 /* Sequence01.mov */,
+				A11VIDEOFILE000000000002 /* Sequence04.mov */,
+				A11VIDEOFILE000000000003 /* SequenceCharm.mov */,
+			);
+			path = Videos;
+			sourceTree = "<group>";
+		};
+		143138B42AF94A72905CB7B3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6254AF8A3CC34BE0B5B02B88 /* Chicken.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		04DE852E2AB34D6584BA70BB /* Chicken */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B99E100E4B2D412AAF473B21 /* Build configuration list for PBXNativeTarget "Chicken" */;
+			buildPhases = (
+				7D84667D165E4E93AC0CB924 /* Sources */,
+				7B5062E9525F43AA83729A51 /* Frameworks */,
+				0A0791EE77004467BB5B598A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Chicken;
+			productName = Chicken;
+			productReference = 6254AF8A3CC34BE0B5B02B88 /* Chicken.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6DB7DD6171E740B49A7F8377 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					04DE852E2AB34D6584BA70BB = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = AA8E12485ECE41C19814EC55 /* Build configuration list for PBXProject "Chicken" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5DED325A747B4BB08C90304E;
+			productRefGroup = 143138B42AF94A72905CB7B3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				04DE852E2AB34D6584BA70BB /* Chicken */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0A0791EE77004467BB5B598A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4B2A81F2DC0B4EC7890A6CA5 /* Assets.xcassets in Resources */,
+				6D7F5875484C420390E2215D /* WorkearFont-Regular.ttf in Resources */,
+				A11VIDEOBUILD00000000001 /* Sequence01.mov in Resources */,
+				A11VIDEOBUILD00000000002 /* Sequence04.mov in Resources */,
+				A11VIDEOBUILD00000000003 /* SequenceCharm.mov in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7D84667D165E4E93AC0CB924 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				935559522CBB46D3A65C7074 /* ChickenApp.swift in Sources */,
+				04BD2F95330C496ABCF7281B /* Theme.swift in Sources */,
+				B35F5E2B496F4B86B786A5EB /* Move.swift in Sources */,
+				635AE1D3DDBB4CF8A0B54EE4 /* WorkoutSession.swift in Sources */,
+				CB4C0AB18B714CD5938DD686 /* RootView.swift in Sources */,
+				A9CEDC9779754C71ABA77E97 /* PaperBackground.swift in Sources */,
+				16AADABC6CD745E6A6074900 /* ChickenMediaView.swift in Sources */,
+				039CD8F96B664804A6C2AE7A /* LoopingVideoPlayer.swift in Sources */,
+				52C136288F99449D80E1B622 /* WorkoutView.swift in Sources */,
+				53AEC853BFC84F6B99516B64 /* CompletionView.swift in Sources */,
+				58B54CDCA385422C87148280 /* ProgressPips.swift in Sources */,
+				527A23BBC8A9475E913A73BB /* WorkoutControls.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		12D3DDBD117F4D05BECEA42E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B2BB3DC55603410CBCC6121C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		685515AC761B4A7DB56E662C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Chicken/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Chicken;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.chicken;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A7DD6AA5EA8E47548E873355 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Chicken/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Chicken;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.chicken;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA8E12485ECE41C19814EC55 /* Build configuration list for PBXProject "Chicken" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				12D3DDBD117F4D05BECEA42E /* Debug */,
+				B2BB3DC55603410CBCC6121C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B99E100E4B2D412AAF473B21 /* Build configuration list for PBXNativeTarget "Chicken" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				685515AC761B4A7DB56E662C /* Debug */,
+				A7DD6AA5EA8E47548E873355 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6DB7DD6171E740B49A7F8377 /* Project object */;
+}

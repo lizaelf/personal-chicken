@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Chicken</title>
+  <style>
+    @font-face {
+      font-family: "Workear Font";
+      src: url("../Chicken/Fonts/WorkearFont-Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    :root {
+      --cream: #fcf6ea;
+      --coral: #ef6856;
+      --ink: #301a1a;
+      --move: #826d5e;
+      --charm: #3c2117;
+      --button-cream: #fefcf4;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #1a1210;
+      font-family: "Workear Font", ui-rounded, "SF Pro Rounded", sans-serif;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      min-height: 100%;
+    }
+
+    .phone {
+      width: 402px;
+      height: 874px;
+      position: relative;
+      overflow: hidden;
+      background: var(--cream);
+      color: var(--ink);
+      flex-shrink: 0;
+    }
+
+    .paper {
+      position: absolute;
+      inset: 0;
+      background: url("../Chicken/Assets.xcassets/PaperTexture.imageset/PaperTexture.png") center / cover no-repeat;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding: 0;
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.42s ease;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease;
+    }
+
+    .scene.is-leave {
+      transform: translateX(-22%);
+      opacity: 0;
+    }
+
+    .scene.is-enter {
+      transform: translateX(28%);
+      opacity: 0;
+      transition: none;
+    }
+
+    .workout.is-leave {
+      transform: translateX(-18%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .complete {
+      cursor: pointer;
+      opacity: 0;
+      transform: translateX(22%);
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    .complete.is-on {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .close {
+      position: absolute;
+      top: 52px;
+      right: 16px;
+      z-index: 2;
+      width: 56px;
+      height: 56px;
+      border-radius: 20px;
+      background: transparent;
+      box-shadow: none;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+    }
+
+    .close svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .header {
+      position: absolute;
+      top: 52px;
+      left: 0;
+      right: 0;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .move-label {
+      font-size: 12px;
+      line-height: 14px;
+      color: var(--move);
+    }
+
+    .pips {
+      display: flex;
+      gap: 10px;
+    }
+
+    .pip {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      border: 1px solid var(--coral);
+      background: transparent;
+    }
+
+    .pip.filled { background: var(--coral); }
+
+    .timer-block {
+      position: absolute;
+      top: 133px;
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
+
+    .time {
+      font-size: 84px;
+      line-height: 84px;
+      color: var(--ink);
+    }
+
+    .move-name {
+      font-size: 20px;
+      line-height: 32px;
+      color: rgba(0, 0, 0, 0.4);
+      padding: 0 24px;
+    }
+
+    .chicken-wrap {
+      position: absolute;
+      top: 250px;
+      left: 0;
+      width: 402px;
+      height: 510px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .chicken-wrap img {
+      max-width: 370px;
+      max-height: 336px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .chicken-wrap video {
+      width: 402px;
+      max-width: none;
+      max-height: none;
+      height: auto;
+      object-fit: contain;
+      background: transparent;
+    }
+
+    .chicken-wrap video.zoomed {
+      transform: translateX(-14px) scale(1.14);
+      transform-origin: center center;
+    }
+
+    .chicken-wrap video.larger {
+      transform: translateX(-6px) scale(1.22);
+      transform-origin: center center;
+    }
+
+    .controls {
+      position: absolute;
+      top: 770px;
+      left: 0;
+      right: 0;
+      display: flex;
+      gap: 12px;
+      padding: 0 16px;
+    }
+
+    button {
+      font-family: inherit;
+      border: 0;
+      cursor: pointer;
+    }
+
+    .pause {
+      width: 72px;
+      height: 72px;
+      border-radius: 25.125px;
+      background: #fff;
+      box-shadow: 0 0.9px 1.35px rgba(0,0,0,0.1);
+      display: grid;
+      place-items: center;
+    }
+
+    .pause img, .pause svg { width: 32px; height: 32px; }
+
+    .next {
+      flex: 1;
+      height: 72px;
+      border-radius: 25.125px;
+      background: var(--coral);
+      color: var(--button-cream);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 0.9px 1.35px rgba(0,0,0,0.1);
+    }
+
+    .next img { width: 32px; height: 32px; }
+
+    .complete img,
+    .complete video {
+      position: absolute;
+      top: 140px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 530px;
+      height: 640px;
+      object-fit: contain;
+      background: transparent;
+    }
+
+    .charm {
+      position: absolute;
+      top: 682px;
+      left: 12px;
+      width: 373px;
+      font-size: 32px;
+      line-height: 38px;
+      text-align: center;
+      color: var(--charm);
+    }
+
+    .hidden { display: none !important; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .screen, .scene { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="paper"></div>
+    <div id="workout" class="screen workout">
+      <div class="scene" id="scene">
+      <div class="header">
+        <div class="move-label" id="moveLabel">Move 3 of 4</div>
+        <div class="pips" id="pips"></div>
+      </div>
+      <div class="timer-block">
+        <div class="time" id="time">4:38</div>
+        <div class="move-name" id="moveName">Overhead press</div>
+      </div>
+      <div class="chicken-wrap">
+        <img id="chicken" class="hidden" alt="" />
+        <video id="chickenVideo" class="hidden zoomed" muted loop playsinline autoplay></video>
+      </div>
+      </div>
+      <div class="controls">
+        <button class="pause" id="pauseBtn" aria-label="Pause">
+          <img src="../Chicken/Assets.xcassets/IconPause.imageset/icon-pause.svg" alt="" />
+        </button>
+        <button class="next" id="nextBtn">
+          <span id="nextLabel">Next</span>
+          <img id="nextArrow" src="../Chicken/Assets.xcassets/IconArrow.imageset/icon-arrow.svg" alt="" />
+        </button>
+      </div>
+    </div>
+    <div id="complete" class="screen complete">
+      <button class="close" id="closeBtn" type="button" aria-label="Close">
+        <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M2 2l14 14M16 2L2 16" stroke="#301A1A" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <video id="charmVideo" muted loop playsinline src="../Chicken/Videos/SequenceCharm.webm?v=02b"></video>
+      <p class="charm">I’ll charm you<br />into coming back!</p>
+    </div>
+  </div>
+  <script>
+    const moves = [
+      { name: "ABS", duration: 28, src: "../Chicken/Assets.xcassets/ChickenAbs.imageset/ChickenAbs.png" },
+      { name: "Dumbbell shoulder press", duration: 5 * 60 + 28, src: "../Chicken/Assets.xcassets/ChickenShoulderPress.imageset/ChickenShoulderPress.png" },
+      { name: "Overhead press", duration: 45, video: "../Chicken/Videos/Sequence01.webm", zoomed: true },
+      { name: "Dumbbell shoulder press", duration: 5 * 60 + 28, video: "../Chicken/Videos/Sequence04.webm?v=desk", larger: true },
+    ];
+
+    const startIndex = 2;
+    let index = startIndex;
+    const startElapsed = 4 * 60 + 38;
+    let elapsed = startElapsed;
+    let paused = false;
+    let phase = "workout";
+
+    const pips = document.getElementById("pips");
+    const chicken = document.getElementById("chicken");
+    const chickenVideo = document.getElementById("chickenVideo");
+    const charmVideo = document.getElementById("charmVideo");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const scene = document.getElementById("scene");
+    const workoutEl = document.getElementById("workout");
+    const completeEl = document.getElementById("complete");
+    let transitioning = false;
+
+    function format(t) {
+      const n = Math.max(0, Math.floor(t));
+      return `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}`;
+    }
+
+    function render() {
+      workoutEl.classList.toggle("is-leave", phase !== "workout");
+      completeEl.classList.toggle("is-on", phase === "complete");
+      if (phase !== "workout") return;
+      document.getElementById("moveLabel").textContent = `Move ${index + 1} of ${moves.length}`;
+      document.getElementById("time").textContent = format(elapsed);
+      document.getElementById("moveName").textContent = moves[index].name;
+      const move = moves[index];
+      if (move.video) {
+        chicken.classList.add("hidden");
+        chickenVideo.classList.remove("hidden");
+        chickenVideo.classList.toggle("zoomed", Boolean(move.zoomed));
+        chickenVideo.classList.toggle("larger", Boolean(move.larger));
+        chickenVideo.muted = true;
+        chickenVideo.playsInline = true;
+        const abs = new URL(move.video, window.location.href).href;
+        if (chickenVideo.src !== abs) chickenVideo.src = move.video;
+        if (paused) chickenVideo.pause();
+        else chickenVideo.play().catch(() => {});
+      } else {
+        chickenVideo.pause();
+        chickenVideo.classList.add("hidden");
+        chicken.classList.remove("hidden");
+        chicken.src = move.src;
+      }
+      pips.innerHTML = moves.map((_, i) => `<div class="pip${i <= index ? " filled" : ""}"></div>`).join("");
+      pauseBtn.innerHTML = paused
+        ? `<svg width="22" height="22" viewBox="0 0 22 22" fill="#301A1A"><path d="M6 3.5v15l13-7.5L6 3.5z"/></svg>`
+        : `<img src="../Chicken/Assets.xcassets/IconPause.imageset/icon-pause.svg" alt="" />`;
+      pauseBtn.setAttribute("aria-label", paused ? "Resume" : "Pause");
+      const isLast = index === moves.length - 1;
+      document.getElementById("nextLabel").textContent = isLast ? "Done" : "Next";
+      document.getElementById("nextArrow").classList.toggle("hidden", isLast);
+    }
+
+    function next() {
+      if (transitioning || phase !== "workout") return;
+      transitioning = true;
+      const goingComplete = index + 1 >= moves.length;
+      scene.classList.add("is-leave");
+      window.setTimeout(() => {
+        if (goingComplete) {
+          phase = "complete";
+          paused = true;
+          chickenVideo.pause();
+          charmVideo.muted = true;
+          charmVideo.play().catch(() => {});
+          render();
+          transitioning = false;
+          return;
+        }
+        index += 1;
+        paused = false;
+        render();
+        scene.classList.remove("is-leave");
+        scene.classList.add("is-enter");
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            scene.classList.remove("is-enter");
+            transitioning = false;
+          });
+        });
+      }, 320);
+    }
+
+    function restart() {
+      if (transitioning) return;
+      index = startIndex;
+      elapsed = startElapsed;
+      paused = false;
+      phase = "workout";
+      charmVideo.pause();
+      scene.classList.remove("is-leave", "is-enter");
+      render();
+    }
+
+    pauseBtn.addEventListener("click", () => {
+      paused = !paused;
+      render();
+    });
+    document.getElementById("nextBtn").addEventListener("click", next);
+    document.getElementById("complete").addEventListener("click", restart);
+    window.goNext = next;
+
+    chickenVideo.addEventListener("canplay", () => {
+      if (phase === "workout" && !paused && moves[index].video) {
+        chickenVideo.muted = true;
+        chickenVideo.play().catch(() => {});
+      }
+    });
+    charmVideo.addEventListener("canplay", () => {
+      if (phase === "complete") {
+        charmVideo.muted = true;
+        charmVideo.play().catch(() => {});
+      }
+    });
+
+    setInterval(() => {
+      if (phase === "workout" && !paused) {
+        elapsed += 0.25;
+        document.getElementById("time").textContent = format(elapsed);
+      }
+    }, 250);
+
+    render();
+  </script>
+</body>
+</html>
