@@ -6,8 +6,6 @@ struct ChickenApp: App {
         WindowGroup {
             RootView()
                 .preferredColorScheme(.light)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped()
         }
     }
 }

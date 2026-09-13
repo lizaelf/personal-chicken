@@ -8,17 +8,18 @@ struct PaperBackground: View {
 }
 
 /// Full-screen paper multiply, matching the web prototype so cream-backed
-/// H.264 clips still sit on the same texture as the rest of the screen.
+/// clips still sit on the same texture as the rest of the screen.
 struct PaperOverlay: View {
     var body: some View {
         Color.clear
             .ignoresSafeArea()
             .overlay {
-                Image("PaperTexture")
-                    .resizable()
-                    .scaledToFill()
+                GeometryReader { geo in
+                    Image("PaperTexture")
+                        .resizable()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                }
             }
-            .clipped()
             .blendMode(.multiply)
             .opacity(0.9)
             .allowsHitTesting(false)
