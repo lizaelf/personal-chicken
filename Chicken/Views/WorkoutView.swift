@@ -69,12 +69,12 @@ struct WorkoutView: View {
                 )
                 .zIndex(1)
                 .padding(.horizontal, gutter)
-                .padding(.bottom, 32 * scale)
+                .padding(.bottom, 32)
             }
             .frame(width: width, height: geo.size.height)
             .clipped()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .clipped()
+        .ignoresSafeArea(.container, edges: .bottom)
     }
 }
