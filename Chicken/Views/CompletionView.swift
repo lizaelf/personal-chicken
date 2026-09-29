@@ -13,6 +13,7 @@ struct CompletionView: View {
                         ChickenMediaView(media: .video("SequenceCharm"))
                     }
                     .padding(.top, 100 * scale)
+                    .padding(.horizontal, 28 * scale)
                     .padding(.bottom, 160 * scale)
                     .clipped()
                     .transaction { $0.animation = nil }
@@ -40,7 +41,7 @@ struct CompletionView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel("Close")
                 }
-                .padding(.top, 52 * scale)
+                .padding(.top, 8 * scale)
                 .padding(.horizontal, 16 * scale)
             }
             .frame(width: geo.size.width, height: geo.size.height)

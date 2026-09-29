@@ -14,12 +14,17 @@ struct PaperOverlay: View {
     var body: some View {
         Image("PaperTexture")
             .resizable()
-            .frame(width: Self.screenSize.width, height: Self.screenSize.height)
+            .frame(width: Self.screenSize.width + Self.shift, height: Self.screenSize.height)
+            .offset(x: -Self.shift)
+            .scaleEffect(Self.textureScale)
             .blendMode(.multiply)
             .opacity(0.9)
             .ignoresSafeArea()
             .allowsHitTesting(false)
     }
+
+    private static let shift: CGFloat = 32
+    private static let textureScale: CGFloat = 1.1
 
     private static var screenSize: CGSize {
         let scene = UIApplication.shared.connectedScenes
