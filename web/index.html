@@ -25,32 +25,32 @@
 
     html, body {
       height: 100%;
-      background: #1a1210;
+      overflow-x: hidden;
+      background: var(--cream);
       font-family: "Workear Font", ui-rounded, "SF Pro Rounded", sans-serif;
     }
 
     body {
-      display: grid;
-      place-items: center;
       min-height: 100%;
+      min-height: 100dvh;
     }
 
     .phone {
-      width: 402px;
-      height: 874px;
+      width: 100%;
+      height: 100dvh;
       position: relative;
       overflow: hidden;
       background: var(--cream);
       color: var(--ink);
-      flex-shrink: 0;
     }
 
     .paper {
       position: absolute;
       inset: 0;
-      background: url("../Chicken/Assets.xcassets/PaperTexture.imageset/PaperTexture.png") center / cover no-repeat;
+      background: url("../Chicken/Assets.xcassets/PaperTexture.imageset/PaperTexture.png") calc(-32px - 5%) 50% / calc((100% + 32px) * 1.1) 110% no-repeat;
       mix-blend-mode: multiply;
       pointer-events: none;
+      z-index: 0;
     }
 
     .screen {
@@ -100,11 +100,13 @@
 
     .close {
       position: absolute;
-      top: 52px;
-      right: 16px;
+      top: max(52px, 6vh);
+      right: 4vw;
       z-index: 2;
-      width: 56px;
-      height: 56px;
+      width: 14vw;
+      height: 14vw;
+      max-width: 56px;
+      max-height: 56px;
       border-radius: 20px;
       background: transparent;
       box-shadow: none;
@@ -120,28 +122,30 @@
 
     .header {
       position: absolute;
-      top: 52px;
+      top: max(52px, 6vh);
       left: 0;
       right: 0;
-      padding: 0 16px;
+      padding: 0 4vw;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
     .move-label {
-      font-size: 12px;
-      line-height: 14px;
+      font-size: clamp(12px, 3vw, 16px);
+      line-height: 1.2;
       color: var(--move);
     }
 
     .pips {
       display: flex;
+      width: 100%;
       gap: 10px;
     }
 
     .pip {
-      flex: 1;
+      flex: 1 1 0;
+      min-width: 0;
       height: 8px;
       border-radius: 999px;
       border: 1px solid var(--coral);
@@ -152,73 +156,64 @@
 
     .timer-block {
       position: absolute;
-      top: 133px;
+      top: 16vh;
       left: 0;
       right: 0;
       text-align: center;
     }
 
     .time {
-      font-size: 84px;
-      line-height: 84px;
+      font-size: clamp(52px, 21vw, 96px);
+      line-height: 1;
       color: var(--ink);
     }
 
     .move-name {
-      font-size: 20px;
-      line-height: 32px;
+      font-size: clamp(16px, 5vw, 24px);
+      line-height: 1.4;
       color: rgba(0, 0, 0, 0.4);
-      padding: 0 24px;
+      padding: 0 6vw;
     }
 
     .chicken-wrap {
       position: absolute;
-      top: 250px;
+      top: 28vh;
       left: 0;
-      width: 402px;
-      height: 510px;
+      width: 100%;
+      bottom: 18vh;
       display: grid;
       place-items: center;
       padding: 0;
       box-sizing: border-box;
       overflow: hidden;
+      z-index: 1;
     }
 
     .chicken-wrap img {
-      max-width: 370px;
-      max-height: 336px;
-      width: auto;
+      width: 92%;
+      max-width: 100%;
+      max-height: 100%;
       height: auto;
       object-fit: contain;
     }
 
     .chicken-wrap video {
-      width: 402px;
-      max-width: none;
-      max-height: none;
+      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
       height: auto;
       object-fit: contain;
       background: transparent;
     }
 
-    .chicken-wrap video.zoomed {
-      transform: translateX(-14px) scale(1.14);
-      transform-origin: center center;
-    }
-
-    .chicken-wrap video.larger {
-      transform: translateX(-6px) scale(1.22);
-      transform-origin: center center;
-    }
-
     .controls {
       position: absolute;
-      top: 770px;
       left: 0;
       right: 0;
+      bottom: 32px;
       display: flex;
-      gap: 12px;
-      padding: 0 16px;
+      gap: 3vw;
+      padding: 0 4vw;
     }
 
     button {
@@ -228,8 +223,10 @@
     }
 
     .pause {
-      width: 72px;
-      height: 72px;
+      width: 18vw;
+      height: 18vw;
+      max-width: 80px;
+      max-height: 80px;
       border-radius: 25.125px;
       background: #fff;
       box-shadow: 0 0.9px 1.35px rgba(0,0,0,0.1);
@@ -241,11 +238,12 @@
 
     .next {
       flex: 1;
-      height: 72px;
+      height: 18vw;
+      max-height: 80px;
       border-radius: 25.125px;
       background: var(--coral);
       color: var(--button-cream);
-      font-size: 20px;
+      font-size: clamp(16px, 5vw, 22px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -258,22 +256,23 @@
     .complete img,
     .complete video {
       position: absolute;
-      top: 140px;
+      top: 16vh;
       left: 50%;
       transform: translateX(-50%);
-      width: 530px;
-      height: 640px;
+      width: 82%;
+      height: 50vh;
       object-fit: contain;
       background: transparent;
     }
 
     .charm {
       position: absolute;
-      top: 682px;
-      left: 12px;
-      width: 373px;
-      font-size: 32px;
-      line-height: 38px;
+      left: 4vw;
+      right: 4vw;
+      width: auto;
+      bottom: 14vh;
+      font-size: clamp(22px, 8vw, 36px);
+      line-height: 1.2;
       text-align: center;
       color: var(--charm);
     }
@@ -300,7 +299,7 @@
       </div>
       <div class="chicken-wrap">
         <img id="chicken" class="hidden" alt="" />
-        <video id="chickenVideo" class="hidden zoomed" muted loop playsinline autoplay></video>
+        <video id="chickenVideo" class="hidden" muted loop playsinline autoplay></video>
       </div>
       </div>
       <div class="controls">
@@ -319,7 +318,7 @@
           <path d="M2 2l14 14M16 2L2 16" stroke="#301A1A" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
       </button>
-      <video id="charmVideo" muted loop playsinline src="../Chicken/Videos/SequenceCharm.webm?v=02b"></video>
+      <video id="charmVideo" muted loop playsinline src="../Chicken/Videos/SequenceCharm.webm?v=alpha"></video>
       <p class="charm">I’ll charm you<br />into coming back!</p>
     </div>
   </div>
@@ -327,8 +326,8 @@
     const moves = [
       { name: "ABS", duration: 28, src: "../Chicken/Assets.xcassets/ChickenAbs.imageset/ChickenAbs.png" },
       { name: "Dumbbell shoulder press", duration: 5 * 60 + 28, src: "../Chicken/Assets.xcassets/ChickenShoulderPress.imageset/ChickenShoulderPress.png" },
-      { name: "Overhead press", duration: 45, video: "../Chicken/Videos/Sequence01.webm", zoomed: true },
-      { name: "Dumbbell shoulder press", duration: 5 * 60 + 28, video: "../Chicken/Videos/Sequence04.webm?v=desk", larger: true },
+      { name: "Overhead press", duration: 45, video: "../Chicken/Videos/Sequence01.webm?v=alpha" },
+      { name: "Dumbbell shoulder press", duration: 5 * 60 + 28, video: "../Chicken/Videos/Sequence04.webm?v=alpha", larger: true },
     ];
 
     const startIndex = 2;
@@ -364,8 +363,6 @@
       if (move.video) {
         chicken.classList.add("hidden");
         chickenVideo.classList.remove("hidden");
-        chickenVideo.classList.toggle("zoomed", Boolean(move.zoomed));
-        chickenVideo.classList.toggle("larger", Boolean(move.larger));
         chickenVideo.muted = true;
         chickenVideo.playsInline = true;
         const abs = new URL(move.video, window.location.href).href;
