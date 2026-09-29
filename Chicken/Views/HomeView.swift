@@ -54,6 +54,7 @@ struct HomeView: View {
     private var weekDays: some View {
         HStack(spacing: 8) {
             todayChip
+                .fixedSize(horizontal: true, vertical: true)
             ForEach(WeekDay.rest) { day in
                 dayDot(day)
             }
@@ -71,6 +72,8 @@ struct HomeView: View {
             Text("Let’s worko-ko!")
                 .font(.workear(size: 14, relativeTo: .body))
                 .foregroundStyle(Theme.fgPrimary)
+                .lineLimit(1)
+                .fixedSize()
                 .padding(.trailing, 11)
         }
         .padding(.leading, 4)
@@ -109,15 +112,7 @@ struct HomeView: View {
     }
 
     private func workoutCard(width: CGFloat) -> some View {
-        ZStack(alignment: .top) {
-            Image("HomeHeroChicken")
-                .resizable()
-                .scaledToFit()
-                .padding(.horizontal, 4)
-                .padding(.top, 100)
-                .padding(.bottom, 76)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
+        VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 11) {
                 Text("Abs & Glutes")
                     .font(.workear(size: 26, relativeTo: .title))
@@ -127,26 +122,31 @@ struct HomeView: View {
                     chip("20 min")
                     chip("Kettlebells", icon: "IconDumbbells")
                     chip("Mat", icon: "IconYogaMat")
-                    Spacer(minLength: 0)
                 }
-
-                Spacer(minLength: 0)
-
-                Button(action: startWorkout) {
-                    HStack(spacing: 10) {
-                        Text("Start")
-                            .font(.workear(size: 16, relativeTo: .headline))
-                            .foregroundStyle(Theme.surface)
-                        Image("IconStartArrow")
-                            .frame(width: 18, height: 18)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Theme.coral, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .shadow(color: .black.opacity(0.1), radius: 1.35, x: 0, y: 0.9)
             }
+            .padding(.top, 24)
+            .padding(.horizontal, 24)
+
+            Image("HomeHeroChicken")
+                .resizable()
+                .scaledToFit()
+                .padding(.horizontal, 4)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            Button(action: startWorkout) {
+                HStack(spacing: 10) {
+                    Text("Start")
+                        .font(.workear(size: 16, relativeTo: .headline))
+                        .foregroundStyle(Theme.surface)
+                    Image("IconStartArrow")
+                        .frame(width: 18, height: 18)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(Theme.coral, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .shadow(color: .black.opacity(0.1), radius: 1.35, x: 0, y: 0.9)
             .padding(24)
         }
         .frame(width: width)
@@ -287,7 +287,7 @@ private struct WeekDay: Identifiable {
         WeekDay(id: "Th", label: "Th", fill: Theme.fgSecondary.opacity(0.1), foreground: Theme.fgSecondary, showsBorder: false),
         WeekDay(id: "Fr", label: "Fr", fill: .clear, foreground: Theme.fgSecondary, showsBorder: true),
         WeekDay(id: "Sa", label: "Sa", fill: Theme.fgSecondary.opacity(0.1), foreground: Theme.fgSecondary, showsBorder: false),
-        WeekDay(id: "Su", label: "Su", fill: Theme.fgSecondary.opacity(0.1), foreground: Theme.fgSecondary.opacity(0.35), showsBorder: false),
+        WeekDay(id: "Su", label: "Su", fill: Theme.fgSecondary.opacity(0.1), foreground: Theme.fgSecondary.opacity(0.1), showsBorder: false),
     ]
 }
 
