@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chicken — iOS preview</title>
+  <style>
+    @font-face {
+      font-family: "Workear Font";
+      src: url("../Chicken/Fonts/WorkearFont-Regular.ttf") format("truetype");
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: #fcf6ea;
+      font-family: "Workear Font", ui-rounded, sans-serif;
+    }
+    body { min-height: 100dvh; }
+    .phone {
+      width: 100%;
+      max-width: 430px;
+      height: 100dvh;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      background: #fcf6ea;
+      color: #301a1a;
+      display: flex;
+      flex-direction: column;
+      padding-top: max(12px, env(safe-area-inset-top, 0px));
+      box-sizing: border-box;
+    }
+    .paper {
+      position: absolute;
+      inset: 0;
+      background: url("../Chicken/Assets.xcassets/PaperTexture.imageset/PaperTexture.png") center / cover no-repeat;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .header {
+      position: relative;
+      padding: 8px 16px 0;
+      z-index: 2;
+      flex: 0 0 auto;
+    }
+    .move-label { font-size: 12px; line-height: 1.2; color: #826d5e; }
+    .pips { display: flex; width: 100%; gap: 10px; margin-top: 10px; }
+    .pip { flex: 1 1 0; min-width: 0; height: 8px; border-radius: 999px; border: 1px solid #ef6856; }
+    .pip.filled { background: #ef6856; }
+    .timer-block {
+      position: relative;
+      padding-top: 49px;
+      text-align: center;
+      z-index: 2;
+      flex: 0 0 auto;
+    }
+    .time { font-size: 84px; line-height: 1; }
+    .move-name { font-size: 20px; line-height: 1.4; color: rgba(0,0,0,0.4); padding: 7px 24px 0; }
+    .spacer { flex: 1 1 23px; min-height: 23px; }
+    .spacer-sm { flex: 1 1 8px; min-height: 8px; }
+    .chicken {
+      position: relative;
+      flex: 0 1 336px;
+      height: 336px;
+      max-height: 336px;
+      margin: 0 16px;
+      display: grid;
+      place-items: center;
+      z-index: 1;
+    }
+    .chicken img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transform: scale(1.14);
+      transform-origin: center center;
+    }
+    .controls {
+      position: relative;
+      display: flex;
+      gap: 12px;
+      padding: 8px 16px 32px;
+      z-index: 2;
+      flex: 0 0 auto;
+    }
+    .pause {
+      width: 72px;
+      height: 72px;
+      border: 0;
+      border-radius: 25px;
+      background: #fff;
+      box-shadow: 0 0.9px 1.35px rgba(0,0,0,0.1);
+    }
+    .next {
+      flex: 1;
+      height: 72px;
+      border: 0;
+      border-radius: 25px;
+      background: #ef6856;
+      color: #fefcf4;
+      font: 20px/1 "Workear Font", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="paper"></div>
+    <div class="header">
+      <div class="move-label">Move 3 of 4</div>
+      <div class="pips">
+        <div class="pip filled"></div>
+        <div class="pip filled"></div>
+        <div class="pip filled"></div>
+        <div class="pip"></div>
+      </div>
+    </div>
+    <div class="timer-block">
+      <div class="time">4:38</div>
+      <div class="move-name">Overhead press</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="chicken">
+      <img src="../Chicken/Frames/Sequence01/frame_012.jpg" alt="Overhead press" />
+    </div>
+    <div class="spacer spacer-sm"></div>
+    <div class="controls">
+      <button class="pause" aria-label="Pause">
+        <img src="../Chicken/Assets.xcassets/IconPause.imageset/icon-pause.svg" width="32" height="32" alt="" />
+      </button>
+      <button class="next">
+        Next
+        <img src="../Chicken/Assets.xcassets/IconArrow.imageset/icon-arrow.svg" width="32" height="32" alt="" />
+      </button>
+    </div>
+  </div>
+</body>
+</html>

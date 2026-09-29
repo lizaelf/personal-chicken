@@ -27,6 +27,15 @@ enum ChickenMedia: Equatable {
         default: return 1
         }
     }
+
+    var frameInterval: TimeInterval {
+        switch self {
+        case .video("Sequence01"): return 1.0 / 9.0
+        case .video("Sequence04"): return 1.0 / 14.0
+        case .video("SequenceCharm"): return 1.0 / 10.0
+        default: return 1.0 / 10.0
+        }
+    }
 }
 
 struct Move: Identifiable, Equatable {

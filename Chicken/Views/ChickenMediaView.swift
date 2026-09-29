@@ -12,7 +12,11 @@ struct ChickenMediaView: View {
                     .resizable()
                     .scaledToFit()
             case .video(let name):
-                LoopingVideoPlayer(resourceName: name, isPlaying: isPlaying)
+                LoopingVideoPlayer(
+                    resourceName: name,
+                    isPlaying: isPlaying,
+                    frameInterval: media.frameInterval
+                )
             }
         }
         .accessibilityHidden(true)
