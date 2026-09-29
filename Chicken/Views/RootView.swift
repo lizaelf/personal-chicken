@@ -6,6 +6,12 @@ struct RootView: View {
     var body: some View {
         ZStack {
             switch session.phase {
+            case .home:
+                HomeView(session: session)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
             case .workout:
                 WorkoutView(session: session)
                     .transition(.asymmetric(
@@ -28,9 +34,13 @@ struct RootView: View {
         .animation(.spring(duration: 0.5, bounce: 0.08), value: session.phase)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background {
-            ZStack {
-                PaperBackground()
-                PaperOverlay()
+            if session.phase == .home {
+                Theme.canvas.ignoresSafeArea()
+            } else {
+                ZStack {
+                    PaperBackground()
+                    PaperOverlay()
+                }
             }
         }
     }

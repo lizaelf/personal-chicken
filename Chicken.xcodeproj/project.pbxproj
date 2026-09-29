@@ -19,6 +19,7 @@
 		53AEC853BFC84F6B99516B64 /* CompletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76E22030C69F4D9D8B12233F /* CompletionView.swift */; };
 		58B54CDCA385422C87148280 /* ProgressPips.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB8AE2095FC4445B40C7A65 /* ProgressPips.swift */; };
 		527A23BBC8A9475E913A73BB /* WorkoutControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D993AFFD4E4776BEFF37E5 /* WorkoutControls.swift */; };
+		C8E1A0B12F4A4C6D9E7B3102 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E1A0B12F4A4C6D9E7B3101 /* HomeView.swift */; };
 		4B2A81F2DC0B4EC7890A6CA5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 117ED6727B9F486DAB85DB37 /* Assets.xcassets */; };
 		6D7F5875484C420390E2215D /* WorkearFont-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D172FFA461974BD68D2D64FE /* WorkearFont-Regular.ttf */; };
 		A11VIDEOBUILD00000000001 /* Sequence01.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000001 /* Sequence01.mov */; };
@@ -54,6 +55,7 @@
 		76E22030C69F4D9D8B12233F /* CompletionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionView.swift; sourceTree = "<group>"; };
 		ABB8AE2095FC4445B40C7A65 /* ProgressPips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressPips.swift; sourceTree = "<group>"; };
 		06D993AFFD4E4776BEFF37E5 /* WorkoutControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutControls.swift; sourceTree = "<group>"; };
+		C8E1A0B12F4A4C6D9E7B3101 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +106,7 @@
 			isa = PBXGroup;
 			children = (
 				D781FA0AF3C149089C77CA90 /* RootView.swift */,
+				C8E1A0B12F4A4C6D9E7B3101 /* HomeView.swift */,
 				6CCE4B0CFA1F420FA9B64C06 /* PaperBackground.swift */,
 				1C0DD10DD94A4349A46A4BC8 /* ChickenMediaView.swift */,
 				89D125A7B67049A0B1C04BCB /* LoopingVideoPlayer.swift */,
@@ -233,6 +236,7 @@
 				53AEC853BFC84F6B99516B64 /* CompletionView.swift in Sources */,
 				58B54CDCA385422C87148280 /* ProgressPips.swift in Sources */,
 				527A23BBC8A9475E913A73BB /* WorkoutControls.swift in Sources */,
+				C8E1A0B12F4A4C6D9E7B3102 /* HomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
