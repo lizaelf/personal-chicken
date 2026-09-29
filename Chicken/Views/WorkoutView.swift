@@ -45,17 +45,22 @@ struct WorkoutView: View {
                             removal: .move(edge: .leading).combined(with: .opacity)
                         ))
                 }
-                .padding(.top, 36 * scale)
+                .padding(.top, 49 * scale)
+
+                Spacer(minLength: 23 * scale)
 
                 ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
                     .id(session.currentMove.id)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: 336 * scale)
+                    .scaleEffect(session.currentMove.media.displayScale)
                     .offset(x: session.currentMove.media.nudgeX)
-                    .clipped()
+                    .padding(.horizontal, gutter)
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .move(edge: .leading).combined(with: .opacity)
                     ))
+
+                Spacer(minLength: 8 * scale)
 
                 WorkoutControls(
                     isPaused: session.isPaused,

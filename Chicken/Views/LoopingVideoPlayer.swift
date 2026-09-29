@@ -8,25 +8,16 @@ struct LoopingVideoPlayer: View {
     let resourceName: String
     var isPlaying: Bool = true
     var frameInterval: TimeInterval = 1.0 / 10.0
-    var displayScale: CGFloat = 1
-    var aspectRatio: CGFloat = 1.45
 
     @State private var frames: [UIImage] = []
 
     var body: some View {
-        GeometryReader { geo in
-            let width = geo.size.width
-            let fittedHeight = width / max(aspectRatio, 0.1)
-            TimelineView(.animation(minimumInterval: max(frameInterval, 0.04), paused: !isPlaying)) { context in
-                resolvedImage(at: context.date)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: width, height: fittedHeight)
-                    .scaleEffect(displayScale)
-                    .frame(width: geo.size.width, height: geo.size.height)
-            }
+        TimelineView(.animation(minimumInterval: max(frameInterval, 0.04), paused: !isPlaying)) { context in
+            resolvedImage(at: context.date)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .clipped()
         .task(id: resourceName) {
             frames = Self.loadJPEGs(named: resourceName)
         }

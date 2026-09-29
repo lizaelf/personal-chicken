@@ -9,9 +9,10 @@ struct CompletionView: View {
 
             ZStack(alignment: .top) {
                 ChickenMediaView(media: .video("SequenceCharm"))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(.top, 100 * scale)
-                    .padding(.bottom, 160 * scale)
+                    .frame(width: 348 * scale, height: 432 * scale)
+                    .scaleEffect(ChickenMedia.video("SequenceCharm").displayScale)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 132 * scale)
 
                 VStack {
                     Spacer()
@@ -20,9 +21,9 @@ struct CompletionView: View {
                         .lineSpacing(6 * scale)
                         .foregroundStyle(Theme.charmInk)
                         .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: 373 * scale)
                         .padding(.horizontal, 16 * scale)
-                        .padding(.bottom, 100 * scale)
+                        .padding(.bottom, 116 * scale)
                 }
 
                 HStack {

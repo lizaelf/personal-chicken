@@ -11,14 +11,11 @@ struct ChickenMediaView: View {
                 Image(name)
                     .resizable()
                     .scaledToFit()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             case .video(let name):
                 LoopingVideoPlayer(
                     resourceName: name,
                     isPlaying: isPlaying,
-                    frameInterval: media.frameInterval,
-                    displayScale: media.displayScale,
-                    aspectRatio: media.aspectRatio
+                    frameInterval: media.frameInterval
                 )
             }
         }
