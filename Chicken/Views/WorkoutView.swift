@@ -11,27 +11,49 @@ struct WorkoutView: View {
 
             VStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 10 * scale) {
-                    Text("Move \(session.currentIndex + 1) of \(session.moves.count)")
-                        .font(.workear(size: 12 * scale, relativeTo: .caption))
-                        .foregroundStyle(Theme.moveLabel)
-                        .contentTransition(.numericText())
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(alignment: .center) {
+                        Text("Move \(session.currentIndex + 1) of \(session.moves.count)")
+                            .font(.workear(size: 12 * scale, relativeTo: .caption))
+                            .foregroundStyle(Theme.moveLabel)
+                            .contentTransition(.numericText())
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
-                    ProgressPips(total: session.moves.count, filled: session.completedPipCount)
-                        .frame(maxWidth: .infinity)
+                        Button {
+                            withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
+                                session.restart()
+                            }
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 13 * scale, weight: .semibold))
+                                .foregroundStyle(Theme.ink)
+                                .frame(width: 32 * scale, height: 32 * scale)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Close")
+                    }
+
+                    ProgressPips(total: session.moves.count, filled: session.completedPipCount) { target in
+                        withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
+                            session.goTo(target)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, gutter)
                 .padding(.top, 8 * scale)
 
                 VStack(spacing: 7 * scale) {
-                    Text(session.timeLabel)
+                    Text("\(session.currentSet)")
                         .font(.workear(size: 84 * scale, relativeTo: .largeTitle))
                         .foregroundStyle(Theme.ink)
                         .minimumScaleFactor(0.4)
                         .lineLimit(1)
                         .monospacedDigit()
-                        .frame(maxWidth: .infinity)
+                        .contentTransition(.numericText())
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.horizontal, gutter)
+                        .accessibilityLabel("Set \(session.currentSet)")
 
                     Text(session.currentMove.name)
                         .id("name-\(session.currentMove.id)")
@@ -51,9 +73,7 @@ struct WorkoutView: View {
 
                 ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
                     .id(session.currentMove.id)
-                    .frame(maxWidth: .infinity, maxHeight: 336 * scale)
-                    .scaleEffect(session.currentMove.media.displayScale)
-                    .offset(x: session.currentMove.media.nudgeX)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(.horizontal, gutter)
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -80,5 +100,7 @@ struct WorkoutView: View {
             .frame(width: width, height: geo.size.height)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .sensoryFeedback(.impact(weight: .light), trigger: session.isPaused)
+        .sensoryFeedback(.impact(weight: .medium), trigger: session.currentIndex)
     }
 }

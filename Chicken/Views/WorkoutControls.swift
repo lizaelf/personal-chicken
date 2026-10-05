@@ -16,9 +16,10 @@ struct WorkoutControls: View {
             Button(action: onTogglePause) {
                 Group {
                     if isPaused {
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 22 * layoutScale, weight: .semibold))
-                            .foregroundStyle(Theme.ink)
+                        Image("IconPlay")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: iconSize, height: iconSize)
                     } else {
                         Image("IconPause")
                             .resizable()

@@ -6,5 +6,10 @@
 	<array>
 		<string>WorkearFont-Regular.ttf</string>
 	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>Cream</string>
+	</dict>
 </dict>
 </plist>

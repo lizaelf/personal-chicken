@@ -38,6 +38,7 @@ struct LoopingVideoPlayer: View {
         case "Sequence01": return "ChickenOverheadPress"
         case "Sequence04": return "ChickenShoulderPress"
         case "SequenceCharm": return "ChickenCharm"
+        case "SequenceHome": return "ChickenCharm"
         default: return nil
         }
     }
