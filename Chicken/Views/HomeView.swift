@@ -1222,7 +1222,7 @@ private struct WeightSparkline: View {
             }
             .stroke(
                 Theme.fgPositive,
-                style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round)
+                style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)
             )
 
             if let last = scaled.last {
@@ -1286,7 +1286,7 @@ private struct WeightTrendChart: View {
                 path.move(to: first)
                 points.dropFirst().forEach { path.addLine(to: $0) }
             }
-            .stroke(Theme.coral, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+            .stroke(Theme.coral, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
 
             if let last = points.last {
                 Circle()

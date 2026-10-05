@@ -1709,7 +1709,7 @@
                 <path
                   d="M1.83236 14.5L10.9943 18.5L18.3238 16.5L27.4857 26.5L36.6476 22.5L49.4743 32.5"
                   stroke="#3eae6f"
-                  stroke-width="8"
+                  stroke-width="1.5"
                   fill="none"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -2717,7 +2717,7 @@
       const ry = box.height > 0 ? (4 * h) / box.height : 4;
       svg.innerHTML = `
         <polygon points="${fill}" fill="rgba(239,104,86,0.16)" />
-        <polyline points="${pts.join(" ")}" fill="none" stroke="#ef6856" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <polyline points="${pts.join(" ")}" fill="none" stroke="#ef6856" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
         <ellipse cx="${last[0]}" cy="${last[1]}" rx="${rx.toFixed(2)}" ry="${ry.toFixed(2)}" fill="#ef6856" />
       `;
     }
