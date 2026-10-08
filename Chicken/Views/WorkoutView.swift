@@ -4,66 +4,103 @@ struct WorkoutView: View {
     let session: WorkoutSession
 
     var body: some View {
-        VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Move \(session.currentIndex + 1) of \(session.moves.count)")
-                    .font(.workear(size: 12, relativeTo: .caption))
-                    .foregroundStyle(Theme.moveLabel)
-                    .contentTransition(.numericText())
+        GeometryReader { geo in
+            let width = geo.size.width
+            let scale = width / 402
+            let gutter = 16 * scale
 
-                ProgressPips(total: session.moves.count, filled: session.completedPipCount)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+            VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 10 * scale) {
+                    HStack(alignment: .center) {
+                        Text("Move \(session.currentIndex + 1) of \(session.moves.count)")
+                            .font(.workear(size: 12 * scale, relativeTo: .caption))
+                            .foregroundStyle(Theme.moveLabel)
+                            .contentTransition(.numericText())
+                            .frame(maxWidth: .infinity, alignment: .leading)
 
-            VStack(spacing: 7) {
-                Text(session.timeLabel)
-                    .font(.workear(size: 84, relativeTo: .largeTitle))
-                    .foregroundStyle(Theme.ink)
-                    .minimumScaleFactor(0.4)
-                    .lineLimit(1)
-                    .monospacedDigit()
+                        Button {
+                            withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
+                                session.restart()
+                            }
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 13 * scale, weight: .semibold))
+                                .foregroundStyle(Theme.ink)
+                                .frame(width: 32 * scale, height: 32 * scale)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Close")
+                    }
 
-                Text(session.currentMove.name)
-                    .id("name-\(session.currentMove.id)")
-                    .font(.workear(size: 20, relativeTo: .title3))
-                    .foregroundStyle(Color.black.opacity(0.4))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
+                    ProgressPips(total: session.moves.count, filled: session.completedPipCount) { target in
+                        withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
+                            session.goTo(target)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, gutter)
+                .padding(.top, 8 * scale)
+
+                VStack(spacing: 7 * scale) {
+                    Text("\(session.currentSet)")
+                        .font(.workear(size: 84 * scale, relativeTo: .largeTitle))
+                        .foregroundStyle(Theme.ink)
+                        .minimumScaleFactor(0.4)
+                        .lineLimit(1)
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.horizontal, gutter)
+                        .accessibilityLabel("Set \(session.currentSet)")
+
+                    Text(session.currentMove.name)
+                        .id("name-\(session.currentMove.id)")
+                        .font(.workear(size: 20 * scale, relativeTo: .title3))
+                        .foregroundStyle(Color.black.opacity(0.4))
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 24 * scale)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
+                }
+                .padding(.top, 49 * scale)
+
+                Spacer(minLength: 23 * scale)
+
+                ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
+                    .id(session.currentMove.id)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.horizontal, gutter)
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .move(edge: .leading).combined(with: .opacity)
                     ))
-            }
-            .padding(.top, 49)
 
-            Spacer(minLength: 23)
+                Spacer(minLength: 8 * scale)
 
-            ChickenMediaView(media: session.currentMove.media, isPlaying: !session.isPaused)
-                .id(session.currentMove.id)
-                .frame(maxWidth: .infinity, maxHeight: 336)
-                .scaleEffect(session.currentMove.media.displayScale)
-                .offset(x: session.currentMove.media.nudgeX)
-                .padding(.horizontal, 16)
-                .transition(.asymmetric(
-                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal: .move(edge: .leading).combined(with: .opacity)
-                ))
-
-            Spacer(minLength: 8)
-
-            WorkoutControls(
-                isPaused: session.isPaused,
-                isLastMove: session.currentIndex == session.moves.count - 1,
-                onTogglePause: { session.togglePause() },
-                onNext: {
-                    withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
-                        session.skipToNext()
+                WorkoutControls(
+                    isPaused: session.isPaused,
+                    isLastMove: session.currentIndex == session.moves.count - 1,
+                    layoutScale: scale,
+                    onTogglePause: { session.togglePause() },
+                    onNext: {
+                        withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
+                            session.skipToNext()
+                        }
                     }
-                }
-            )
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
+                )
+                .zIndex(1)
+                .padding(.horizontal, gutter)
+                .padding(.bottom, 32 * scale)
+            }
+            .frame(width: width, height: geo.size.height)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .sensoryFeedback(.impact(weight: .light), trigger: session.isPaused)
+        .sensoryFeedback(.impact(weight: .medium), trigger: session.currentIndex)
     }
 }

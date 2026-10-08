@@ -24,7 +24,20 @@ enum ChickenMedia: Equatable {
         case .video("Sequence01"): return 1.14
         case .video("Sequence04"): return 1.22
         case .video("SequenceCharm"): return 1.5
+        case .video("SequenceHome"): return 1.12
+        case .video("SequenceFreeDay"): return 1.08
         default: return 1
+        }
+    }
+
+    var frameInterval: TimeInterval {
+        switch self {
+        case .video("Sequence01"): return 1.0 / 9.0
+        case .video("Sequence04"): return 1.0 / 14.0
+        case .video("SequenceCharm"): return 1.0 / 10.0
+        case .video("SequenceHome"): return 1.0 / 12.0
+        case .video("SequenceFreeDay"): return 1.0 / 6.0
+        default: return 1.0 / 10.0
         }
     }
 }
@@ -33,14 +46,13 @@ struct Move: Identifiable, Equatable {
     let id: Int
     let name: String
     let duration: TimeInterval
+    let repInterval: TimeInterval
     let media: ChickenMedia
 }
 
 enum WorkoutCatalog {
     static let moves: [Move] = [
-        Move(id: 1, name: "ABS", duration: 28, media: .image("ChickenAbs")),
-        Move(id: 2, name: "Dumbbell shoulder press", duration: 5 * 60 + 28, media: .image("ChickenShoulderPress")),
-        Move(id: 3, name: "Overhead press", duration: 45, media: .video("Sequence01")),
-        Move(id: 4, name: "Dumbbell shoulder press", duration: 5 * 60 + 28, media: .video("Sequence04")),
+        Move(id: 1, name: "ABS", duration: 20 * 5, repInterval: 5, media: .video("Sequence01")),
+        Move(id: 2, name: "Dumbbell shoulder press", duration: 20 * 2, repInterval: 2, media: .video("Sequence04")),
     ]
 }
