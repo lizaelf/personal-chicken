@@ -56,7 +56,7 @@ struct HomeView: View {
                 unit: weightUnit,
                 onLog: { currentWeightKg = $0 }
             )
-            .presentationDetents([.large])
+            .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(28)
             .presentationBackground(Theme.surface)
@@ -86,10 +86,10 @@ struct HomeView: View {
                     iconButton(asset: "IconSettings", size: 20)
                 }
             }
+            .padding(.horizontal, 16)
 
             weekDays
         }
-        .padding(.horizontal, 16)
     }
 
     private var weekDays: some View {
@@ -112,9 +112,15 @@ struct HomeView: View {
                     }
                 }
             }
+            .contentMargins(.horizontal, 16, for: .scrollContent)
+            .onAppear {
+                DispatchQueue.main.async {
+                    proxy.scrollTo(selectedDay, anchor: .leading)
+                }
+            }
             .onChange(of: selectedDay) { _, day in
                 withAnimation(.easeInOut(duration: 0.35)) {
-                    proxy.scrollTo(day, anchor: .center)
+                    proxy.scrollTo(day, anchor: .leading)
                 }
             }
         }
@@ -122,7 +128,6 @@ struct HomeView: View {
 
     private func dayCopy(for day: WeekDay) -> String? {
         if day.id == todayDay { return "Let’s work. Cluck cluck" }
-        if day.id == "Su" { return "Relax day" }
         if day.showsBorder { return "Future trainings" }
         return "Free day"
     }
@@ -130,31 +135,29 @@ struct HomeView: View {
     private func labeledDayChip(_ day: WeekDay, copy: String) -> some View {
         let selected = day.id == selectedDay
         let isToday = day.id == todayDay
-        let isRest = day.id == "Su" && !isToday
-        let isFree = !isToday && !isRest && !day.showsBorder
-        let fillInner = (selected || isToday) && !isFree && !isRest
+        let isFree = !isToday && !day.showsBorder
+        let fillInner = (selected || isToday) && !isFree
         return HStack(spacing: 8) {
             Text(day.label)
                 .font(.workear(size: 12, relativeTo: .caption))
                 .foregroundStyle(fillInner ? Color.white : Theme.fgSecondary)
                 .frame(width: 34, height: 34)
                 .background {
-                    Circle().fill(fillInner ? Theme.fgAccent : (isRest || isFree ? Theme.fgSecondary.opacity(0.2) : Color.clear))
+                    Circle().fill(fillInner ? Theme.fgAccent : (isFree ? Theme.fgSecondary.opacity(0.2) : Color.clear))
                 }
                 .overlay {
                     if !fillInner {
                         if day.showsBorder {
                             Circle().stroke(Theme.borderAccent, lineWidth: 1)
-                        } else if isFree || isRest {
+                        } else if isFree {
                             Circle().stroke(Theme.fgSecondary.opacity(0.24), lineWidth: 1)
                         }
                     }
                 }
-                .opacity(isRest && !fillInner ? 0.45 : 1)
 
             Text(copy)
                 .font(.workear(size: 14, relativeTo: .body))
-                .foregroundStyle((isRest || isFree) && !fillInner ? Theme.fgSecondary : Theme.fgPrimary)
+                .foregroundStyle(selected || !isFree ? Theme.fgPrimary : Theme.fgSecondary)
                 .lineLimit(1)
                 .fixedSize()
                 .padding(.trailing, 11)
@@ -165,7 +168,7 @@ struct HomeView: View {
         .fixedSize(horizontal: true, vertical: true)
         .background(Theme.surface, in: Capsule())
         .overlay {
-            Capsule().stroke(isFree || isRest ? Theme.fgSecondary.opacity(0.28) : Theme.borderAccent, lineWidth: 1)
+            Capsule().stroke(isFree ? Theme.fgSecondary.opacity(0.28) : Theme.borderAccent, lineWidth: 1)
         }
     }
 
@@ -223,9 +226,6 @@ struct HomeView: View {
     private func pageKind(for day: WeekDay) -> DayPageKind {
         if day.id == todayDay {
             return .train(live: true, title: "Abs & Glutes", image: "ChickenAbs")
-        }
-        if day.id == "Su" {
-            return .rest(title: "Relax day")
         }
         if day.showsBorder {
             let wing = day.id == "Fr"
@@ -296,43 +296,24 @@ struct HomeView: View {
     }
 
     private func restCard(width: CGFloat, title: String) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 11) {
-                Text(title)
-                    .font(.workear(size: 26, relativeTo: .title))
-                    .foregroundStyle(Theme.fgPrimary)
-
-                HStack(spacing: 6) {
-                    chip("Rest")
-                    chip("Recover")
-                }
-            }
-            .padding(.top, 24)
-            .padding(.horizontal, 24)
-
-            Image("ChickenOverheadPress")
-                .resizable()
-                .scaledToFit()
-                .padding(.horizontal, 4)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            Button {
-                selectedTab = .workouts
-            } label: {
-                Text("See extra workouts")
-                    .font(.workear(size: 16, relativeTo: .headline))
-                    .foregroundStyle(Theme.fgPrimary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Theme.bgMuted, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            }
-            .buttonStyle(.plain)
-            .padding(24)
+        ZStack(alignment: .bottom) {
+            ChickenMediaView(media: .video("SequenceFreeDay"), isPlaying: true, fillsBounds: true)
+                .scaleEffect(0.8, anchor: .bottom)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .clipped()
         }
         .frame(width: width)
         .frame(maxHeight: .infinity)
         .background(Theme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(alignment: .topLeading) {
+            Text(title)
+                .font(.workear(size: 26, relativeTo: .title))
+                .foregroundStyle(Theme.fgPrimary)
+                .padding(.top, 24)
+                .padding(.horizontal, 24)
+                .accessibilityAddTraits(.isHeader)
+        }
     }
 
     private func chip(_ title: String, icon: String? = nil) -> some View {
@@ -522,7 +503,7 @@ struct HomeView: View {
             .padding(.horizontal, 16)
 
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 16) {
+                VStack(spacing: 8) {
                     StatsTrendCard(
                         title: "Calories",
                         value: "12,480 kcal",
@@ -933,11 +914,7 @@ private struct WeightLogSheet: View {
             Text("Your current weight")
                 .font(.workear(size: 24, relativeTo: .title2))
                 .foregroundStyle(Theme.fgPrimary)
-                .padding(.top, 12)
-            Text("Peck in today’s number.")
-                .font(.workear(size: 14, relativeTo: .body))
-                .foregroundStyle(Theme.fgSecondary)
-                .padding(.top, 8)
+                .padding(.top, 28)
                 .padding(.bottom, 20)
 
             HStack(spacing: 2) {
@@ -972,6 +949,7 @@ private struct WeightLogSheet: View {
                     .foregroundStyle(Theme.fgPrimary)
                     .padding(.leading, 4)
             }
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             Button {
@@ -1164,7 +1142,7 @@ private struct StatsTrendCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                HStack(alignment: .top, spacing: 10) {
                     Text(title)
                         .font(.workear(size: 16, relativeTo: .headline))
                         .foregroundStyle(Theme.fgPrimary)
@@ -1370,7 +1348,7 @@ private struct WeekDay: Identifiable {
         WeekDay(id: "Th", label: "Th", fill: Theme.bgSoft, foreground: Theme.fgSecondary, showsBorder: false),
         WeekDay(id: "Fr", label: "Fr", fill: .clear, foreground: Theme.fgSecondary, showsBorder: true),
         WeekDay(id: "Sa", label: "Sa", fill: Theme.bgSoft, foreground: Theme.fgSecondary, showsBorder: false),
-        WeekDay(id: "Su", label: "Su", fill: Theme.bgSoft, foreground: Theme.fgSecondary.opacity(0.35), showsBorder: false),
+        WeekDay(id: "Su", label: "Su", fill: Theme.bgSoft, foreground: Theme.fgSecondary, showsBorder: false),
     ]
 
     static func week(starting today: String) -> [WeekDay] {

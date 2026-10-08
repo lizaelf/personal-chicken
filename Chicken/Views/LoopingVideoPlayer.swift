@@ -8,15 +8,24 @@ struct LoopingVideoPlayer: View {
     let resourceName: String
     var isPlaying: Bool = true
     var frameInterval: TimeInterval = 1.0 / 10.0
+    var fillsBounds: Bool = false
 
     @State private var frames: [UIImage] = []
 
     var body: some View {
         TimelineView(.animation(minimumInterval: max(frameInterval, 0.04), paused: !isPlaying)) { context in
-            resolvedImage(at: context.date)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            Group {
+                if fillsBounds {
+                    resolvedImage(at: context.date)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    resolvedImage(at: context.date)
+                        .resizable()
+                        .scaledToFit()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .task(id: resourceName) {
             frames = Self.loadJPEGs(named: resourceName)
@@ -39,6 +48,7 @@ struct LoopingVideoPlayer: View {
         case "Sequence04": return "ChickenShoulderPress"
         case "SequenceCharm": return "ChickenCharm"
         case "SequenceHome": return "ChickenCharm"
+        case "SequenceFreeDay": return "ChickenFreeDay"
         default: return nil
         }
     }
@@ -57,19 +67,22 @@ struct LoopingVideoPlayer: View {
             resourceName,
             "Frames",
         ]
+        let extensions = ["png", "jpg", "jpeg"]
         for subdirectory in subdirectories {
-            if let urls = bundle.urls(forResourcesWithExtension: "jpg", subdirectory: subdirectory),
-               !urls.isEmpty {
-                let filtered: [URL]
-                if subdirectory == "Frames" {
-                    filtered = urls.filter { $0.path.contains("/\(resourceName)/") }
-                } else {
-                    filtered = urls
+            for ext in extensions {
+                if let urls = bundle.urls(forResourcesWithExtension: ext, subdirectory: subdirectory),
+                   !urls.isEmpty {
+                    let filtered: [URL]
+                    if subdirectory == "Frames" {
+                        filtered = urls.filter { $0.path.contains("/\(resourceName)/") }
+                    } else {
+                        filtered = urls
+                    }
+                    let images = filtered
+                        .sorted { $0.lastPathComponent < $1.lastPathComponent }
+                        .compactMap { UIImage(contentsOfFile: $0.path) }
+                    if !images.isEmpty { return images }
                 }
-                let images = filtered
-                    .sorted { $0.lastPathComponent < $1.lastPathComponent }
-                    .compactMap { UIImage(contentsOfFile: $0.path) }
-                if !images.isEmpty { return images }
             }
         }
 
@@ -81,7 +94,7 @@ struct LoopingVideoPlayer: View {
             includingPropertiesForKeys: nil
         )) ?? []
         return contents
-            .filter { $0.pathExtension.lowercased() == "jpg" }
+            .filter { ["png", "jpg", "jpeg"].contains($0.pathExtension.lowercased()) }
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
             .compactMap { UIImage(contentsOfFile: $0.path) }
     }

@@ -25,6 +25,7 @@ enum ChickenMedia: Equatable {
         case .video("Sequence04"): return 1.22
         case .video("SequenceCharm"): return 1.5
         case .video("SequenceHome"): return 1.12
+        case .video("SequenceFreeDay"): return 1.08
         default: return 1
         }
     }
@@ -35,6 +36,7 @@ enum ChickenMedia: Equatable {
         case .video("Sequence04"): return 1.0 / 14.0
         case .video("SequenceCharm"): return 1.0 / 10.0
         case .video("SequenceHome"): return 1.0 / 12.0
+        case .video("SequenceFreeDay"): return 1.0 / 6.0
         default: return 1.0 / 10.0
         }
     }
