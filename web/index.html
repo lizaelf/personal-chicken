@@ -1960,7 +1960,7 @@
       );
     }
 
-    const seq01 = makeFrames("Sequence01", 46);
+    const seq01 = makeFrames("Sequence01", 42);
     const seq04 = makeFrames("Sequence04", 20);
     const seqCharm = makeFrames("SequenceCharm", 9);
     const homeFrames = makeFrames("SequenceHome", 44);
@@ -1969,7 +1969,7 @@
     const setCount = 20;
     let lastRepBucket = -1;
     const moves = [
-      { name: "ABS", duration: 20 * 5, interval: 5, frames: seq01, fps: 9 },
+      { name: "ABS", duration: 20 * 5, interval: 5, frames: seq01, fps: 10 },
       { name: "Dumbbell shoulder press", duration: 20 * 2, interval: 2, frames: seq04, fps: 14, larger: true },
     ];
 
@@ -2081,9 +2081,9 @@
         const chips = wing
           ? chipHTML("Dumbbells", iconDumbbells)
           : chipHTML("Kettlebells", iconDumbbells) + chipHTML("Mat", iconMat);
-        const visual = kind === "today"
-          ? `<img id="homeChicken" alt="" />`
-          : `<img src="../Chicken/Assets.xcassets/${wing ? "ChickenShoulderPress.imageset/ChickenShoulderPress.png" : "ChickenAbs.imageset/ChickenAbs.png"}" alt="" />`;
+        const visual = wing
+          ? `<img src="../Chicken/Assets.xcassets/ChickenShoulderPress.imageset/ChickenShoulderPress.png" alt="" />`
+          : `<img class="abs-preview-chicken"${kind === "today" ? ' id="homeChicken"' : ""} src="${seq01[0]}" alt="" />`;
         const cta = kind === "today" ? "Start" : "Open workout";
         return workoutSlide(title, minutes, chips, visual, cta, true);
       }
@@ -2093,7 +2093,7 @@
 
     dayTrack.innerHTML = dayIds.map((day) => `<section class="day-slide" data-slide="${day}">${slideMarkup(day)}</section>`).join("");
     homeChicken = document.getElementById("homeChicken");
-    if (homeChicken) homeChicken.src = homeFrames[0];
+    if (homeChicken) homeChicken.src = seq01[0];
 
     function slideOffset(index) {
       return -Math.max(0, index) * dayStage.clientWidth;
@@ -2821,10 +2821,12 @@
         return;
       }
       if (phase === "home" && homeTab === "home" && !settingsOpen && !notesOpen) {
-        if (now - lastHomeTick >= 1000 / 12) {
+        if (now - lastHomeTick >= 1000 / 10) {
           lastHomeTick = now;
-          homeFrame = (homeFrame + 1) % homeFrames.length;
-          if (homeChicken) homeChicken.src = homeFrames[homeFrame];
+          homeFrame = (homeFrame + 1) % seq01.length;
+          document.querySelectorAll(".abs-preview-chicken").forEach((img) => {
+            img.src = seq01[homeFrame];
+          });
         }
         if (now - lastFreeDayTick >= 1000 / 6) {
           lastFreeDayTick = now;

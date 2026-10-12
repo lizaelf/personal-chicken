@@ -260,7 +260,9 @@ struct HomeView: View {
             .padding(.horizontal, 24)
 
             Group {
-                if live {
+                if !wing {
+                    ChickenMediaView(media: .video("Sequence01"), isPlaying: true)
+                } else if live {
                     ChickenMediaView(media: .video("SequenceHome"), isPlaying: true)
                 } else {
                     Image(image)
