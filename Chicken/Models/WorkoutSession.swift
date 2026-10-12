@@ -15,19 +15,36 @@ final class WorkoutSession {
     var currentIndex: Int
     var elapsed: TimeInterval
     var isPaused = false
-    var soundsEnabled = true
+    var soundsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(soundsEnabled, forKey: Self.soundsKey)
+            if !soundsEnabled {
+                WorkoutCue.stop()
+            }
+        }
+    }
     var phase: Phase = .home
 
     private var ticker: Timer?
     private var lastRepBucket = -1
     private let startElapsed: TimeInterval = 0
     private var repInterval: TimeInterval { currentMove.repInterval }
+    private static let soundsKey = "soundsEnabled"
 
     init(moves: [Move] = WorkoutCatalog.moves, startIndex: Int = 0) {
         self.moves = moves
         self.startIndex = min(max(startIndex, 0), max(moves.count - 1, 0))
         self.currentIndex = self.startIndex
         self.elapsed = startElapsed
+        if UserDefaults.standard.object(forKey: Self.soundsKey) == nil {
+            self.soundsEnabled = true
+        } else {
+            self.soundsEnabled = UserDefaults.standard.bool(forKey: Self.soundsKey)
+        }
+    }
+
+    func toggleSounds() {
+        soundsEnabled.toggle()
     }
 
     var currentMove: Move { moves[currentIndex] }
@@ -95,9 +112,6 @@ final class WorkoutSession {
     private func introduceCurrentMove() async {
         if soundsEnabled {
             await WorkoutCue.speakName(currentMove.name)
-            if currentMove.name.compare("ABS", options: .caseInsensitive) == .orderedSame {
-                try? await Task.sleep(for: .seconds(2))
-            }
         } else {
             try? await Task.sleep(for: .milliseconds(350))
         }

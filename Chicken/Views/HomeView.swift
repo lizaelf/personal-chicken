@@ -261,7 +261,8 @@ struct HomeView: View {
 
             Group {
                 if !wing {
-                    ChickenMediaView(media: .video("Sequence01"), isPlaying: true)
+                    ChickenMediaView(media: .video("SequenceAbs"), isPlaying: true)
+                        .scaleEffect(1.2)
                 } else if live {
                     ChickenMediaView(media: .video("SequenceHome"), isPlaying: true)
                 } else {
@@ -272,6 +273,7 @@ struct HomeView: View {
             }
             .padding(.horizontal, 4)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
 
             Button(action: startWorkout) {
                 HStack(spacing: 10) {

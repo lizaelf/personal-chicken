@@ -403,6 +403,7 @@
       display: grid;
       place-items: center;
       padding: 4px;
+      overflow: hidden;
     }
 
     .home-chicken img {
@@ -410,6 +411,10 @@
       height: 100%;
       object-fit: contain;
       object-position: center;
+    }
+
+    .home-chicken .abs-preview-chicken {
+      transform: scale(1.2);
     }
 
     .workout-card.is-rest {
@@ -1193,8 +1198,8 @@
     }
 
     .splash-chicken {
-      width: min(78%, 260px);
-      height: min(44dvh, 300px);
+      width: min(78%, 312px);
+      height: min(53dvh, 360px);
       object-fit: contain;
       transform: scale(0.9);
       animation: splash-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -1265,7 +1270,15 @@
       gap: 12px;
     }
 
-    .workout-close {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .workout-close,
+    .workout-mute {
       width: 32px;
       height: 32px;
       border-radius: 16px;
@@ -1280,6 +1293,11 @@
     .workout-close svg {
       width: 14px;
       height: 14px;
+    }
+
+    .workout-mute svg {
+      width: 18px;
+      height: 18px;
     }
 
     .move-label {
@@ -1899,11 +1917,23 @@
       <div class="header">
         <div class="header-top">
           <div class="move-label" id="moveLabel">Move 1 of 2</div>
-          <button class="workout-close" id="workoutClose" type="button" aria-label="Close">
-            <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-            </svg>
-          </button>
+          <div class="header-actions">
+            <button class="workout-mute" id="workoutMute" type="button" aria-pressed="false" aria-label="Mute sounds">
+              <svg class="mute-on" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M3.2 7.2h2.1l3.2-2.7v9L5.3 10.8H3.2A1.2 1.2 0 0 1 2 9.6V8.4a1.2 1.2 0 0 1 1.2-1.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M12.1 6.3a3.4 3.4 0 0 1 0 5.4M13.9 4.6a6 6 0 0 1 0 8.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <svg class="mute-off" viewBox="0 0 18 18" fill="none" aria-hidden="true" hidden>
+                <path d="M3.2 7.2h2.1l3.2-2.7v9L5.3 10.8H3.2A1.2 1.2 0 0 1 2 9.6V8.4a1.2 1.2 0 0 1 1.2-1.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M12.2 6.8l3.6 4.4M15.8 6.8l-3.6 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button class="workout-close" id="workoutClose" type="button" aria-label="Close">
+              <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
         </div>
         <div class="pips" id="pips"></div>
       </div>
@@ -1960,17 +1990,18 @@
       );
     }
 
-    const seq01 = makeFrames("Sequence01", 42);
-    const seq04 = makeFrames("Sequence04", 20);
-    const seqCharm = makeFrames("SequenceCharm", 9);
+    const seq01 = makeFrames("Sequence01", 46, "png");
+    const seqAbs = makeFrames("SequenceAbs", 22, "png");
+    const seq04 = makeFrames("Sequence04", 6, "png");
+    const seqCharm = makeFrames("SequenceCharm", 9, "png");
     const homeFrames = makeFrames("SequenceHome", 44);
     const freeDayFrames = makeFrames("SequenceFreeDay", 10, "png");
 
     const setCount = 20;
     let lastRepBucket = -1;
     const moves = [
-      { name: "ABS", duration: 20 * 5, interval: 5, frames: seq01, fps: 10 },
-      { name: "Dumbbell shoulder press", duration: 20 * 2, interval: 2, frames: seq04, fps: 14, larger: true },
+      { name: "ABS", duration: 20 * 5, interval: 5, frames: seq01, fps: 9 },
+      { name: "Dumbbell shoulder press", duration: 20 * 2, interval: 2, frames: seq04, fps: 10, larger: true },
     ];
 
     const startIndex = 0;
@@ -2002,7 +2033,7 @@
     let settingsOpen = false;
     let notesOpen = false;
     let homeFrame = 0;
-    splashChicken.src = homeFrames[0];
+    splashChicken.src = seqAbs[0];
     let transitioning = false;
 
     const haptic = {
@@ -2083,7 +2114,7 @@
           : chipHTML("Kettlebells", iconDumbbells) + chipHTML("Mat", iconMat);
         const visual = wing
           ? `<img src="../Chicken/Assets.xcassets/ChickenShoulderPress.imageset/ChickenShoulderPress.png" alt="" />`
-          : `<img class="abs-preview-chicken"${kind === "today" ? ' id="homeChicken"' : ""} src="${seq01[0]}" alt="" />`;
+          : `<img class="abs-preview-chicken"${kind === "today" ? ' id="homeChicken"' : ""} src="${seqAbs[0]}" alt="" />`;
         const cta = kind === "today" ? "Start" : "Open workout";
         return workoutSlide(title, minutes, chips, visual, cta, true);
       }
@@ -2093,7 +2124,7 @@
 
     dayTrack.innerHTML = dayIds.map((day) => `<section class="day-slide" data-slide="${day}">${slideMarkup(day)}</section>`).join("");
     homeChicken = document.getElementById("homeChicken");
-    if (homeChicken) homeChicken.src = seq01[0];
+    if (homeChicken) homeChicken.src = seqAbs[0];
 
     function slideOffset(index) {
       return -Math.max(0, index) * dayStage.clientWidth;
@@ -2359,8 +2390,38 @@
       document.getElementById("setN").textContent = String(currentSet());
     }
 
+    let soundsOn = localStorage.getItem("soundsEnabled") !== "false";
+    let currentCue = null;
+
     function soundsEnabled() {
-      return document.querySelector('[aria-label="Sounds"]')?.classList.contains("is-on") !== false;
+      return soundsOn;
+    }
+
+    function paintSoundToggles() {
+      const settingsBtn = document.querySelector('[aria-label="Sounds"]');
+      if (settingsBtn) {
+        settingsBtn.classList.toggle("is-on", soundsOn);
+        settingsBtn.setAttribute("aria-checked", String(soundsOn));
+      }
+      const muteBtn = document.getElementById("workoutMute");
+      if (muteBtn) {
+        muteBtn.setAttribute("aria-pressed", String(!soundsOn));
+        muteBtn.setAttribute("aria-label", soundsOn ? "Mute sounds" : "Unmute sounds");
+        const onIcon = muteBtn.querySelector(".mute-on");
+        const offIcon = muteBtn.querySelector(".mute-off");
+        if (onIcon) onIcon.hidden = !soundsOn;
+        if (offIcon) offIcon.hidden = soundsOn;
+      }
+    }
+
+    function setSoundsEnabled(on) {
+      soundsOn = on;
+      localStorage.setItem("soundsEnabled", String(on));
+      if (!on && currentCue) {
+        currentCue.pause();
+        currentCue = null;
+      }
+      paintSoundToggles();
     }
 
     function setSoundUrl(n) {
@@ -2370,6 +2431,9 @@
 
     function nameSoundUrl(name) {
       const slug = String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      if (slug === "abs" || slug === "done" || slug === "dumbbell-shoulder-press") {
+        return `../Chicken/Sounds/names/${slug}.mp3`;
+      }
       return `../Chicken/Sounds/names/${slug}.wav`;
     }
 
@@ -2379,9 +2443,17 @@
           resolve();
           return;
         }
+        if (currentCue) {
+          currentCue.pause();
+          currentCue = null;
+        }
         const hit = new Audio(url);
         hit.volume = 0.95;
-        const done = () => resolve();
+        currentCue = hit;
+        const done = () => {
+          if (currentCue === hit) currentCue = null;
+          resolve();
+        };
         hit.addEventListener("ended", done, { once: true });
         hit.addEventListener("error", done, { once: true });
         hit.play().catch(done);
@@ -2407,10 +2479,6 @@
       render();
       await playCue(nameSoundUrl(moves[index].name));
       if (phase !== "workout") return;
-      if (/^abs$/i.test(moves[index].name)) {
-        await new Promise((resolve) => window.setTimeout(resolve, 2000));
-        if (phase !== "workout") return;
-      }
       paused = false;
       lastRepBucket = -1;
       cueRep();
@@ -2666,10 +2734,22 @@
     document.querySelectorAll(".set-toggle").forEach((btn) => {
       btn.addEventListener("click", () => {
         haptic.selection();
-        const on = btn.classList.toggle("is-on");
-        btn.setAttribute("aria-checked", String(on));
+        const on = !btn.classList.contains("is-on");
+        if (btn.getAttribute("aria-label") === "Sounds") {
+          setSoundsEnabled(on);
+        } else {
+          btn.classList.toggle("is-on", on);
+          btn.setAttribute("aria-checked", String(on));
+        }
       });
     });
+
+    document.getElementById("workoutMute")?.addEventListener("click", () => {
+      haptic.selection();
+      setSoundsEnabled(!soundsOn);
+    });
+
+    paintSoundToggles();
 
     document.getElementById("setUnits").addEventListener("click", (event) => {
       const btn = event.target.closest("[data-unit]");
@@ -2813,19 +2893,19 @@
     function mediaLoop(now) {
       requestAnimationFrame(mediaLoop);
       if (splashOn) {
-        if (now - lastHomeTick >= 1000 / 12) {
+        if (now - lastHomeTick >= 1000 / 10) {
           lastHomeTick = now;
-          homeFrame = (homeFrame + 1) % homeFrames.length;
-          splashChicken.src = homeFrames[homeFrame];
+          homeFrame = (homeFrame + 1) % seqAbs.length;
+          splashChicken.src = seqAbs[homeFrame];
         }
         return;
       }
       if (phase === "home" && homeTab === "home" && !settingsOpen && !notesOpen) {
         if (now - lastHomeTick >= 1000 / 10) {
           lastHomeTick = now;
-          homeFrame = (homeFrame + 1) % seq01.length;
+          homeFrame = (homeFrame + 1) % seqAbs.length;
           document.querySelectorAll(".abs-preview-chicken").forEach((img) => {
-            img.src = seq01[homeFrame];
+            img.src = seqAbs[homeFrame];
           });
         }
         if (now - lastFreeDayTick >= 1000 / 6) {

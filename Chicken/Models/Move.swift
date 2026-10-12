@@ -13,7 +13,7 @@ enum ChickenMedia: Equatable {
 
     var nudgeX: CGFloat {
         switch self {
-        case .video("Sequence01"): return 0
+        case .video("Sequence01"): return -14
         case .video("Sequence04"): return -6
         default: return 0
         }
@@ -21,7 +21,7 @@ enum ChickenMedia: Equatable {
 
     var displayScale: CGFloat {
         switch self {
-        case .video("Sequence01"): return 1.0
+        case .video("Sequence01"): return 1.14
         case .video("Sequence04"): return 1.22
         case .video("SequenceCharm"): return 1.5
         case .video("SequenceHome"): return 1.12
@@ -32,8 +32,9 @@ enum ChickenMedia: Equatable {
 
     var frameInterval: TimeInterval {
         switch self {
-        case .video("Sequence01"): return 1.0 / 10.0
-        case .video("Sequence04"): return 1.0 / 14.0
+        case .video("Sequence01"): return 1.0 / 9.0
+        case .video("SequenceAbs"): return 1.0 / 10.0
+        case .video("Sequence04"): return 1.0 / 10.0
         case .video("SequenceCharm"): return 1.0 / 10.0
         case .video("SequenceHome"): return 1.0 / 12.0
         case .video("SequenceFreeDay"): return 1.0 / 6.0

@@ -45,6 +45,7 @@ struct LoopingVideoPlayer: View {
     private var fallback: String? {
         switch resourceName {
         case "Sequence01": return "ChickenAbs"
+        case "SequenceAbs": return "ChickenAbs"
         case "Sequence04": return "ChickenShoulderPress"
         case "SequenceCharm": return "ChickenCharm"
         case "SequenceHome": return "ChickenCharm"

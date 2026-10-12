@@ -84,8 +84,8 @@ private struct SplashView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            ChickenMediaView(media: .video("SequenceHome"), isPlaying: true)
-                .frame(width: 240, height: 280)
+            ChickenMediaView(media: .video("SequenceAbs"), isPlaying: true)
+                .frame(width: 288, height: 336)
                 .scaleEffect(popped ? 1 : 0.86)
 
             VStack(spacing: 8) {

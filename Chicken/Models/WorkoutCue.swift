@@ -12,6 +12,11 @@ enum WorkoutCue {
         try? session.setActive(true)
     }
 
+    static func stop() {
+        player?.stop()
+        player = nil
+    }
+
     static func speakSet(_ number: Int) {
         play(resource: "\(number)", subdirectory: "sets")
     }
