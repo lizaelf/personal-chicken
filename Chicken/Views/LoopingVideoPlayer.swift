@@ -1,71 +1,111 @@
-import AVFoundation
 import SwiftUI
 import UIKit
 
-/// Loops a bundled video silently. Used when `ChickenMedia.video` is set.
-struct LoopingVideoPlayer: UIViewRepresentable {
+/// Loops bundled PNG/JPEG frames. PNG keeps the ProRes 4444 alpha so drop
+/// shadows stay translucent instead of flattening to black. SwiftUI `Image`
+/// sizes reliably — unlike `AVPlayerLayer`.
+/// Frame index is derived from the timeline date so we never mutate `@State`
+/// during a view update (that crashed Simulator to a white launch screen).
+struct LoopingVideoPlayer: View {
     let resourceName: String
     var isPlaying: Bool = true
+    var frameInterval: TimeInterval = 1.0 / 10.0
+    var aspectRatio: CGFloat = 1.45
 
-    func makeUIView(context: Context) -> PlayerView {
-        let view = PlayerView()
-        view.isOpaque = false
-        view.backgroundColor = .clear
-        view.playerLayer.isOpaque = false
-        view.playerLayer.backgroundColor = UIColor.clear.cgColor
-        view.playerLayer.videoGravity = .resizeAspect
-        view.load(resourceName: resourceName)
-        view.setPlaying(isPlaying)
-        return view
-    }
+    @State private var frames: [UIImage] = []
 
-    func updateUIView(_ uiView: PlayerView, context: Context) {
-        if uiView.resourceName != resourceName {
-            uiView.load(resourceName: resourceName)
-        }
-        uiView.setPlaying(isPlaying)
-    }
-
-    static func dismantleUIView(_ uiView: PlayerView, coordinator: ()) {
-        uiView.tearDown()
-    }
-
-    final class PlayerView: UIView {
-        var resourceName: String?
-        override class var layerClass: AnyClass { AVPlayerLayer.self }
-        var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
-        private var looper: AVPlayerLooper?
-        private var queuePlayer: AVQueuePlayer?
-
-        func load(resourceName: String) {
-            tearDown()
-            self.resourceName = resourceName
-            guard let url = Bundle.main.url(forResource: resourceName, withExtension: "mov")
-                    ?? Bundle.main.url(forResource: resourceName, withExtension: "mp4") else {
-                return
-            }
-            let item = AVPlayerItem(url: url)
-            let player = AVQueuePlayer()
-            player.isMuted = true
-            looper = AVPlayerLooper(player: player, templateItem: item)
-            queuePlayer = player
-            playerLayer.player = player
-            player.play()
-        }
-
-        func setPlaying(_ playing: Bool) {
-            if playing {
-                queuePlayer?.play()
-            } else {
-                queuePlayer?.pause()
+    var body: some View {
+        GeometryReader { geo in
+            let size = Self.containedSize(in: geo.size, aspectRatio: aspectRatio)
+            TimelineView(.animation(minimumInterval: max(frameInterval, 0.04), paused: !isPlaying)) { context in
+                resolvedImage(at: context.date)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size.width, height: size.height)
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .transaction { $0.animation = nil }
             }
         }
-
-        func tearDown() {
-            queuePlayer?.pause()
-            looper = nil
-            queuePlayer = nil
-            playerLayer.player = nil
+        .clipped()
+        .transaction { $0.animation = nil }
+        .task(id: resourceName) {
+            frames = Self.loadFrames(named: resourceName)
         }
+    }
+
+    /// Fit the clip inside the slot without ever exceeding its width or height.
+    private static func containedSize(in bounds: CGSize, aspectRatio: CGFloat) -> CGSize {
+        let ratio = max(aspectRatio, 0.1)
+        guard bounds.width > 0, bounds.height > 0 else { return .zero }
+        let heightIfFullWidth = bounds.width / ratio
+        if heightIfFullWidth <= bounds.height {
+            return CGSize(width: bounds.width, height: heightIfFullWidth)
+        }
+        return CGSize(width: bounds.height * ratio, height: bounds.height)
+    }
+
+    private func resolvedImage(at date: Date) -> Image {
+        if let image = image(at: date) {
+            return Image(uiImage: image)
+        }
+        if let fallback {
+            return Image(fallback)
+        }
+        return Image(systemName: "photo")
+    }
+
+    private var fallback: String? {
+        switch resourceName {
+        case "Sequence01": return "ChickenOverheadPress"
+        case "Sequence04": return "ChickenShoulderPress"
+        case "SequenceCharm": return "ChickenCharm"
+        default: return nil
+        }
+    }
+
+    private func image(at date: Date) -> UIImage? {
+        guard !frames.isEmpty else { return nil }
+        let step = max(frameInterval, 0.04)
+        let i = Int(date.timeIntervalSinceReferenceDate / step) % frames.count
+        return frames[i]
+    }
+
+    private static func loadFrames(named resourceName: String) -> [UIImage] {
+        let bundle = Bundle.main
+        let subdirectories = [
+            "Frames/\(resourceName)",
+            resourceName,
+            "Frames",
+        ]
+        for ext in ["png", "jpg"] {
+            for subdirectory in subdirectories {
+                if let urls = bundle.urls(forResourcesWithExtension: ext, subdirectory: subdirectory),
+                   !urls.isEmpty {
+                    let filtered: [URL]
+                    if subdirectory == "Frames" {
+                        filtered = urls.filter { $0.path.contains("/\(resourceName)/") }
+                    } else {
+                        filtered = urls
+                    }
+                    let images = filtered
+                        .sorted { $0.lastPathComponent < $1.lastPathComponent }
+                        .compactMap { UIImage(contentsOfFile: $0.path) }
+                    if !images.isEmpty { return images }
+                }
+            }
+        }
+
+        guard let root = bundle.resourceURL else { return [] }
+        let folder = root.appendingPathComponent("Frames", isDirectory: true)
+            .appendingPathComponent(resourceName, isDirectory: true)
+        let contents = (try? FileManager.default.contentsOfDirectory(
+            at: folder,
+            includingPropertiesForKeys: nil
+        )) ?? []
+        let preferred = contents.filter { $0.pathExtension.lowercased() == "png" }
+        let fallback = contents.filter { $0.pathExtension.lowercased() == "jpg" }
+        return (preferred.isEmpty ? fallback : preferred)
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+            .compactMap { UIImage(contentsOfFile: $0.path) }
     }
 }

@@ -11,19 +11,21 @@ enum ChickenMedia: Equatable {
         return false
     }
 
-    var nudgeX: CGFloat {
+    var frameInterval: TimeInterval {
         switch self {
-        case .video("Sequence01"): return -14
-        case .video("Sequence04"): return -6
-        default: return 0
+        case .video("Sequence01"): return 1.0 / 9.0
+        case .video("Sequence04"): return 1.0 / 14.0
+        case .video("SequenceCharm"): return 1.0 / 10.0
+        default: return 1.0 / 10.0
         }
     }
 
-    var displayScale: CGFloat {
+    /// Pixel aspect of the bundled clip after empty margins were cropped out.
+    var aspectRatio: CGFloat {
         switch self {
-        case .video("Sequence01"): return 1.14
-        case .video("Sequence04"): return 1.22
-        case .video("SequenceCharm"): return 1.5
+        case .video("Sequence01"): return 800.0 / 560.0
+        case .video("Sequence04"): return 800.0 / 748.0
+        case .video("SequenceCharm"): return 800.0 / 1009.0
         default: return 1
         }
     }

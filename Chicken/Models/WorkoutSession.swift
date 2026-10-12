@@ -4,6 +4,7 @@ import Observation
 @Observable
 final class WorkoutSession {
     enum Phase {
+        case home
         case workout
         case complete
     }
@@ -12,8 +13,8 @@ final class WorkoutSession {
     private let startIndex: Int
     var currentIndex: Int
     var elapsed: TimeInterval
-    var isPaused = false
-    var phase: Phase = .workout
+    var isPaused = true
+    var phase: Phase = .home
 
     private var ticker: Timer?
     private let startElapsed: TimeInterval = 4 * 60 + 38
@@ -23,7 +24,6 @@ final class WorkoutSession {
         self.startIndex = min(max(startIndex, 0), max(moves.count - 1, 0))
         self.currentIndex = self.startIndex
         self.elapsed = startElapsed
-        startTicking()
     }
 
     var currentMove: Move { moves[currentIndex] }
@@ -50,12 +50,20 @@ final class WorkoutSession {
         }
     }
 
-    func restart() {
-        currentIndex = startIndex
-        elapsed = startElapsed
+    func startWorkout() {
+        currentIndex = 0
+        elapsed = 0
         isPaused = false
         phase = .workout
         startTicking()
+    }
+
+    func restart() {
+        stopTicking()
+        currentIndex = startIndex
+        elapsed = startElapsed
+        isPaused = true
+        phase = .home
     }
 
     private func startTicking() {
