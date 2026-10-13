@@ -34,11 +34,18 @@ enum ChickenMedia: Equatable {
         switch self {
         case .video("Sequence01"): return 1.0 / 9.0
         case .video("SequenceAbs"): return 1.0 / 10.0
-        case .video("Sequence04"): return 1.0 / 10.0
+        case .video("Sequence04"): return 1.0 / 15.0
         case .video("SequenceCharm"): return 1.0 / 10.0
         case .video("SequenceHome"): return 1.0 / 12.0
         case .video("SequenceFreeDay"): return 1.0 / 6.0
         default: return 1.0 / 10.0
+        }
+    }
+
+    var loopPause: TimeInterval {
+        switch self {
+        case .video("SequenceAbs"): return 0.5
+        default: return 0
         }
     }
 }

@@ -11,6 +11,7 @@ enum Theme {
     static let canvas = Color(red: 242 / 255, green: 230 / 255, blue: 218 / 255)
     static let fgPrimary = Color(red: 44 / 255, green: 31 / 255, blue: 28 / 255)
     static let fgSecondary = Color(red: 151 / 255, green: 138 / 255, blue: 130 / 255)
+    static let fgRest = Color(red: 188 / 255, green: 180 / 255, blue: 175 / 255)
     static let fgAccent = Color(red: 232 / 255, green: 92 / 255, blue: 92 / 255)
     static let fgPositive = Color(red: 62 / 255, green: 174 / 255, blue: 111 / 255)
     static let fgInverse = Color(red: 58 / 255, green: 42 / 255, blue: 38 / 255)

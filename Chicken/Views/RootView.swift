@@ -87,17 +87,6 @@ private struct SplashView: View {
             ChickenMediaView(media: .video("SequenceAbs"), isPlaying: true)
                 .frame(width: 288, height: 336)
                 .scaleEffect(popped ? 1 : 0.86)
-
-            VStack(spacing: 8) {
-                Text("Chicken")
-                    .font(.workear(size: 40, relativeTo: .largeTitle))
-                    .foregroundStyle(Theme.fgPrimary)
-                Text("Let’s worko-ko!")
-                    .font(.workear(size: 16, relativeTo: .body))
-                    .foregroundStyle(Theme.fgSecondary)
-            }
-            .opacity(popped ? 1 : 0)
-            .offset(y: popped ? 0 : 10)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.cream.ignoresSafeArea())
@@ -107,7 +96,7 @@ private struct SplashView: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Chicken")
+        .accessibilityLabel("Fit Coco")
     }
 }
 

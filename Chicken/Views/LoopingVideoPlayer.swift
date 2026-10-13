@@ -8,9 +8,12 @@ struct LoopingVideoPlayer: View {
     let resourceName: String
     var isPlaying: Bool = true
     var frameInterval: TimeInterval = 1.0 / 10.0
+    var loopPause: TimeInterval = 0
+    var loops: Bool = true
     var fillsBounds: Bool = false
 
     @State private var frames: [UIImage] = []
+    @State private var startedAt: Date?
 
     var body: some View {
         TimelineView(.animation(minimumInterval: max(frameInterval, 0.04), paused: !isPlaying)) { context in
@@ -29,6 +32,7 @@ struct LoopingVideoPlayer: View {
         }
         .task(id: resourceName) {
             frames = Self.loadJPEGs(named: resourceName)
+            startedAt = Date()
         }
     }
 
@@ -57,7 +61,15 @@ struct LoopingVideoPlayer: View {
     private func image(at date: Date) -> UIImage? {
         guard !frames.isEmpty else { return nil }
         let step = max(frameInterval, 0.04)
-        let i = Int(date.timeIntervalSinceReferenceDate / step) % frames.count
+        let playDuration = step * Double(frames.count)
+        if !loops {
+            let elapsed = max(0, date.timeIntervalSince(startedAt ?? date))
+            let i = min(Int(elapsed / step), frames.count - 1)
+            return frames[i]
+        }
+        let cycle = playDuration + max(loopPause, 0)
+        let t = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: cycle)
+        let i = t >= playDuration ? frames.count - 1 : min(Int(t / step), frames.count - 1)
         return frames[i]
     }
 

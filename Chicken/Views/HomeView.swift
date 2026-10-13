@@ -11,6 +11,8 @@ struct HomeView: View {
     @State private var showingWeightSheet = false
     @State private var currentWeightKg = 62.4
     @State private var lastWeekWeightKg = 63.2
+    @AppStorage("notificationsEnabled") private var notificationsEnabled = false
+    @AppStorage("trainingDays") private var trainingDaysRaw = ""
 
     var body: some View {
         GeometryReader { geo in
@@ -50,6 +52,7 @@ struct HomeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.canvas.ignoresSafeArea())
         .ignoresSafeArea(.container, edges: .bottom)
+        .onAppear { seedTrainingDaysIfNeeded() }
         .sheet(isPresented: $showingWeightSheet) {
             WeightLogSheet(
                 initialKg: currentWeightKg,
@@ -75,16 +78,18 @@ struct HomeView: View {
     }
 
     private var weeklyPlan: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .center) {
-                Text("Today")
-                    .font(.workear(size: 24, relativeTo: .title2))
-                    .foregroundStyle(Theme.fgPrimary)
-                Spacer()
-                HStack(spacing: 14) {
-                    iconButton(asset: "IconNotification", size: 18)
-                    iconButton(asset: "IconSettings", size: 20)
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text("4")
+                        .font(.workear(size: 28, relativeTo: .title))
+                        .foregroundStyle(Theme.fgPrimary)
+                    Text("days streak")
+                        .font(.workear(size: 15, relativeTo: .body))
+                        .foregroundStyle(Theme.fgSecondary)
                 }
+                Spacer()
+                profileButton
             }
             .padding(.horizontal, 16)
 
@@ -95,20 +100,20 @@ struct HomeView: View {
     private var weekDays: some View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
+                HStack(spacing: 9) {
                     ForEach(WeekDay.week(starting: todayDay)) { day in
-                        Button {
-                            selectedDay = day.id
-                        } label: {
+                        Group {
                             if day.id == selectedDay, let copy = dayCopy(for: day) {
                                 labeledDayChip(day, copy: copy)
                             } else {
                                 dayDot(day, accent: day.id == todayDay)
                             }
                         }
-                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
+                        .onTapGesture { selectedDay = day.id }
                         .id(day.id)
                         .accessibilityAddTraits(day.id == selectedDay ? .isSelected : [])
+                        .accessibilityAddTraits(.isButton)
                     }
                 }
             }
@@ -127,52 +132,98 @@ struct HomeView: View {
     }
 
     private func dayCopy(for day: WeekDay) -> String? {
-        if day.id == todayDay { return "Let’s work. Cluck cluck" }
-        if day.showsBorder { return "Future trainings" }
+        if day.id == todayDay { return "Let’s worko-ko!" }
+        if isFutureTraining(day) { return "Future trainings" }
         return "Free day"
     }
 
     private func labeledDayChip(_ day: WeekDay, copy: String) -> some View {
         let selected = day.id == selectedDay
         let isToday = day.id == todayDay
-        let isFree = !isToday && !day.showsBorder
+        let isFree = !isToday && !isFutureTraining(day)
         let fillInner = (selected || isToday) && !isFree
-        return HStack(spacing: 8) {
+        return HStack(spacing: 9) {
             Text(day.label)
-                .font(.workear(size: 12, relativeTo: .caption))
+                .font(.workear(size: 13, relativeTo: .caption))
                 .foregroundStyle(fillInner ? Color.white : Theme.fgSecondary)
-                .frame(width: 34, height: 34)
+                .frame(width: 36, height: 37)
                 .background {
-                    Circle().fill(fillInner ? Theme.fgAccent : (isFree ? Theme.fgSecondary.opacity(0.2) : Color.clear))
+                    Capsule().fill(fillInner ? Theme.fgAccent : (isFree ? Theme.fgSecondary.opacity(0.2) : Color.clear))
                 }
                 .overlay {
                     if !fillInner {
-                        if day.showsBorder {
-                            Circle().stroke(Theme.borderAccent, lineWidth: 1)
+                        if isFutureTraining(day) {
+                            Capsule().stroke(Theme.borderAccent, lineWidth: 1)
                         } else if isFree {
-                            Circle().stroke(Theme.fgSecondary.opacity(0.24), lineWidth: 1)
+                            Capsule().stroke(Theme.fgSecondary.opacity(0.24), lineWidth: 1)
                         }
                     }
                 }
 
             Text(copy)
-                .font(.workear(size: 14, relativeTo: .body))
+                .font(.workear(size: 15, relativeTo: .body))
                 .foregroundStyle(selected || !isFree ? Theme.fgPrimary : Theme.fgSecondary)
                 .lineLimit(1)
                 .fixedSize()
-                .padding(.trailing, 11)
         }
         .padding(.leading, 4)
+        .padding(.trailing, 20)
         .padding(.vertical, 4)
-        .frame(height: 44)
+        .frame(height: 47)
         .fixedSize(horizontal: true, vertical: true)
-        .background(Theme.surface, in: Capsule())
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay {
-            Capsule().stroke(isFree ? Theme.fgSecondary.opacity(0.28) : Theme.borderAccent, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(isFree ? Theme.fgSecondary.opacity(0.28) : Theme.borderAccent, lineWidth: 1)
         }
     }
 
     private var todayDay: String { Self.currentWeekdayId() }
+
+    private var nextDayId: String {
+        let ids = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+        guard let index = ids.firstIndex(of: todayDay) else { return "We" }
+        return ids[(index + 1) % ids.count]
+    }
+
+    private var trainingDays: Set<String> {
+        let saved = Set(trainingDaysRaw.split(separator: ",").map(String.init).filter { !$0.isEmpty })
+        if saved.isEmpty || saved == ["We", "Fr"] {
+            return Set(Self.everyOtherTrainingDays(from: todayDay))
+        }
+        return saved
+    }
+
+    private static func everyOtherTrainingDays(from today: String) -> [String] {
+        let ids = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+        guard let start = ids.firstIndex(of: today) else { return ids }
+        return ids.enumerated().compactMap { index, id in
+            ((index - start + 7) % 7).isMultiple(of: 2) ? id : nil
+        }
+    }
+
+    private func seedTrainingDaysIfNeeded() {
+        let saved = Set(trainingDaysRaw.split(separator: ",").map(String.init).filter { !$0.isEmpty })
+        if saved.isEmpty || saved == ["We", "Fr"] {
+            trainingDaysRaw = Self.everyOtherTrainingDays(from: todayDay).joined(separator: ",")
+        }
+    }
+
+    private func isFutureTraining(_ day: WeekDay) -> Bool {
+        trainingDays.contains(day.id) && day.id != todayDay && day.id != nextDayId
+    }
+
+    private func toggleTrainingDay(_ id: String) {
+        var days = trainingDays
+        if days.contains(id) {
+            days.remove(id)
+        } else {
+            days.insert(id)
+        }
+        trainingDaysRaw = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+            .filter { days.contains($0) }
+            .joined(separator: ",")
+    }
 
     private static func currentWeekdayId() -> String {
         let map = [1: "Su", 2: "Mo", 3: "Tu", 4: "We", 5: "Th", 6: "Fr", 7: "Sa"]
@@ -181,21 +232,35 @@ struct HomeView: View {
     }
 
     private func dayDot(_ day: WeekDay, accent: Bool) -> some View {
-        Text(day.label)
-            .font(.workear(size: 14, relativeTo: .body))
-            .foregroundStyle(accent ? Color.white : day.foreground)
-            .frame(width: 34, height: 34)
-            .background {
-                Circle().fill(accent ? Theme.fgAccent : day.fill)
+        let color: Color = {
+            if accent { return .white }
+            return isFutureTraining(day) ? Theme.fgSecondary : Theme.fgRest
+        }()
+        return VStack(spacing: accent ? 0 : 4) {
+            Text(day.label)
+            Text(monthDay(for: day.id))
+        }
+        .font(.workear(size: 15, relativeTo: .caption))
+        .foregroundStyle(color)
+        .frame(width: 36, height: accent ? 37 : 56)
+        .background {
+            if accent {
+                Capsule().fill(Theme.fgAccent)
             }
-            .overlay {
-                if !accent {
-                    Circle().stroke(
-                        day.showsBorder ? Theme.borderAccent : Theme.fgSecondary.opacity(0.24),
-                        lineWidth: 1
-                    )
-                }
-            }
+        }
+    }
+
+    private func monthDay(for weekdayId: String) -> String {
+        let ids = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+        guard let offset = ids.firstIndex(of: weekdayId) else { return "" }
+        var cal = Calendar(identifier: .gregorian)
+        cal.firstWeekday = 2
+        let today = cal.startOfDay(for: Date())
+        let weekday = cal.component(.weekday, from: today)
+        let mondayOffset = (weekday + 5) % 7
+        guard let monday = cal.date(byAdding: .day, value: -mondayOffset, to: today),
+              let date = cal.date(byAdding: .day, value: offset, to: monday) else { return "" }
+        return "\(cal.component(.day, from: date))"
     }
 
     private func dayPager(cardWidth: CGFloat) -> some View {
@@ -227,7 +292,7 @@ struct HomeView: View {
         if day.id == todayDay {
             return .train(live: true, title: "Abs & Glutes", image: "ChickenAbs")
         }
-        if day.showsBorder {
+        if isFutureTraining(day) {
             let wing = day.id == "Fr"
             return .train(
                 live: false,
@@ -247,11 +312,11 @@ struct HomeView: View {
                     .foregroundStyle(Theme.fgPrimary)
 
                 HStack(spacing: 6) {
-                    chip(wing ? "18 min" : "20 min")
+                    chip(wing ? "18 min" : "20 min", icon: "IconTime")
                     if wing {
                         chip("Dumbbells", icon: "IconDumbbells")
                     } else {
-                        chip("Kettlebells", icon: "IconDumbbells")
+                        chip("Dumbbells", icon: "IconDumbbells")
                         chip("Mat", icon: "IconYogaMat")
                     }
                 }
@@ -261,8 +326,28 @@ struct HomeView: View {
 
             Group {
                 if !wing {
-                    ChickenMediaView(media: .video("SequenceAbs"), isPlaying: true)
-                        .scaleEffect(1.2)
+                    GeometryReader { geo in
+                        ZStack {
+                            Ellipse()
+                                .fill(
+                                    RadialGradient(
+                                        colors: [
+                                            Color(red: 206 / 255, green: 119 / 255, blue: 69 / 255),
+                                            Color(red: 244 / 255, green: 158 / 255, blue: 109 / 255).opacity(0.1),
+                                            Color.clear,
+                                        ],
+                                        center: .center,
+                                        startRadius: 0,
+                                        endRadius: geo.size.width * 0.28
+                                    )
+                                )
+                                .frame(width: geo.size.width * 0.55, height: 31)
+                                .position(x: geo.size.width * 0.5, y: geo.size.height * 0.81)
+                            ChickenMediaView(media: .video("SequenceAbs"), isPlaying: true)
+                                .scaleEffect(1.2, anchor: UnitPoint(x: 0.5, y: 0.82))
+                                .frame(width: geo.size.width, height: geo.size.height)
+                        }
+                    }
                 } else if live {
                     ChickenMediaView(media: .video("SequenceHome"), isPlaying: true)
                 } else {
@@ -276,18 +361,18 @@ struct HomeView: View {
             .clipped()
 
             Button(action: startWorkout) {
-                HStack(spacing: 10) {
+                HStack(spacing: 12) {
                     Text(live ? "Start" : "Open workout")
-                        .font(.workear(size: 16, relativeTo: .headline))
+                        .font(.workear(size: 17, relativeTo: .headline))
                         .foregroundStyle(Theme.surface)
                     if live {
                         Image("IconStartArrow")
-                            .frame(width: 18, height: 18)
+                            .frame(width: 20, height: 20)
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(Theme.coral, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .frame(height: 56)
+                .background(Theme.coral, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             }
             .buttonStyle(.plain)
             .shadow(color: .black.opacity(0.1), radius: 1.35, x: 0, y: 0.9)
@@ -295,20 +380,20 @@ struct HomeView: View {
         }
         .frame(width: width)
         .frame(maxHeight: .infinity)
-        .background(Theme.surface)
+        .background { duneCardBackground() }
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 
     private func restCard(width: CGFloat, title: String) -> some View {
         ZStack(alignment: .bottom) {
-            ChickenMediaView(media: .video("SequenceFreeDay"), isPlaying: true, fillsBounds: true)
-                .scaleEffect(0.8, anchor: .bottom)
+            ChickenMediaView(media: .video("SequenceFreeDay"), isPlaying: true)
+                .scaleEffect(2, anchor: .bottom)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 .clipped()
         }
         .frame(width: width)
         .frame(maxHeight: .infinity)
-        .background(Theme.surface)
+        .background { duneCardBackground() }
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .overlay(alignment: .topLeading) {
             Text(title)
@@ -324,19 +409,20 @@ struct HomeView: View {
         HStack(spacing: 6) {
             if let icon {
                 Image(icon)
-                    .frame(width: 18, height: 18)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: icon == "IconTime" ? 24 : 20, height: icon == "IconTime" ? 24 : 20)
             }
             Text(title)
-                .font(.workear(size: 14, relativeTo: .body))
-                .foregroundStyle(Theme.fgSecondary)
+                .font(.workear(size: 15, relativeTo: .body))
+                .foregroundStyle(Theme.fgPrimary)
         }
-        .padding(.leading, 10)
+        .padding(.leading, 8)
         .padding(.trailing, 12)
-        .padding(.vertical, 8)
-        .background(Theme.fgSecondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .frame(height: 36)
         .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Theme.fgSecondary.opacity(0.24), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Theme.fgSecondary.opacity(0.2), lineWidth: 1)
         }
     }
 
@@ -425,10 +511,7 @@ struct HomeView: View {
                     .font(.workear(size: 24, relativeTo: .title2))
                     .foregroundStyle(Theme.fgPrimary)
                 Spacer()
-                HStack(spacing: 14) {
-                    iconButton(asset: "IconNotification", size: 18)
-                    iconButton(asset: "IconSettings", size: 20)
-                }
+                profileButton
             }
             .padding(.horizontal, 16)
 
@@ -450,46 +533,54 @@ struct HomeView: View {
 
     private func extraWorkoutCard(_ item: ExtraWorkout, width: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("\(item.line1) \(item.line2)")
-                .font(.workear(size: 40, relativeTo: .largeTitle))
-                .foregroundStyle(Theme.fgPrimary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .padding(.top, 24)
-                .padding(.horizontal, 24)
+            VStack(alignment: .leading, spacing: 12) {
+                Text("\(item.line1) \(item.line2)")
+                    .font(.workear(size: 28, relativeTo: .title))
+                    .foregroundStyle(Theme.fgPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        chip(item.duration, icon: "IconTime")
+                        ForEach(item.equipment) { gear in
+                            chip(gear.title, icon: gear.icon)
+                        }
+                    }
+                }
+            }
+            .padding(.top, 24)
+            .padding(.horizontal, 24)
 
             Image(item.image)
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    chip(item.duration)
-                    ForEach(item.equipment) { gear in
-                        chip(gear.title, icon: gear.icon)
-                    }
-                }
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 16)
+                .padding(.horizontal, 36)
 
             Button(action: startWorkout) {
                 Text("Open workout")
-                    .font(.workear(size: 16, relativeTo: .headline))
+                    .font(.workear(size: 17, relativeTo: .headline))
                     .foregroundStyle(Theme.surface)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Theme.coral, in: Capsule())
+                    .frame(height: 56)
+                    .background(Theme.coral, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             }
             .buttonStyle(.plain)
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
         }
+        .background {
+            duneCardBackground(
+                referenceHeight: 702,
+                duneY: 420,
+                duneHeight: 315,
+                centerPeach: false
+            )
+        }
         .frame(width: width)
         .frame(maxHeight: .infinity)
-        .background(Theme.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
     }
 
     private var statisticsContent: some View {
@@ -499,28 +590,27 @@ struct HomeView: View {
                     .font(.workear(size: 24, relativeTo: .title2))
                     .foregroundStyle(Theme.fgPrimary)
                 Spacer()
-                HStack(spacing: 14) {
-                    iconButton(asset: "IconNotification", size: 18)
-                    iconButton(asset: "IconSettings", size: 20)
-                }
+                profileButton
             }
             .padding(.horizontal, 16)
 
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 8) {
                     StatsTrendCard(
-                        title: "Calories",
-                        value: "12,480 kcal",
-                        delta: "+840 this week",
+                        title: "Calories burned",
+                        value: "12,480",
+                        unit: "kcal",
+                        delta: "+1840 kcal",
                         values: FitnessStats.calorieTrend,
-                        startLabel: "Jul 4"
+                        startLabel: "Jul 12"
                     )
                     StatsTrendCard(
                         title: "Weight",
-                        value: formattedWeight(currentWeightKg),
+                        value: String(format: "%.1f", displayWeight(currentWeightKg)),
+                        unit: weightUnit,
                         delta: formattedWeightLoss,
                         values: FitnessStats.weightTrend(endingAt: currentWeightKg),
-                        startLabel: "Jan"
+                        startLabel: "Jul 12"
                     )
                     statsCalendarCard
                 }
@@ -556,21 +646,35 @@ struct HomeView: View {
                     }
                 }
             }
+
+            Image("StatsProgress")
+                .resizable()
+                .scaledToFit()
+                .padding(.horizontal, -24)
+                .padding(.bottom, -24)
+                .accessibilityLabel("Progress looks good on you!")
         }
         .padding(24)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background(Theme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 
     private func statsDayCell(_ cell: FitnessDay) -> some View {
         ZStack {
             Circle()
-                .fill(cell.day == nil ? Color.clear : (cell.workedOut ? Theme.cream : Theme.bgSoft))
+                .fill(
+                    cell.day == nil
+                        ? Color.clear
+                        : (cell.workedOut
+                            ? Color(red: 251 / 255, green: 226 / 255, blue: 225 / 255)
+                            : Theme.bgSoft)
+                )
             if let day = cell.day {
                 if cell.workedOut {
                     Image("CalendarChicken")
                         .resizable()
-                        .scaledToFit()
-                        .scaleEffect(0.59)
+                        .scaledToFill()
+                        .clipShape(Circle())
                         .accessibilityHidden(true)
                 } else {
                     Text("\(day)")
@@ -579,11 +683,10 @@ struct HomeView: View {
                 }
             }
         }
-        .frame(height: 32)
+        .frame(height: 43)
+        .clipShape(Circle())
         .overlay {
-            if cell.workedOut {
-                Circle().stroke(Theme.coral, lineWidth: 1.5)
-            } else if cell.isToday {
+            if cell.isToday && !cell.workedOut {
                 Circle().stroke(Theme.fgPrimary.opacity(0.35), lineWidth: 1.5)
             }
         }
@@ -598,36 +701,30 @@ struct HomeView: View {
                 } label: {
                     Text(tab.title)
                         .font(.workear(size: 14, relativeTo: .body))
-                        .foregroundStyle(tab == selectedTab ? Theme.fgInverse : Theme.fgSecondary)
+                        .foregroundStyle(
+                            tab == selectedTab
+                                ? Color(red: 58 / 255, green: 42 / 255, blue: 38 / 255)
+                                : Color(red: 151 / 255, green: 138 / 255, blue: 130 / 255)
+                        )
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
                         .background(
-                            tab == selectedTab ? Theme.surface : Theme.bgSoft,
-                            in: Capsule()
+                            tab == selectedTab
+                                ? Color(red: 255 / 255, green: 252 / 255, blue: 250 / 255)
+                                : Color(red: 246 / 255, green: 237 / 255, blue: 224 / 255),
+                            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
                         )
-                        .overlay {
-                            if tab != selectedTab {
-                                Capsule().stroke(Theme.fgSecondary.opacity(0.24), lineWidth: 1)
-                            }
-                        }
+                        .shadow(
+                            color: tab == selectedTab ? Color.black.opacity(0.1) : .clear,
+                            radius: 2,
+                            y: 1
+                        )
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.top, 16)
         .padding(.horizontal, 16)
-        .padding(.bottom, 32)
-        .background {
-            ZStack {
-                Rectangle().fill(.ultraThinMaterial)
-                LinearGradient(
-                    colors: [Theme.canvas.opacity(0), Theme.canvas],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            }
-            .ignoresSafeArea(edges: .bottom)
-        }
+        .padding(.bottom, 8)
     }
 
     private var notificationsContent: some View {
@@ -791,6 +888,35 @@ struct HomeView: View {
                         settingsToggle("Sounds", isOn: Bindable(session).soundsEnabled)
                     }
 
+                    settingsGroup(title: "Training") {
+                        settingsToggle("Notifications", isOn: $notificationsEnabled)
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Workout days")
+                                .font(.workear(size: 16, relativeTo: .headline))
+                                .foregroundStyle(Theme.fgPrimary)
+                            HStack(spacing: 8) {
+                                ForEach(["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"], id: \.self) { day in
+                                    Button {
+                                        toggleTrainingDay(day)
+                                    } label: {
+                                        Text(day)
+                                            .font(.workear(size: 14, relativeTo: .body))
+                                            .foregroundStyle(trainingDays.contains(day) ? Theme.fgInverse : Theme.fgSecondary)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 36)
+                                            .background(
+                                                trainingDays.contains(day) ? Theme.canvas : Theme.bgSoft,
+                                                in: Capsule()
+                                            )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 16)
+                    }
+
                     settingsGroup(title: "About") {
                         settingsInfo("Version", value: "beta")
                     }
@@ -846,6 +972,54 @@ struct HomeView: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
+    }
+
+    private func duneCardBackground(
+        referenceHeight: CGFloat = 525,
+        duneY: CGFloat = 271,
+        duneHeight: CGFloat = 257,
+        centerPeach: Bool = true
+    ) -> some View {
+        GeometryReader { geo in
+            let size = geo.size
+            let peach = Color(red: 254 / 255, green: 229 / 255, blue: 222 / 255)
+            let sand = Color(red: 244 / 255, green: 235 / 255, blue: 213 / 255)
+            ZStack(alignment: .topLeading) {
+                RadialGradient(
+                    colors: centerPeach ? [peach, sand] : [sand, peach],
+                    center: centerPeach ? UnitPoint(x: 0.78, y: 0.18) : UnitPoint(x: 0.76, y: 0.75),
+                    startRadius: 24,
+                    endRadius: max(size.width, size.height)
+                )
+                SandDune()
+                    .fill(Color(red: 1, green: 228 / 255, blue: 164 / 255))
+                    .frame(
+                        width: size.width * 612 / 395,
+                        height: size.height * duneHeight / referenceHeight
+                    )
+                    .offset(
+                        x: size.width * -108 / 395,
+                        y: size.height * duneY / referenceHeight
+                    )
+            }
+        }
+    }
+
+    private var profileButton: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showingNotifications = false
+                showingSettings = true
+            }
+        } label: {
+            Image("AvatarChicken")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 40, height: 40)
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Settings")
     }
 
     private func iconButton(asset: String, size: CGFloat) -> some View {
@@ -1115,6 +1289,29 @@ private enum FitnessStats {
         return formatter.string(from: Date())
     }
 
+    static func axisLabels(for values: [Double?]) -> [String] {
+        let known = values.compactMap { $0 }
+        guard let minV = known.min(), let maxV = known.max() else { return [] }
+        if maxV > 100 {
+            let top = (maxV / 200).rounded(.up) * 200
+            let step: Double = 600
+            return [top, top - step, top - 2 * step].map { formatGrouped($0) }
+        }
+        let top = maxV.rounded(.up)
+        let bot = minV.rounded(.down)
+        let mid = (top + bot) / 2
+        return [top, mid, bot].map { String(format: "%.1f", $0) }
+    }
+
+    private static func formatGrouped(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 0
+        formatter.groupingSeparator = ","
+        return formatter.string(from: NSNumber(value: value)) ?? "\(Int(value))"
+    }
+
     static func weightTrend(endingAt current: Double) -> [Double?] {
         [65.6, 65.4, 65.1, 64.8, 64.5, 64.1, 63.8, 63.3, current, nil, nil, nil]
     }
@@ -1123,59 +1320,91 @@ private enum FitnessStats {
 private struct StatsTrendCard: View {
     let title: String
     let value: String
+    let unit: String
     let delta: String
     let values: [Double?]
     let startLabel: String
 
-    init(title: String, value: String, delta: String, values: [Double], startLabel: String) {
+    init(title: String, value: String, unit: String, delta: String, values: [Double], startLabel: String) {
         self.title = title
         self.value = value
+        self.unit = unit
         self.delta = delta
         self.values = values.map { Optional($0) }
         self.startLabel = startLabel
     }
 
-    init(title: String, value: String, delta: String, values: [Double?], startLabel: String) {
+    init(title: String, value: String, unit: String, delta: String, values: [Double?], startLabel: String) {
         self.title = title
         self.value = value
+        self.unit = unit
         self.delta = delta
         self.values = values
         self.startLabel = startLabel
     }
 
+    private var ticks: [String] { FitnessStats.axisLabels(for: values) }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .top, spacing: 10) {
+            HStack(alignment: .bottom, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(.workear(size: 16, relativeTo: .headline))
+                        .font(.workear(size: 17, relativeTo: .headline))
                         .foregroundStyle(Theme.fgPrimary)
-                    Spacer()
-                    Text(value)
-                        .font(.workear(size: 28, relativeTo: .title))
-                        .foregroundStyle(Theme.fgPrimary)
-                        .minimumScaleFactor(0.7)
-                        .lineLimit(1)
+                    Color.clear.frame(height: 2)
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text(value)
+                            .font(.workear(size: 30, relativeTo: .title))
+                            .foregroundStyle(Theme.fgPrimary)
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(1)
+                        Text(unit)
+                            .font(.workear(size: 15, relativeTo: .body))
+                            .foregroundStyle(Theme.fgSecondary)
+                    }
                 }
-
-                Text(delta)
-                    .font(.workear(size: 14, relativeTo: .body))
-                    .foregroundStyle(Theme.fgPositive)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                Spacer(minLength: 4)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(delta)
+                        .font(.workear(size: 15, relativeTo: .body))
+                        .foregroundStyle(Theme.fgPositive)
+                    Text("this week")
+                        .font(.workear(size: 15, relativeTo: .body))
+                        .foregroundStyle(Theme.fgSecondary)
+                }
+                .padding(.bottom, 4)
             }
 
-            WeightTrendChart(values: values)
-                .frame(height: 120)
-
-            HStack {
-                Text(startLabel)
-                Spacer()
-                Text(FitnessStats.chartEndLabel)
+            HStack(alignment: .center, spacing: 6) {
+                VStack(spacing: 8) {
+                    WeightTrendChart(values: values)
+                        .frame(height: 128)
+                        .clipped()
+                    HStack {
+                        Text(startLabel)
+                        Spacer()
+                        Text(FitnessStats.chartEndLabel)
+                    }
+                    .font(.workear(size: 12, relativeTo: .caption))
+                    .foregroundStyle(Theme.fgSecondary)
+                }
+                VStack {
+                    ForEach(Array(ticks.enumerated()), id: \.offset) { index, label in
+                        Text(label)
+                            .font(.workear(size: 12, relativeTo: .caption))
+                            .foregroundStyle(Theme.fgSecondary)
+                        if index < ticks.count - 1 {
+                            Spacer(minLength: 0)
+                        }
+                    }
+                }
+                .frame(height: 128)
             }
-            .font(.workear(size: 12, relativeTo: .caption))
-            .foregroundStyle(Theme.fgSecondary)
         }
-        .padding(24)
+        .padding(.top, 20)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 24)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 }
@@ -1230,7 +1459,7 @@ private struct WeightTrendChart: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
+        Canvas { context, size in
             let known = values.compactMap { $0 }
             let rawMin = known.min() ?? 0
             let rawMax = known.max() ?? 1
@@ -1239,45 +1468,84 @@ private struct WeightTrendChart: View {
             let maxV = rawMax + pad
             let span = max(maxV - minV, 0.1)
             let slots = max(known.count - 1, 1)
-            let dotRadius: CGFloat = 4
-            let insetX = dotRadius
-            let insetY = dotRadius
-            let plotW = geo.size.width - 2 * insetX
-            let plotH = geo.size.height - 2 * insetY
+            let inset: CGFloat = 4
+            let plotW = size.width - 2 * inset
+            let plotH = size.height - 2 * inset
+            let weak = Theme.fgPrimary.opacity(0.06)
+            let strong = Theme.fgPrimary.opacity(0.12)
+            let cell: CGFloat = 8
+            var x: CGFloat = 0
+            var col = 0
+            while x <= size.width {
+                var line = Path()
+                line.move(to: CGPoint(x: x, y: 0))
+                line.addLine(to: CGPoint(x: x, y: size.height))
+                context.stroke(line, with: .color(col % 4 == 0 ? strong : weak), lineWidth: col % 4 == 0 ? 2 : 1)
+                x += cell
+                col += 1
+            }
+            var y: CGFloat = 0
+            var row = 0
+            while y <= size.height {
+                var line = Path()
+                line.move(to: CGPoint(x: 0, y: y))
+                line.addLine(to: CGPoint(x: size.width, y: y))
+                context.stroke(line, with: .color(row % 4 == 0 ? strong : weak), lineWidth: row % 4 == 0 ? 2 : 1)
+                y += cell
+                row += 1
+            }
+
             let points: [CGPoint] = known.enumerated().map { index, value in
                 CGPoint(
-                    x: insetX + plotW * CGFloat(index) / CGFloat(slots),
-                    y: insetY + plotH * (1 - CGFloat((value - minV) / span))
+                    x: inset + plotW * CGFloat(index) / CGFloat(slots),
+                    y: inset + plotH * (1 - CGFloat((value - minV) / span))
                 )
             }
+            guard let first = points.first, let last = points.last else { return }
 
-            Path { path in
-                guard let first = points.first else { return }
-                path.move(to: CGPoint(x: first.x, y: geo.size.height))
-                path.addLine(to: first)
-                points.dropFirst().forEach { path.addLine(to: $0) }
-                if let last = points.last {
-                    path.addLine(to: CGPoint(x: last.x, y: geo.size.height))
-                }
-                path.closeSubpath()
-            }
-            .fill(Theme.coral.opacity(0.16))
+            var fill = Path()
+            fill.move(to: CGPoint(x: first.x, y: size.height))
+            fill.addLine(to: first)
+            points.dropFirst().forEach { fill.addLine(to: $0) }
+            fill.addLine(to: CGPoint(x: last.x, y: size.height))
+            fill.closeSubpath()
+            context.fill(fill, with: .color(Theme.fgAccent.opacity(0.16)))
 
-            Path { path in
-                guard let first = points.first else { return }
-                path.move(to: first)
-                points.dropFirst().forEach { path.addLine(to: $0) }
-            }
-            .stroke(Theme.coral, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+            var stroke = Path()
+            stroke.move(to: first)
+            points.dropFirst().forEach { stroke.addLine(to: $0) }
+            context.stroke(stroke, with: .color(Theme.fgAccent), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
 
-            if let last = points.last {
-                Circle()
-                    .fill(Theme.coral)
-                    .frame(width: 8, height: 8)
-                    .position(last)
-            }
+            let dot = Path(ellipseIn: CGRect(x: last.x - 4.5, y: last.y - 4.5, width: 9, height: 9))
+            context.fill(dot, with: .color(Theme.fgAccent))
         }
         .accessibilityHidden(true)
+    }
+}
+
+private struct SandDune: Shape {
+    func path(in rect: CGRect) -> Path {
+        let sx = rect.width / 612
+        let sy = rect.height / 257
+        func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
+            CGPoint(x: x * sx, y: y * sy)
+        }
+        var path = Path()
+        path.move(to: pt(0, 60.87))
+        path.addCurve(to: pt(32.28, 77.63), control1: pt(8.28, 63.66), control2: pt(26.32, 70.93))
+        path.addCurve(to: pt(76.16, 18.12), control1: pt(39.74, 86.02), control2: pt(37.25, 22.32))
+        path.addCurve(to: pt(138.25, 51.65), control1: pt(107.29, 14.77), control2: pt(130.52, 39.08))
+        path.addCurve(to: pt(202.82, 0.52), control1: pt(142.94, 32.37), control2: pt(162.42, -4.84))
+        path.addCurve(to: pt(279.80, 83.50), control1: pt(243.21, 5.89), control2: pt(270.97, 58.08))
+        path.addCurve(to: pt(447.02, 102.78), control1: pt(326.44, 85.46), control2: pt(425.17, 92.05))
+        path.addCurve(to: pt(447.02, 153.91), control1: pt(474.34, 116.19), control2: pt(427.98, 153.07))
+        path.addCurve(to: pt(541.39, 125.41), control1: pt(466.06, 154.74), control2: pt(514.07, 117.87))
+        path.addCurve(to: pt(558.78, 170.67), control1: pt(568.71, 132.95), control2: pt(543.05, 170.67))
+        path.addCurve(to: pt(601.82, 153.91), control1: pt(574.51, 170.67), control2: pt(589.41, 153.91))
+        path.addCurve(to: pt(611.76, 257), control1: pt(611.76, 153.91), control2: pt(612.59, 222.64))
+        path.addLine(to: pt(0, 251.97))
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -1297,13 +1565,13 @@ private struct ExtraWorkout: Identifiable {
 
     static let all: [ExtraWorkout] = [
         ExtraWorkout(
-            id: "butt",
-            line1: "Fit",
-            line2: "butt",
-            image: "ChickenAbs",
+            id: "press",
+            line1: "Dumbbell",
+            line2: "shoulder press",
+            image: "ChickenShoulderPress",
             duration: "4 min",
             equipment: [
-                ExtraGear(id: "mat", title: "Mat", icon: "IconYogaMat"),
+                ExtraGear(id: "db", title: "Dumbbells", icon: "IconDumbbells"),
             ]
         ),
         ExtraWorkout(
@@ -1346,13 +1614,13 @@ private struct WeekDay: Identifiable {
     let showsBorder: Bool
 
     static let all: [WeekDay] = [
-        WeekDay(id: "Mo", label: "Mo", fill: Theme.bgSoft, foreground: Theme.fgSecondary, showsBorder: false),
-        WeekDay(id: "Tu", label: "Tu", fill: Theme.bgSoft, foreground: Theme.fgSecondary, showsBorder: false),
+        WeekDay(id: "Mo", label: "Mo", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
+        WeekDay(id: "Tu", label: "Tu", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
         WeekDay(id: "We", label: "We", fill: .clear, foreground: Theme.fgSecondary, showsBorder: true),
-        WeekDay(id: "Th", label: "Th", fill: Theme.bgSoft, foreground: Theme.fgSecondary, showsBorder: false),
+        WeekDay(id: "Th", label: "Th", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
         WeekDay(id: "Fr", label: "Fr", fill: .clear, foreground: Theme.fgSecondary, showsBorder: true),
-        WeekDay(id: "Sa", label: "Sa", fill: Theme.bgSoft, foreground: Theme.fgSecondary, showsBorder: false),
-        WeekDay(id: "Su", label: "Su", fill: Theme.bgSoft, foreground: Theme.fgSecondary, showsBorder: false),
+        WeekDay(id: "Sa", label: "Sa", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
+        WeekDay(id: "Su", label: "Su", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
     ]
 
     static func week(starting today: String) -> [WeekDay] {

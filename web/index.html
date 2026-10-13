@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Chicken</title>
+  <title>Fit Coco</title>
   <style>
     @font-face {
       font-family: "Workear Font";
@@ -23,6 +23,7 @@
       --surface: #fff8f1;
       --fg-primary: #2c1f1c;
       --fg-secondary: #978a82;
+      --fg-rest: #bcb4af;
       --fg-accent: #e85c5c;
       --fg-positive: #3eae6f;
       --fg-inverse: #3a2a26;
@@ -37,7 +38,7 @@
       --body: clamp(13px, 3.6cqi, 16px);
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --tab-clear: 92px;
+      --tab-clear: 64px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -162,7 +163,7 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 16px;
       min-width: 0;
     }
 
@@ -174,10 +175,41 @@
     }
 
     .streak {
-      font-size: 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
       line-height: 1.2;
-      color: var(--fg-primary);
       white-space: nowrap;
+    }
+
+    .streak-n {
+      color: var(--fg-primary);
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .streak-copy {
+      font-size: 15px;
+      line-height: 1.2;
+      color: var(--fg-secondary);
+    }
+
+    .avatar-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: transparent;
+      display: block;
+      padding: 0;
+    }
+
+    .avatar-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
     }
 
     .home-icons {
@@ -198,9 +230,11 @@
 
     .days {
       display: flex;
+      flex-wrap: nowrap;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
       width: 100%;
+      min-height: 56px;
       min-width: 0;
       overflow-x: auto;
       overflow-y: hidden;
@@ -209,6 +243,14 @@
       padding: 0 var(--gutter);
       scroll-padding-inline: var(--gutter);
       box-sizing: border-box;
+      touch-action: pan-x;
+      overscroll-behavior-x: contain;
+      cursor: grab;
+    }
+
+    .days.is-dragging {
+      cursor: grabbing;
+      scroll-snap-type: none;
     }
 
     .days::-webkit-scrollbar {
@@ -218,12 +260,12 @@
     .today-chip {
       display: flex;
       align-items: center;
-      gap: 8px;
-      height: 44px;
-      padding: 4px 19px 4px 4px;
+      gap: 9px;
+      height: 47px;
+      padding: 4px 20px 4px 4px;
       background: var(--surface);
       border: 1px solid var(--border-accent);
-      border-radius: 46px;
+      border-radius: 20px;
       flex: 0 0 auto;
       cursor: pointer;
       color: inherit;
@@ -236,19 +278,19 @@
     }
 
     .today-mo {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 37px;
       border-radius: 999px;
       background: var(--fg-accent);
       color: #fff;
-      font-size: 12px;
-      line-height: 34px;
+      font-size: 13px;
+      line-height: 37px;
       text-align: center;
-      flex: 0 0 34px;
+      flex: 0 0 36px;
     }
 
     .today-copy {
-      font-size: 14px;
+      font-size: 15px;
       line-height: 1.2;
       color: var(--fg-primary);
       white-space: nowrap;
@@ -282,36 +324,48 @@
     }
 
     .day-dot {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      flex: 0 0 34px;
-      display: grid;
-      place-items: center;
-      font-size: 14px;
+      width: 36px;
+      height: 56px;
+      border-radius: 16px;
+      flex: 0 0 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 8px 4px;
+      font-size: 15px;
       line-height: 1.2;
-      color: var(--fg-secondary);
-      background: var(--bg-soft);
-      border: 1px solid rgba(151, 138, 130, 0.24);
+      color: var(--fg-rest);
+      background: transparent;
+      border: 0;
       cursor: pointer;
     }
 
-    .day-dot.ring {
-      background: transparent;
-      border: 1px solid var(--border-accent);
+    .day-dot.is-train {
+      color: var(--fg-secondary);
     }
 
-    .day-dot.ghost {
-      color: var(--fg-secondary);
-      opacity: 0.35;
-      font-size: 14px;
+    .day-dot.is-rest {
+      color: var(--fg-rest);
+      background: transparent;
+    }
+
+    .day-dot.is-empty {
+      height: 37px;
+      padding: 0;
+      gap: 0;
+      color: rgba(151, 138, 130, 0.18);
+      background: rgba(151, 138, 130, 0.1);
     }
 
     .day-dot.is-on {
+      height: 37px;
+      padding: 0;
+      gap: 0;
       color: #fff;
       background: var(--fg-accent);
-      border: 0;
-      opacity: 1;
+      border-radius: 999px;
     }
 
     .day-stage {
@@ -346,11 +400,29 @@
     .workout-card {
       width: 100%;
       height: 100%;
-      background: var(--surface);
+      position: relative;
+      background: radial-gradient(90% 80% at 78% 18%, #fee5de 0%, #f4ebd5 70%);
       border-radius: var(--card-radius);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+    }
+
+    .card-dune {
+      position: absolute;
+      left: -27.3%;
+      top: 51.6%;
+      width: 154.9%;
+      height: 49%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .workout-card-head,
+    .home-chicken,
+    .home-start {
+      position: relative;
+      z-index: 1;
     }
 
     .workout-card-head {
@@ -362,7 +434,7 @@
     }
 
     .workout-card-head h1 {
-      font-size: var(--title);
+      font-size: 26px;
       line-height: 1.2;
       font-weight: 400;
       color: var(--fg-primary);
@@ -384,18 +456,29 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 12px 8px 10px;
-      border: 1px solid rgba(151, 138, 130, 0.24);
-      background: rgba(151, 138, 130, 0.08);
-      border-radius: 14px;
-      font-size: var(--body);
+      height: 36px;
+      padding: 0 12px 0 8px;
+      border: 1px solid rgba(151, 138, 130, 0.2);
+      background: transparent;
+      border-radius: 16px;
+      font-size: 15px;
       line-height: 1.2;
-      color: var(--fg-secondary);
+      color: var(--fg-primary);
       white-space: nowrap;
       flex-shrink: 0;
+      box-sizing: border-box;
     }
 
-    .chip img { display: block; }
+    .chip img {
+      display: block;
+      width: 20px;
+      height: 20px;
+    }
+
+    .chip img.chip-time {
+      width: 24px;
+      height: 24px;
+    }
 
     .home-chicken {
       flex: 1;
@@ -406,7 +489,23 @@
       overflow: hidden;
     }
 
+    .home-chicken::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 81%;
+      width: 55%;
+      height: 31px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgb(206, 119, 69) 0%, rgba(244, 158, 109, 0.1) 70%, transparent 78%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .home-chicken img {
+      position: relative;
+      z-index: 1;
       width: 100%;
       height: 100%;
       object-fit: contain;
@@ -415,10 +514,15 @@
 
     .home-chicken .abs-preview-chicken {
       transform: scale(1.2);
+      transform-origin: 50% 82%;
     }
 
     .workout-card.is-rest {
       position: relative;
+    }
+
+    .workout-card.is-rest .home-chicken::after {
+      content: none;
     }
 
     .workout-card.is-rest .home-chicken {
@@ -429,13 +533,17 @@
       display: flex;
       align-items: flex-end;
       justify-content: center;
+      overflow: hidden;
     }
 
     .workout-card.is-rest .home-chicken img {
-      width: 80%;
-      height: 80%;
+      width: 200%;
+      height: auto;
+      max-width: none;
+      max-height: none;
       object-fit: contain;
       object-position: bottom center;
+      align-self: flex-end;
     }
 
     .workout-card.is-rest .workout-card-head,
@@ -454,19 +562,25 @@
     }
 
     .home-start {
-      padding: var(--space-md);
+      padding: 24px;
     }
 
     .home-start .next {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
       width: 100%;
-      height: 52px;
-      border-radius: 16px;
-      font-size: 16px;
-      gap: 10px;
+      height: 56px;
+      border-radius: 20px;
+      background: var(--coral);
+      font-size: 17px;
+      gap: 12px;
       color: var(--surface);
+      box-shadow: none;
     }
 
-    .home-start .next img { width: 18px; height: 18px; }
+    .home-start .next img { width: 20px; height: 20px; }
 
     .home-start .next.is-quiet {
       background: var(--bg-muted);
@@ -677,14 +791,28 @@
     .st-card {
       background: var(--surface);
       border-radius: var(--card-radius);
-      padding: 24px 20px 20px;
+      padding: 20px 24px 24px;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      overflow: hidden;
+    }
+
+    .st-progress {
+      display: block;
+      margin: 4px -24px -24px;
+      width: calc(100% + 48px);
+    }
+
+    .st-progress img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     .st-card-title {
-      font-size: 16px;
+      font-size: 17px;
+      line-height: 1.24;
       text-align: left;
       color: var(--fg-primary);
     }
@@ -741,18 +869,21 @@
     }
 
     .st-day.is-done {
-      background: var(--cream);
-      box-shadow: inset 0 0 0 1.5px var(--coral);
+      background: #fbe2e1;
+      box-shadow: none;
+      overflow: hidden;
+      padding: 0;
     }
 
     .st-day.is-done img {
-      width: 59%;
-      height: 59%;
-      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
+      border-radius: 999px;
     }
 
-    .st-day.is-today {
+    .st-day.is-today:not(.is-done) {
       box-shadow: inset 0 0 0 1.5px rgba(44, 31, 28, 0.35);
     }
 
@@ -766,33 +897,105 @@
     .st-card-top {
       display: flex;
       flex-direction: column;
-      gap: 4px;
       width: 100%;
     }
 
     .st-card-head {
       display: flex;
-      align-items: flex-start;
+      align-items: flex-end;
       justify-content: space-between;
-      gap: 10px;
+      gap: 4px;
       width: 100%;
       min-width: 0;
     }
 
+    .st-head-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
     .st-weight-now {
-      font-size: 28px;
+      font-size: 30px;
       color: var(--fg-primary);
+      line-height: 1.26;
+    }
+
+    .st-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .st-unit {
+      font-size: 15px;
+      line-height: 1.2;
+      color: var(--fg-secondary);
+    }
+
+    .st-delta-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      flex-shrink: 0;
+      padding-bottom: 4px;
     }
 
     .st-weight-delta {
-      font-size: var(--body);
+      font-size: 15px;
+      line-height: 1.26;
       color: var(--fg-positive);
-      align-self: flex-end;
+    }
+
+    .st-delta-hint {
+      font-size: 15px;
+      line-height: 1.2;
+      color: var(--fg-secondary);
+    }
+
+    .st-plot-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .st-plot-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .st-plot {
+      height: 128px;
+      background-color: transparent;
+      background-image:
+        linear-gradient(to right, rgba(44, 31, 28, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(44, 31, 28, 0.06) 1px, transparent 1px),
+        linear-gradient(to right, rgba(44, 31, 28, 0.12) 2px, transparent 2px),
+        linear-gradient(to bottom, rgba(44, 31, 28, 0.12) 2px, transparent 2px);
+      background-size: 8px 8px, 8px 8px, 32px 32px, 32px 32px;
+      overflow: hidden;
+    }
+
+    .st-yaxis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 128px;
+      font-size: 12px;
+      color: var(--fg-secondary);
+      line-height: 1;
+      flex-shrink: 0;
     }
 
     .st-weight-chart {
       width: 100%;
-      height: 120px;
+      height: 128px;
       display: block;
       overflow: visible;
     }
@@ -962,6 +1165,26 @@
       box-shadow: inset 0 1px 0 rgba(151, 138, 130, 0.12);
     }
 
+    .set-row-stack {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .set-days {
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .set-days .ch-filter {
+      min-width: 40px;
+      padding: 0 10px;
+    }
+
+    .set-value {
+      font-size: 14px;
+      color: var(--fg-secondary);
+    }
+
     .set-toggle {
       width: 44px;
       height: 26px;
@@ -1116,36 +1339,31 @@
       display: flex;
       gap: 8px;
       flex-shrink: 0;
-      padding: 16px var(--gutter) max(16px, calc(var(--safe-bottom) + 12px));
-      background: linear-gradient(
-        to bottom,
-        transparent,
-        color-mix(in srgb, var(--canvas) 92%, transparent)
-      );
-      backdrop-filter: blur(20px) saturate(1.2);
-      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      padding: 0 var(--gutter) max(8px, var(--safe-bottom));
+      background: transparent;
     }
 
     .tab {
       flex: 1;
       min-width: 0;
-      height: clamp(36px, 10vw, 44px);
-      border-radius: 999px;
-      background: var(--bg-soft);
-      color: var(--fg-secondary);
-      font-size: var(--body);
+      height: 40px;
+      border-radius: 18px;
+      background: #f6ede0;
+      color: #978a82;
+      font-size: 14px;
       line-height: 1.2;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 8px;
-      border: 1px solid rgba(151, 138, 130, 0.24);
+      border: 0;
+      box-shadow: none;
     }
 
     .tab.is-on {
-      background: var(--surface);
-      color: var(--fg-inverse);
-      border-color: transparent;
+      background: #fffcfa;
+      color: #3a2a26;
+      box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .complete {
@@ -1205,17 +1423,6 @@
       animation: splash-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
-    .splash-name {
-      font-size: 40px;
-      line-height: 1.1;
-      color: var(--fg-primary);
-    }
-
-    .splash-tag {
-      font-size: 16px;
-      color: var(--fg-secondary);
-    }
-
     @keyframes splash-pop {
       to { transform: scale(1); }
     }
@@ -1267,7 +1474,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
     .header-actions {
@@ -1308,8 +1515,10 @@
 
     .pips {
       display: flex;
-      width: 100%;
-      gap: 10px;
+      align-items: center;
+      flex: 1 1 auto;
+      min-width: 0;
+      gap: 8px;
     }
 
     .pip {
@@ -1392,7 +1601,9 @@
       position: relative;
       flex: 0 0 auto;
       display: flex;
-      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
       padding: 8px var(--gutter) max(16px, calc(var(--safe-bottom) + 12px));
     }
 
@@ -1402,35 +1613,36 @@
       cursor: pointer;
     }
 
-    .pause {
-      width: clamp(56px, 18vw, 72px);
-      height: clamp(56px, 18vw, 72px);
+    .pause,
+    .prev,
+    .next {
       flex-shrink: 0;
-      border-radius: 25.125px;
       background: #fff;
+      color: var(--ink);
       box-shadow: 0 0.9px 1.35px rgba(0,0,0,0.1);
       display: grid;
       place-items: center;
     }
 
-    .pause img, .pause svg { width: 32px; height: 32px; }
-
+    .prev,
     .next {
-      flex: 1;
-      min-width: 0;
-      height: clamp(52px, 18vw, 72px);
-      border-radius: 25.125px;
-      background: var(--coral);
-      color: var(--button-cream);
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      box-shadow: 0 0.9px 1.35px rgba(0,0,0,0.1);
+      width: 56px;
+      height: 56px;
+      border-radius: 20px;
     }
 
-    .next img { width: 32px; height: 32px; }
+    .pause {
+      width: 72px;
+      height: 72px;
+      border-radius: 24px;
+    }
+
+    .pause img, .pause svg,
+    .prev svg, .next svg { width: 22px; height: 22px; }
+
+    .prev:disabled {
+      opacity: 0.35;
+    }
 
     .complete img,
     .complete video {
@@ -1670,20 +1882,54 @@
     .wo-card {
       flex: 0 0 100%;
       height: 100%;
-      background: var(--surface);
-      border-radius: var(--card-radius);
-      padding: 24px 24px 20px;
+      position: relative;
+      background: radial-gradient(90% 80% at 76% 75%, #f4ebd5 0%, #fee5de 67%);
+      border-radius: 30px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       scroll-snap-align: start;
       min-width: 0;
+      overflow: hidden;
+    }
+
+    .wo-card .card-dune {
+      left: -27.3%;
+      top: 59.8%;
+      width: 154.9%;
+      height: 44.9%;
+      bottom: auto;
+    }
+
+    .wo-head,
+    .wo-visual,
+    .wo-open {
+      position: relative;
+      z-index: 1;
+    }
+
+    .wo-head {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
     }
 
     .wo-name {
-      font-size: clamp(32px, 10cqi, 42px);
-      line-height: 0.95;
+      font-size: 28px;
+      line-height: 1.2;
       color: var(--fg-primary);
       white-space: nowrap;
+    }
+
+    .wo-card .chip {
+      height: 36px;
+      padding: 0 12px 0 8px;
+      border-radius: 16px;
+      background: transparent;
+      border: 1px solid rgba(151, 138, 130, 0.2);
+      font-size: 15px;
+      box-sizing: border-box;
     }
 
     .wo-visual {
@@ -1691,26 +1937,24 @@
       min-height: 0;
       display: grid;
       place-items: center;
-      margin: 8px 0 12px;
+      margin: 0;
     }
 
     .wo-visual img {
-      max-width: 100%;
+      width: 82%;
       max-height: 100%;
       object-fit: contain;
     }
 
-    .wo-meta {
-      margin-bottom: 16px;
-    }
-
     .wo-open {
       width: 100%;
-      height: 52px;
-      border-radius: 999px;
+      height: 56px;
+      border-radius: 20px;
       background: var(--coral);
       color: var(--surface);
-      font-size: 16px;
+      font-size: 17px;
+      flex-shrink: 0;
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -1719,31 +1963,24 @@
     <div class="paper"></div>
     <div id="splash" class="screen splash is-on">
       <img id="splashChicken" class="splash-chicken" alt="" />
-      <div class="splash-name">Chicken</div>
-      <div class="splash-tag">Let’s worko-ko!</div>
     </div>
     <div id="home" class="screen home">
       <div class="home-body" id="pane-home">
         <div class="weekly">
           <div class="weekly-top">
-            <div class="streak">Today</div>
-            <div class="home-icons">
-              <button class="icon-btn js-notes" type="button" aria-label="Notifications">
-                <img src="../Chicken/Assets.xcassets/IconNotification.imageset/icon-notification.svg" width="18" height="18" alt="" />
-              </button>
-              <button class="icon-btn js-settings" type="button" aria-label="Settings">
-                <img src="../Chicken/Assets.xcassets/IconSettings.imageset/icon-settings.svg" width="20" height="20" alt="" />
-              </button>
-            </div>
+            <div class="streak"><span class="streak-n">4</span> <span class="streak-copy">days streak</span></div>
+            <button class="avatar-btn js-settings" type="button" aria-label="Settings">
+              <img src="../Chicken/Assets.xcassets/AvatarChicken.imageset/AvatarChicken.png?v=3" alt="" />
+            </button>
           </div>
           <div class="days" id="days">
-            <button class="day-dot" type="button" data-day="Mo" aria-pressed="false">Mo</button>
-            <button class="day-dot" type="button" data-day="Tu" aria-pressed="false">Tu</button>
-            <button class="day-dot ring" type="button" data-day="We" aria-pressed="false">We</button>
-            <button class="day-dot" type="button" data-day="Th" aria-pressed="false">Th</button>
-            <button class="day-dot ring" type="button" data-day="Fr" aria-pressed="false">Fr</button>
-            <button class="day-dot" type="button" data-day="Sa" aria-pressed="false">Sa</button>
-            <button class="day-dot" type="button" data-day="Su" aria-pressed="false">Su</button>
+            <button class="day-dot is-rest" type="button" data-day="Mo" aria-pressed="false">Mo</button>
+            <button class="day-dot is-rest" type="button" data-day="Tu" aria-pressed="false">Tu</button>
+            <button class="day-dot is-train" type="button" data-day="We" aria-pressed="false">We</button>
+            <button class="day-dot is-rest" type="button" data-day="Th" aria-pressed="false">Th</button>
+            <button class="day-dot is-train" type="button" data-day="Fr" aria-pressed="false">Fr</button>
+            <button class="day-dot is-rest" type="button" data-day="Sa" aria-pressed="false">Sa</button>
+            <button class="day-dot is-rest" type="button" data-day="Su" aria-pressed="false">Su</button>
           </div>
         </div>
 
@@ -1791,41 +2028,48 @@
       <div class="workouts-pane pane-hidden" id="pane-workouts">
         <div class="ch-top">
           <div class="ch-title">Extra workouts</div>
-          <div class="home-icons">
-            <button class="icon-btn js-notes" type="button" aria-label="Notifications">
-              <img src="../Chicken/Assets.xcassets/IconNotification.imageset/icon-notification.svg" width="18" height="18" alt="" />
-            </button>
-            <button class="icon-btn js-settings" type="button" aria-label="Settings">
-              <img src="../Chicken/Assets.xcassets/IconSettings.imageset/icon-settings.svg" width="20" height="20" alt="" />
-            </button>
-          </div>
+          <button class="avatar-btn js-settings" type="button" aria-label="Settings">
+            <img src="../Chicken/Assets.xcassets/AvatarChicken.imageset/AvatarChicken.png?v=3" alt="" />
+          </button>
         </div>
         <div class="wo-rail">
           <article class="wo-card">
-            <div class="wo-name">Fit butt</div>
-            <div class="wo-visual">
-              <img src="../Chicken/Assets.xcassets/ChickenAbs.imageset/ChickenAbs.png" alt="" />
+            <svg class="card-dune" viewBox="0 0 612 257" preserveAspectRatio="none" aria-hidden="true"><path fill="#ffe4a4" d="M0 60.87C8.28 63.66 26.32 70.93 32.28 77.63C39.74 86.02 37.25 22.32 76.16 18.12C107.29 14.77 130.52 39.08 138.25 51.65C142.94 32.37 162.42-4.84 202.82 0.52C243.21 5.89 270.97 58.08 279.8 83.5C326.44 85.46 425.17 92.05 447.02 102.78C474.34 116.19 427.98 153.07 447.02 153.91C466.06 154.74 514.07 117.87 541.39 125.41C568.71 132.95 543.05 170.67 558.78 170.67C574.51 170.67 589.41 153.91 601.82 153.91C611.76 153.91 612.59 222.64 611.76 257L0 251.97L0 60.87Z"/></svg>
+            <div class="wo-head">
+              <div class="wo-name">Dumbbell shoulder press</div>
+              <div class="chips">
+                <span class="chip">
+                  <img class="chip-time" src="../Chicken/Assets.xcassets/IconTime.imageset/icon-time.svg" width="24" height="24" alt="" />
+                  4 min
+                </span>
+                <span class="chip">
+                  <img src="../Chicken/Assets.xcassets/IconDumbbells.imageset/icon-dumbbells.svg" width="20" height="20" alt="" />
+                  Dumbbells
+                </span>
+              </div>
             </div>
-            <div class="wo-meta chips">
-              <span class="chip">4 min</span>
-              <span class="chip">
-                <img src="../Chicken/Assets.xcassets/IconYogaMat.imageset/icon-yoga-mat.svg" width="18" height="18" alt="" />
-                Mat
-              </span>
+            <div class="wo-visual">
+              <img src="../Chicken/Assets.xcassets/ChickenShoulderPress.imageset/ChickenShoulderPress.png" alt="" />
             </div>
             <button class="wo-open js-start" type="button">Open workout</button>
           </article>
           <article class="wo-card">
-            <div class="wo-name">Wing press</div>
+            <svg class="card-dune" viewBox="0 0 612 257" preserveAspectRatio="none" aria-hidden="true"><path fill="#ffe4a4" d="M0 60.87C8.28 63.66 26.32 70.93 32.28 77.63C39.74 86.02 37.25 22.32 76.16 18.12C107.29 14.77 130.52 39.08 138.25 51.65C142.94 32.37 162.42-4.84 202.82 0.52C243.21 5.89 270.97 58.08 279.8 83.5C326.44 85.46 425.17 92.05 447.02 102.78C474.34 116.19 427.98 153.07 447.02 153.91C466.06 154.74 514.07 117.87 541.39 125.41C568.71 132.95 543.05 170.67 558.78 170.67C574.51 170.67 589.41 153.91 601.82 153.91C611.76 153.91 612.59 222.64 611.76 257L0 251.97L0 60.87Z"/></svg>
+            <div class="wo-head">
+              <div class="wo-name">Wing press</div>
+              <div class="chips">
+                <span class="chip">
+                  <img class="chip-time" src="../Chicken/Assets.xcassets/IconTime.imageset/icon-time.svg" width="24" height="24" alt="" />
+                  4 min
+                </span>
+                <span class="chip">
+                  <img src="../Chicken/Assets.xcassets/IconDumbbells.imageset/icon-dumbbells.svg" width="20" height="20" alt="" />
+                  Dumbbells
+                </span>
+              </div>
+            </div>
             <div class="wo-visual">
               <img src="../Chicken/Assets.xcassets/ChickenShoulderPress.imageset/ChickenShoulderPress.png" alt="" />
-            </div>
-            <div class="wo-meta chips">
-              <span class="chip">4 min</span>
-              <span class="chip">
-                <img src="../Chicken/Assets.xcassets/IconDumbbells.imageset/icon-dumbbells.svg" width="18" height="18" alt="" />
-                Dumbbells
-              </span>
             </div>
             <button class="wo-open js-start" type="button">Open workout</button>
           </article>
@@ -1834,14 +2078,9 @@
       <div class="stats-pane pane-hidden" id="pane-stats">
         <div class="ch-top">
           <div class="ch-title">Statistics</div>
-          <div class="home-icons">
-            <button class="icon-btn js-notes" type="button" aria-label="Notifications">
-              <img src="../Chicken/Assets.xcassets/IconNotification.imageset/icon-notification.svg" width="18" height="18" alt="" />
-            </button>
-            <button class="icon-btn js-settings" type="button" aria-label="Settings">
-              <img src="../Chicken/Assets.xcassets/IconSettings.imageset/icon-settings.svg" width="20" height="20" alt="" />
-            </button>
-          </div>
+          <button class="avatar-btn js-settings" type="button" aria-label="Settings">
+            <img src="../Chicken/Assets.xcassets/AvatarChicken.imageset/AvatarChicken.png?v=3" alt="" />
+          </button>
         </div>
         <div id="stCaloriesCard"></div>
         <div id="stWeightCard"></div>
@@ -1871,6 +2110,27 @@
             <div class="set-row">
               Sounds
               <button class="set-toggle is-on" type="button" role="switch" aria-checked="true" aria-label="Sounds"></button>
+            </div>
+          </div>
+        </div>
+        <div class="set-group">
+          <div class="set-label">Training</div>
+          <div class="set-card">
+            <div class="set-row">
+              Notifications
+              <button class="set-toggle" type="button" role="switch" aria-checked="false" aria-label="Notifications"></button>
+            </div>
+            <div class="set-row set-row-stack">
+              <span>Workout days</span>
+              <div class="ch-filters set-days" id="setDays">
+                <button class="ch-filter" type="button" data-train="Mo">Mo</button>
+                <button class="ch-filter" type="button" data-train="Tu">Tu</button>
+                <button class="ch-filter" type="button" data-train="We">We</button>
+                <button class="ch-filter" type="button" data-train="Th">Th</button>
+                <button class="ch-filter" type="button" data-train="Fr">Fr</button>
+                <button class="ch-filter" type="button" data-train="Sa">Sa</button>
+                <button class="ch-filter" type="button" data-train="Su">Su</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1916,30 +2176,27 @@
       <div class="scene" id="scene">
       <div class="header">
         <div class="header-top">
-          <div class="move-label" id="moveLabel">Move 1 of 2</div>
-          <div class="header-actions">
-            <button class="workout-mute" id="workoutMute" type="button" aria-pressed="false" aria-label="Mute sounds">
-              <svg class="mute-on" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <path d="M3.2 7.2h2.1l3.2-2.7v9L5.3 10.8H3.2A1.2 1.2 0 0 1 2 9.6V8.4a1.2 1.2 0 0 1 1.2-1.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                <path d="M12.1 6.3a3.4 3.4 0 0 1 0 5.4M13.9 4.6a6 6 0 0 1 0 8.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-              </svg>
-              <svg class="mute-off" viewBox="0 0 18 18" fill="none" aria-hidden="true" hidden>
-                <path d="M3.2 7.2h2.1l3.2-2.7v9L5.3 10.8H3.2A1.2 1.2 0 0 1 2 9.6V8.4a1.2 1.2 0 0 1 1.2-1.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                <path d="M12.2 6.8l3.6 4.4M15.8 6.8l-3.6 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-              </svg>
-            </button>
-            <button class="workout-close" id="workoutClose" type="button" aria-label="Close">
-              <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-              </svg>
-            </button>
-          </div>
+          <button class="workout-close" id="workoutClose" type="button" aria-label="Close">
+            <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="pips" id="pips"></div>
+          <button class="workout-mute" id="workoutMute" type="button" aria-pressed="false" aria-label="Mute sounds">
+            <svg class="mute-on" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M3.2 7.2h2.1l3.2-2.7v9L5.3 10.8H3.2A1.2 1.2 0 0 1 2 9.6V8.4a1.2 1.2 0 0 1 1.2-1.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M12.1 6.3a3.4 3.4 0 0 1 0 5.4M13.9 4.6a6 6 0 0 1 0 8.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            <svg class="mute-off" viewBox="0 0 18 18" fill="none" aria-hidden="true" hidden>
+              <path d="M3.2 7.2h2.1l3.2-2.7v9L5.3 10.8H3.2A1.2 1.2 0 0 1 2 9.6V8.4a1.2 1.2 0 0 1 1.2-1.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M12.2 6.8l3.6 4.4M15.8 6.8l-3.6 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+          </button>
         </div>
-        <div class="pips" id="pips"></div>
       </div>
       <div class="timer-block">
         <div class="timer-row">
-          <div class="set-n" id="setN" aria-label="Set">20</div>
+          <div class="set-n" id="setN" aria-label="Time remaining">1:40</div>
         </div>
         <div class="move-name" id="moveName">Overhead press</div>
       </div>
@@ -1950,12 +2207,18 @@
       <div class="spacer spacer-sm"></div>
       </div>
       <div class="controls">
+        <button class="prev" id="prevBtn" aria-label="Previous" disabled>
+          <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M11 3.5L5.5 9l5.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
         <button class="pause" id="pauseBtn" aria-label="Pause">
           <img src="../Chicken/Assets.xcassets/IconPause.imageset/icon-pause.svg" alt="" />
         </button>
-        <button class="next" id="nextBtn">
-          <span id="nextLabel">Next</span>
-          <img id="nextArrow" src="../Chicken/Assets.xcassets/IconArrow.imageset/icon-arrow.svg" alt="" />
+        <button class="next" id="nextBtn" aria-label="Next">
+          <svg id="nextArrow" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M7 3.5L12.5 9 7 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
       </div>
     </div>
@@ -2001,7 +2264,7 @@
     let lastRepBucket = -1;
     const moves = [
       { name: "ABS", duration: 20 * 5, interval: 5, frames: seq01, fps: 9 },
-      { name: "Dumbbell shoulder press", duration: 20 * 2, interval: 2, frames: seq04, fps: 10, larger: true },
+      { name: "Dumbbell shoulder press", duration: 20 * 2, interval: 2, frames: seq04, fps: 15, larger: true },
     ];
 
     const startIndex = 0;
@@ -2009,6 +2272,7 @@
     const startElapsed = 0;
     let elapsed = startElapsed;
     let paused = false;
+    let announcing = false;
     let phase = "home";
 
     const pips = document.getElementById("pips");
@@ -2052,8 +2316,30 @@
     };
 
     const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-    const dayRings = new Set(["We", "Fr"]);
     const todayDay = weekDays[(new Date().getDay() + 6) % 7];
+    const nextDay = weekDays[(weekDays.indexOf(todayDay) + 1) % 7];
+    function everyOtherTrainingDays() {
+      const start = weekDays.indexOf(todayDay);
+      return weekDays.filter((_, index) => ((index - start + 7) % 7) % 2 === 0);
+    }
+    function loadTrainingDays() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("trainingDays") || "null");
+        if (Array.isArray(saved) && saved.length) {
+          const days = saved.filter((day) => weekDays.includes(day));
+          const isLegacy = days.length === 2 && days.includes("We") && days.includes("Fr");
+          if (!isLegacy) return days;
+        }
+      } catch (_) {}
+      return everyOtherTrainingDays();
+    }
+    let trainingDays = new Set(loadTrainingDays());
+    localStorage.setItem("trainingDays", JSON.stringify(weekDays.filter((day) => trainingDays.has(day))));
+    let dayRings = new Set();
+    function syncDayRings() {
+      dayRings = new Set([...trainingDays].filter((day) => day !== nextDay));
+    }
+    syncDayRings();
     const todayIndex = weekDays.indexOf(todayDay);
     const dayIds = weekDays.slice(todayIndex).concat(weekDays.slice(0, todayIndex));
     const daysEl = document.getElementById("days");
@@ -2067,23 +2353,29 @@
     const dayStage = document.getElementById("dayStage");
     const iconDumbbells = "../Chicken/Assets.xcassets/IconDumbbells.imageset/icon-dumbbells.svg";
     const iconMat = "../Chicken/Assets.xcassets/IconYogaMat.imageset/icon-yoga-mat.svg";
+    const iconTime = "../Chicken/Assets.xcassets/IconTime.imageset/icon-time.svg";
     const iconStart = "../Chicken/Assets.xcassets/IconStartArrow.imageset/icon-arrow-right.svg";
 
     function dayKind(day) {
       if (day === todayDay) return "today";
+      if (day === nextDay) return "free";
       if (dayRings.has(day)) return "future";
       return "free";
     }
 
     function chipHTML(label, icon) {
-      const mark = icon ? `<img src="${icon}" width="18" height="18" alt="" />` : "";
+      const isTime = icon === iconTime;
+      const size = isTime ? 24 : 20;
+      const mark = icon
+        ? `<img class="${isTime ? "chip-time" : ""}" src="${icon}" width="${size}" height="${size}" alt="" />`
+        : "";
       return `<span class="chip">${mark}${label}</span>`;
     }
 
     function workoutSlide(title, minutes, chips, visual, cta, start, rest = false) {
       const chipsRow = rest || (!minutes && !chips)
         ? ""
-        : `<div class="chips">${chipHTML(minutes)}${chips}</div>`;
+        : `<div class="chips">${chipHTML(minutes, iconTime)}${chips}</div>`;
       const startRow = rest
         ? ""
         : `<div class="home-start">
@@ -2092,8 +2384,10 @@
               ${start ? `<img src="${iconStart}" width="18" height="18" alt="" />` : ""}
             </button>
           </div>`;
+      const dune = `<svg class="card-dune" viewBox="0 0 612 257" preserveAspectRatio="none" aria-hidden="true"><path fill="#ffe4a4" d="M0 60.87C8.28 63.66 26.32 70.93 32.28 77.63C39.74 86.02 37.25 22.32 76.16 18.12C107.29 14.77 130.52 39.08 138.25 51.65C142.94 32.37 162.42-4.84 202.82 0.52C243.21 5.89 270.97 58.08 279.8 83.5C326.44 85.46 425.17 92.05 447.02 102.78C474.34 116.19 427.98 153.07 447.02 153.91C466.06 154.74 514.07 117.87 541.39 125.41C568.71 132.95 543.05 170.67 558.78 170.67C574.51 170.67 589.41 153.91 601.82 153.91C611.76 153.91 612.59 222.64 611.76 257L0 251.97L0 60.87Z"/></svg>`;
       return `
         <article class="workout-card${rest ? " is-rest" : ""}">
+          ${dune}
           <div class="workout-card-head">
             <h1>${title}</h1>
             ${chipsRow}
@@ -2111,7 +2405,7 @@
         const minutes = wing ? "18 min" : "20 min";
         const chips = wing
           ? chipHTML("Dumbbells", iconDumbbells)
-          : chipHTML("Kettlebells", iconDumbbells) + chipHTML("Mat", iconMat);
+          : chipHTML("Dumbbells", iconDumbbells) + chipHTML("Mat", iconMat);
         const visual = wing
           ? `<img src="../Chicken/Assets.xcassets/ChickenShoulderPress.imageset/ChickenShoulderPress.png" alt="" />`
           : `<img class="abs-preview-chicken"${kind === "today" ? ' id="homeChicken"' : ""} src="${seqAbs[0]}" alt="" />`;
@@ -2122,9 +2416,12 @@
       return workoutSlide("Free day", "", "", visual, "See extra workouts", false, true);
     }
 
-    dayTrack.innerHTML = dayIds.map((day) => `<section class="day-slide" data-slide="${day}">${slideMarkup(day)}</section>`).join("");
-    homeChicken = document.getElementById("homeChicken");
-    if (homeChicken) homeChicken.src = seqAbs[0];
+    function renderDayTrack() {
+      dayTrack.innerHTML = dayIds.map((day) => `<section class="day-slide" data-slide="${day}">${slideMarkup(day)}</section>`).join("");
+      homeChicken = document.getElementById("homeChicken");
+      if (homeChicken) homeChicken.src = seqAbs[0];
+    }
+    renderDayTrack();
 
     function slideOffset(index) {
       return -Math.max(0, index) * dayStage.clientWidth;
@@ -2161,6 +2458,17 @@
       scroller.scrollTo({ left: target, behavior: smooth ? "smooth" : "auto" });
     }
 
+    function weekDate(dayId) {
+      const ids = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+      const offset = ids.indexOf(dayId);
+      if (offset < 0) return "";
+      const now = new Date();
+      const mondayOffset = (now.getDay() + 6) % 7;
+      const date = new Date(now);
+      date.setDate(now.getDate() - mondayOffset + offset);
+      return String(date.getDate());
+    }
+
     function selectDay(day) {
       if (!day || day === selectedDay) return;
       haptic.selection();
@@ -2177,7 +2485,7 @@
         dayBtn.setAttribute("aria-pressed", String(isOn));
         const isFuture = dayRings.has(day) && !isToday;
         const isFree = !isToday && !isFuture;
-        const copy = isToday ? "Let’s work. Cluck cluck" : isFuture ? "Future trainings" : "Free day";
+        const copy = isToday ? "Let’s worko-ko!" : isFuture ? "Future trainings" : "Free day";
         if (isOn) {
           dayBtn.className = [
             "today-chip",
@@ -2190,10 +2498,10 @@
         }
         dayBtn.className = [
           "day-dot",
-          isFuture ? "ring" : "",
+          isFuture ? "is-train" : "is-rest",
           isToday ? "is-on" : "",
         ].filter(Boolean).join(" ");
-        dayBtn.textContent = day;
+        dayBtn.innerHTML = `<span>${day}</span><span>${weekDate(day)}</span>`;
       });
       paintWeightCard();
     }
@@ -2203,10 +2511,45 @@
     }
 
     document.getElementById("days").addEventListener("click", (event) => {
+      if (daysDragMoved) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       const btn = event.target.closest("[data-day]");
       if (!btn) return;
       selectDay(btn.dataset.day);
     });
+
+    let daysDragX = null;
+    let daysDragScroll = 0;
+    let daysDragMoved = false;
+    const daysScroller = document.getElementById("days");
+    daysScroller.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      daysDragX = event.clientX;
+      daysDragScroll = daysScroller.scrollLeft;
+      daysDragMoved = false;
+      daysScroller.classList.add("is-dragging");
+      daysScroller.setPointerCapture(event.pointerId);
+    });
+    daysScroller.addEventListener("pointermove", (event) => {
+      if (daysDragX == null) return;
+      const dx = event.clientX - daysDragX;
+      if (Math.abs(dx) > 6) daysDragMoved = true;
+      daysScroller.scrollLeft = daysDragScroll - dx;
+    });
+    function endDaysDrag() {
+      daysDragX = null;
+      daysScroller.classList.remove("is-dragging");
+    }
+    daysScroller.addEventListener("pointerup", endDaysDrag);
+    daysScroller.addEventListener("pointercancel", endDaysDrag);
+    daysScroller.addEventListener("wheel", (event) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      daysScroller.scrollLeft += event.deltaY;
+      event.preventDefault();
+    }, { passive: false });
 
     let dragStartX = null;
     let dragFrom = 0;
@@ -2270,11 +2613,14 @@
       const delta = kgToDisplay(weightState.kg) - kgToDisplay(weightState.lastWeekKg);
       const sign = delta > 0 ? "+" : "";
       document.getElementById("weightDelta").textContent = `${sign}${delta.toFixed(1)} ${currentUnit()}`;
-      document.getElementById("stWeight").textContent = formatWeight(weightState.kg);
+      document.getElementById("stWeight").textContent = kgToDisplay(weightState.kg).toFixed(1);
+      document.getElementById("stWeightUnit").textContent = currentUnit();
       const loss = kgToDisplay(65.6) - kgToDisplay(weightState.kg);
       document.getElementById("stLossChart").textContent = `−${Math.abs(loss).toFixed(1)} ${currentUnit()}`;
+      const weightSeries = [65.6, 65.4, 65.1, 64.8, 64.5, 64.1, 63.8, 63.3, weightState.kg, null, null, null].map((v) => v == null ? null : kgToDisplay(v));
+      paintAxis("stWeightAxis", axisLabels(weightSeries));
       document.getElementById("weightUnitLabel").textContent = currentUnit();
-      drawTrendChart("stWeightChart", [65.6, 65.4, 65.1, 64.8, 64.5, 64.1, 63.8, 63.3, weightState.kg, null, null, null]);
+      drawTrendChart("stWeightChart", weightSeries);
     }
 
     function fillWheel(el, values) {
@@ -2386,8 +2732,14 @@
       return Math.max(1, setCount - Math.floor(elapsed / currentInterval()));
     }
 
+    function remainingClock() {
+      const rem = Math.max(0, (moves[index]?.duration ?? 0) - elapsed);
+      const seconds = Math.floor(rem);
+      return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+    }
+
     function paintTimer() {
-      document.getElementById("setN").textContent = String(currentSet());
+      document.getElementById("setN").textContent = remainingClock();
     }
 
     let soundsOn = localStorage.getItem("soundsEnabled") !== "false";
@@ -2475,10 +2827,15 @@
 
     async function introduceMove() {
       paused = true;
+      announcing = true;
       lastRepBucket = -1;
       render();
       await playCue(nameSoundUrl(moves[index].name));
-      if (phase !== "workout") return;
+      if (phase !== "workout") {
+        announcing = false;
+        return;
+      }
+      announcing = false;
       paused = false;
       lastRepBucket = -1;
       cueRep();
@@ -2490,6 +2847,8 @@
     }
 
     function cueRep() {
+      const firstCueDelay = index === 0 ? 1.5 : 0;
+      if (elapsed < firstCueDelay) return;
       const bucket = Math.floor(elapsed / currentInterval());
       if (bucket === lastRepBucket) return;
       lastRepBucket = bucket;
@@ -2504,7 +2863,6 @@
       workoutEl.classList.toggle("is-leave", splashOn || phase !== "workout");
       completeEl.classList.toggle("is-on", !splashOn && phase === "complete");
       if (splashOn || phase !== "workout") return;
-      document.getElementById("moveLabel").textContent = `Move ${index + 1} of ${moves.length}`;
       paintTimer();
       document.getElementById("moveName").textContent = moves[index].name;
       const move = moves[index];
@@ -2517,15 +2875,25 @@
       pips.innerHTML = moves.map((_, i) => {
         const state = i <= index ? " filled" : "";
         const back = i < index ? " is-back" : "";
-        return `<div class="pip${state}${back}" data-index="${i}"></div>`;
+        const pip = `<div class="pip${state}${back}" data-index="${i}"></div>`;
+        const label = i === 1 ? `<div class="move-label">${index + 1}/${moves.length}</div>` : "";
+        return `${label}${pip}`;
       }).join("");
       pauseBtn.innerHTML = paused
         ? `<img src="../Chicken/Assets.xcassets/IconPlay.imageset/icon-play.svg" width="32" height="32" alt="" />`
         : `<img src="../Chicken/Assets.xcassets/IconPause.imageset/icon-pause.svg" alt="" />`;
       pauseBtn.setAttribute("aria-label", paused ? "Resume" : "Pause");
       const isLast = index === moves.length - 1;
-      document.getElementById("nextLabel").textContent = isLast ? "Done" : "Next";
-      document.getElementById("nextArrow").classList.toggle("hidden", isLast);
+      document.getElementById("prevBtn").disabled = index === 0;
+      document.getElementById("nextBtn").setAttribute("aria-label", isLast ? "Done" : "Next");
+      document.getElementById("nextArrow").innerHTML = isLast
+        ? `<path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+        : `<path d="M7 3.5L12.5 9 7 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+
+    function prev() {
+      if (index <= 0) return;
+      goToMove(index - 1);
     }
 
     function enterMove(target) {
@@ -2533,6 +2901,7 @@
       elapsed = startElapsed;
       lastRepBucket = -1;
       paused = true;
+      announcing = true;
       workoutFrame = 0;
       render();
       introduceMove();
@@ -2566,6 +2935,7 @@
         if (goingComplete) {
           phase = "complete";
           paused = true;
+          announcing = false;
           charmFrame = 0;
           charmChicken.src = seqCharm[0];
           render();
@@ -2590,6 +2960,7 @@
       elapsed = startElapsed;
       lastRepBucket = -1;
       paused = false;
+      announcing = false;
       phase = "home";
       if (countdownTimer) {
         window.clearInterval(countdownTimer);
@@ -2638,6 +3009,7 @@
       lastRepBucket = -1;
       elapsed = startElapsed;
       paused = true;
+      announcing = true;
       phase = "workout";
       render();
       introduceMove();
@@ -2731,6 +3103,29 @@
       if (wasUnread && !document.querySelector("[data-note].is-unread")) haptic.light();
     });
 
+    function paintTrainingDays() {
+      document.querySelectorAll("[data-train]").forEach((btn) => {
+        btn.classList.toggle("is-on", trainingDays.has(btn.dataset.train));
+      });
+    }
+
+    function persistTrainingDays() {
+      localStorage.setItem("trainingDays", JSON.stringify(weekDays.filter((day) => trainingDays.has(day))));
+      syncDayRings();
+      renderDayTrack();
+      paintDays();
+      slideHome(true);
+    }
+
+    paintTrainingDays();
+
+    const notificationsBtn = document.querySelector('[aria-label="Notifications"]');
+    const notificationsOn = localStorage.getItem("notificationsEnabled") === "true";
+    if (notificationsBtn) {
+      notificationsBtn.classList.toggle("is-on", notificationsOn);
+      notificationsBtn.setAttribute("aria-checked", String(notificationsOn));
+    }
+
     document.querySelectorAll(".set-toggle").forEach((btn) => {
       btn.addEventListener("click", () => {
         haptic.selection();
@@ -2740,8 +3135,22 @@
         } else {
           btn.classList.toggle("is-on", on);
           btn.setAttribute("aria-checked", String(on));
+          if (btn.getAttribute("aria-label") === "Notifications") {
+            localStorage.setItem("notificationsEnabled", String(on));
+          }
         }
       });
+    });
+
+    document.getElementById("setDays").addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-train]");
+      if (!btn) return;
+      haptic.selection();
+      const day = btn.dataset.train;
+      if (trainingDays.has(day)) trainingDays.delete(day);
+      else trainingDays.add(day);
+      paintTrainingDays();
+      persistTrainingDays();
     });
 
     document.getElementById("workoutMute")?.addEventListener("click", () => {
@@ -2762,46 +3171,86 @@
       paintWeight();
     });
 
-    function statsTrendCard({ title, value, delta, chartId, start, endId, valueId, deltaId }) {
+    function axisLabels(values) {
+      const known = values.filter((v) => v != null);
+      const minV = Math.min(...known);
+      const maxV = Math.max(...known);
+      if (maxV > 100) {
+        const top = Math.ceil(maxV / 200) * 200;
+        return [top, top - 600, top - 1200].map((n) => n.toLocaleString("en-US"));
+      }
+      const top = Math.ceil(maxV);
+      const bot = Math.floor(minV);
+      const mid = (top + bot) / 2;
+      return [top, mid, bot].map((n) => n.toFixed(1));
+    }
+
+    function paintAxis(id, labels) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = labels.map((label) => `<span>${label}</span>`).join("");
+    }
+
+    function statsTrendCard({ title, value, unit, delta, chartId, start, endId, valueId, unitId, deltaId, axisId }) {
       const valueAttr = valueId ? ` id="${valueId}"` : "";
+      const unitAttr = unitId ? ` id="${unitId}"` : "";
       const deltaAttr = deltaId ? ` id="${deltaId}"` : "";
       return `<article class="st-card">
           <div class="st-card-top">
             <div class="st-card-head">
-              <div class="st-card-title">${title}</div>
-              <div class="st-weight-now"${valueAttr}>${value}</div>
+              <div class="st-head-main">
+                <div class="st-card-title">${title}</div>
+                <div class="st-value-row">
+                  <div class="st-weight-now"${valueAttr}>${value}</div>
+                  <div class="st-unit"${unitAttr}>${unit}</div>
+                </div>
+              </div>
+              <div class="st-delta-col">
+                <div class="st-weight-delta"${deltaAttr}>${delta}</div>
+                <div class="st-delta-hint">this week</div>
+              </div>
             </div>
-            <div class="st-weight-delta"${deltaAttr}>${delta}</div>
           </div>
-          <svg class="st-weight-chart" id="${chartId}" viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="st-weight-axis"><span>${start}</span><span id="${endId}"></span></div>
+          <div class="st-plot-row">
+            <div class="st-plot-col">
+              <div class="st-plot">
+                <svg class="st-weight-chart" id="${chartId}" viewBox="0 0 300 128" preserveAspectRatio="none" aria-hidden="true"></svg>
+              </div>
+              <div class="st-weight-axis"><span>${start}</span><span id="${endId}"></span></div>
+            </div>
+            <div class="st-yaxis" id="${axisId}"></div>
+          </div>
         </article>`;
     }
 
     document.getElementById("stCaloriesCard").outerHTML = statsTrendCard({
-      title: "Calories",
-      value: "12,480 kcal",
-      delta: "+840 this week",
+      title: "Calories burned",
+      value: "12,480",
+      unit: "kcal",
+      delta: "+1840 kcal",
       chartId: "stCalorieChart",
-      start: "Jul 4",
+      start: "Jul 12",
       endId: "stCalorieAxisEnd",
+      axisId: "stCalorieAxis",
     });
     document.getElementById("stWeightCard").outerHTML = statsTrendCard({
       title: "Weight",
-      value: "62.4 kg",
+      value: "62.4",
+      unit: "kg",
       delta: "−3.2 kg",
       chartId: "stWeightChart",
-      start: "Jan",
+      start: "Jul 12",
       endId: "stWeightAxisEnd",
       valueId: "stWeight",
+      unitId: "stWeightUnit",
       deltaId: "stLossChart",
+      axisId: "stWeightAxis",
     });
 
     const chartEndLabel = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
     document.getElementById("stCalorieAxisEnd").textContent = chartEndLabel;
     document.getElementById("stWeightAxisEnd").textContent = chartEndLabel;
 
-    const chickenMark = `<img src="../Chicken/Assets.xcassets/CalendarChicken.imageset/calendar-chicken.png" alt="" />`;
+    const chickenMark = `<img src="../Chicken/Assets.xcassets/CalendarChicken.imageset/calendar-chicken.png?v=2" alt="" />`;
     const monthNames = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December",
@@ -2828,14 +3277,14 @@
         return `<span class="st-day${done ? " is-done" : ""}${today}">${done ? chickenMark : day}</span>`;
       }).join("");
       return `<div class="st-month"><div class="st-card-title">${name}</div><div class="st-weekdays"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="st-cal">${blanks}${days}</div></div>`;
-    }).join("");
+    }).join("") + `<div class="st-progress"><img src="../Chicken/Assets.xcassets/StatsProgress.imageset/StatsProgress.png" alt="Progress looks good on you!" /></div>`;
 
     const chartValues = {};
     function drawTrendChart(id, values) {
       chartValues[id] = values;
       const svg = document.getElementById(id);
       const w = 300;
-      const h = 120;
+      const h = 128;
       const known = values.filter((v) => v != null);
       const rawMin = Math.min(...known);
       const rawMax = Math.max(...known);
@@ -2859,9 +3308,9 @@
       const rx = box.width > 0 ? (4 * w) / box.width : 4;
       const ry = box.height > 0 ? (4 * h) / box.height : 4;
       svg.innerHTML = `
-        <polygon points="${fill}" fill="rgba(239,104,86,0.16)" />
-        <polyline points="${pts.join(" ")}" fill="none" stroke="#ef6856" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
-        <ellipse cx="${last[0]}" cy="${last[1]}" rx="${rx.toFixed(2)}" ry="${ry.toFixed(2)}" fill="#ef6856" />
+        <polygon points="${fill}" fill="rgba(232,92,92,0.16)" />
+        <polyline points="${pts.join(" ")}" fill="none" stroke="#e85c5c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+        <ellipse cx="${last[0]}" cy="${last[1]}" rx="${rx.toFixed(2)}" ry="${ry.toFixed(2)}" fill="#e85c5c" />
       `;
     }
 
@@ -2872,7 +3321,9 @@
       if (homeTab === "statistics") redrawCharts();
     }).observe(document.getElementById("pane-stats"));
 
-    drawTrendChart("stCalorieChart", [980, 1120, 1340, 1510, 1680, 1840, 2040, 2200]);
+    const calorieSeries = [980, 1120, 1340, 1510, 1680, 1840, 2040, 2200];
+    drawTrendChart("stCalorieChart", calorieSeries);
+    paintAxis("stCalorieAxis", axisLabels(calorieSeries));
     paintWeight();
 
     pauseBtn.addEventListener("click", () => {
@@ -2881,33 +3332,72 @@
       render();
     });
     document.getElementById("nextBtn").addEventListener("click", next);
+    document.getElementById("prevBtn").addEventListener("click", prev);
     document.getElementById("workoutClose").addEventListener("click", restart);
     document.getElementById("complete").addEventListener("click", restart);
     window.goNext = next;
 
     let lastHomeTick = 0;
+    let lastHomeAbsTick = 0;
     let lastFreeDayTick = 0;
     let freeDayFrame = 0;
     let lastWorkoutTick = 0;
     let lastCharmTick = 0;
+    let absHolding = false;
+    let homeAbsHolding = false;
+    let homeAbsFrame = 0;
+    const absLoopPauseMs = 500;
+    function paintSplashAbs() {
+      splashChicken.src = seqAbs[homeFrame];
+    }
+    function paintHomeAbs() {
+      const src = seqAbs[homeAbsFrame];
+      document.querySelectorAll(".abs-preview-chicken").forEach((img) => {
+        img.src = src;
+      });
+    }
+    function advanceAbs(now) {
+      const wait = absHolding ? absLoopPauseMs : 1000 / 10;
+      if (now - lastHomeTick < wait) return;
+      lastHomeTick = now;
+      if (absHolding) {
+        absHolding = false;
+        homeFrame = 0;
+        paintSplashAbs();
+        return;
+      }
+      if (homeFrame >= seqAbs.length - 1) {
+        absHolding = true;
+        return;
+      }
+      homeFrame += 1;
+      paintSplashAbs();
+    }
+    function advanceHomeAbs(now) {
+      const wait = homeAbsHolding ? absLoopPauseMs : 1000 / 10;
+      if (now - lastHomeAbsTick < wait) return;
+      lastHomeAbsTick = now;
+      if (homeAbsHolding) {
+        homeAbsHolding = false;
+        homeAbsFrame = 0;
+        paintHomeAbs();
+        return;
+      }
+      if (homeAbsFrame >= seqAbs.length - 1) {
+        homeAbsHolding = true;
+        return;
+      }
+      homeAbsFrame += 1;
+      paintHomeAbs();
+    }
     function mediaLoop(now) {
       requestAnimationFrame(mediaLoop);
       if (splashOn) {
-        if (now - lastHomeTick >= 1000 / 10) {
-          lastHomeTick = now;
-          homeFrame = (homeFrame + 1) % seqAbs.length;
-          splashChicken.src = seqAbs[homeFrame];
-        }
+        advanceAbs(now);
         return;
       }
       if (phase === "home" && homeTab === "home" && !settingsOpen && !notesOpen) {
-        if (now - lastHomeTick >= 1000 / 10) {
-          lastHomeTick = now;
-          homeFrame = (homeFrame + 1) % seqAbs.length;
-          document.querySelectorAll(".abs-preview-chicken").forEach((img) => {
-            img.src = seqAbs[homeFrame];
-          });
-        }
+        advanceHomeAbs(now);
         if (now - lastFreeDayTick >= 1000 / 6) {
           lastFreeDayTick = now;
           freeDayFrame = (freeDayFrame + 1) % freeDayFrames.length;
@@ -2916,7 +3406,7 @@
           });
         }
       }
-      if (phase === "workout" && !paused) {
+      if (phase === "workout" && (!paused || announcing)) {
         const move = moves[index];
         if (move.frames && now - lastWorkoutTick >= 1000 / (move.fps || 10)) {
           lastWorkoutTick = now;

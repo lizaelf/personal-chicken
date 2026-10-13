@@ -15,6 +15,7 @@ final class WorkoutSession {
     var currentIndex: Int
     var elapsed: TimeInterval
     var isPaused = false
+    var isAnnouncing = false
     var soundsEnabled: Bool {
         didSet {
             UserDefaults.standard.set(soundsEnabled, forKey: Self.soundsKey)
@@ -55,6 +56,12 @@ final class WorkoutSession {
         return max(1, total - Int(elapsed / repInterval))
     }
 
+    var remainingClock: String {
+        let remaining = max(0, currentMove.duration - elapsed)
+        let seconds = Int(remaining.rounded(.down))
+        return String(format: "%d:%02d", seconds / 60, seconds % 60)
+    }
+
     func togglePause() {
         isPaused.toggle()
     }
@@ -63,6 +70,7 @@ final class WorkoutSession {
         currentIndex = startIndex
         elapsed = startElapsed
         isPaused = true
+        isAnnouncing = false
         lastRepBucket = -1
         phase = .countdown
         stopTicking()
@@ -73,6 +81,7 @@ final class WorkoutSession {
         currentIndex = startIndex
         elapsed = startElapsed
         isPaused = true
+        isAnnouncing = true
         lastRepBucket = -1
         phase = .workout
         stopTicking()
@@ -86,8 +95,14 @@ final class WorkoutSession {
         elapsed = startElapsed
         lastRepBucket = -1
         isPaused = true
+        isAnnouncing = true
         stopTicking()
         Task { await introduceCurrentMove() }
+    }
+
+    func skipToPrevious() {
+        guard phase == .workout, currentIndex > 0 else { return }
+        goTo(currentIndex - 1)
     }
 
     func skipToNext() {
@@ -97,11 +112,13 @@ final class WorkoutSession {
             elapsed = startElapsed
             lastRepBucket = -1
             isPaused = true
+            isAnnouncing = true
             stopTicking()
             Task { await introduceCurrentMove() }
         } else {
             phase = .complete
             isPaused = true
+            isAnnouncing = false
             stopTicking()
             if soundsEnabled {
                 WorkoutCue.speakDone()
@@ -110,12 +127,17 @@ final class WorkoutSession {
     }
 
     private func introduceCurrentMove() async {
+        isAnnouncing = true
         if soundsEnabled {
             await WorkoutCue.speakName(currentMove.name)
         } else {
             try? await Task.sleep(for: .milliseconds(350))
         }
-        guard phase == .workout else { return }
+        guard phase == .workout else {
+            isAnnouncing = false
+            return
+        }
+        isAnnouncing = false
         isPaused = false
         lastRepBucket = -1
         startTicking()
@@ -126,6 +148,7 @@ final class WorkoutSession {
         currentIndex = startIndex
         elapsed = startElapsed
         isPaused = false
+        isAnnouncing = false
         phase = .home
         stopTicking()
     }
@@ -156,6 +179,8 @@ final class WorkoutSession {
     }
 
     private func cueRep() {
+        let firstCueDelay: TimeInterval = currentIndex == 0 ? 1.5 : 0
+        guard elapsed >= firstCueDelay else { return }
         let bucket = Int(elapsed / repInterval)
         guard bucket != lastRepBucket else { return }
         lastRepBucket = bucket

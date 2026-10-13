@@ -4,6 +4,7 @@ struct ChickenMediaView: View {
     let media: ChickenMedia
     var isPlaying: Bool = true
     var fillsBounds: Bool = false
+    var loops: Bool = true
 
     var body: some View {
         Group {
@@ -17,6 +18,8 @@ struct ChickenMediaView: View {
                     resourceName: name,
                     isPlaying: isPlaying,
                     frameInterval: media.frameInterval,
+                    loopPause: media.loopPause,
+                    loops: loops,
                     fillsBounds: fillsBounds
                 )
             }
