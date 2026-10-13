@@ -3,6 +3,8 @@ import SwiftUI
 struct ChickenMediaView: View {
     let media: ChickenMedia
     var isPlaying: Bool = true
+    var fillsBounds: Bool = false
+    var loops: Bool = true
 
     var body: some View {
         Group {
@@ -10,11 +12,30 @@ struct ChickenMediaView: View {
             case .image(let name):
                 Image(name)
                     .resizable()
-                    .scaledToFit()
+                    .modifier(MediaFitModifier(fillsBounds: fillsBounds))
             case .video(let name):
-                LoopingVideoPlayer(resourceName: name, isPlaying: isPlaying)
+                LoopingVideoPlayer(
+                    resourceName: name,
+                    isPlaying: isPlaying,
+                    frameInterval: media.frameInterval,
+                    loopPause: media.loopPause,
+                    loops: loops,
+                    fillsBounds: fillsBounds
+                )
             }
         }
         .accessibilityHidden(true)
+    }
+}
+
+private struct MediaFitModifier: ViewModifier {
+    let fillsBounds: Bool
+
+    func body(content: Content) -> some View {
+        if fillsBounds {
+            content.scaledToFill()
+        } else {
+            content.scaledToFit()
+        }
     }
 }

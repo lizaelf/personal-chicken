@@ -2,37 +2,138 @@ import SwiftUI
 
 struct RootView: View {
     @State private var session = WorkoutSession()
+    @State private var showSplash = true
 
     var body: some View {
-        ZStack {
-            PaperBackground()
+        phaseStack
+            .animation(.spring(duration: 0.5, bounce: 0.08), value: session.currentIndex)
+            .animation(.spring(duration: 0.5, bounce: 0.08), value: session.phase)
+            .animation(.easeInOut(duration: 0.45), value: showSplash)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background { rootBackground }
+            .task { await dismissSplash() }
+            .sensoryFeedback(.impact(weight: .medium), trigger: session.phase)
+    }
 
-            ZStack {
-                switch session.phase {
-                case .workout:
-                    WorkoutView(session: session)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing).combined(with: .opacity),
-                            removal: .move(edge: .leading).combined(with: .opacity)
-                        ))
-                case .complete:
-                    CompletionView(onRestart: {
-                        withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
-                            session.restart()
-                        }
-                    })
+    private var phaseStack: some View {
+        ZStack {
+            switch session.phase {
+            case .home:
+                HomeView(session: session)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+            case .countdown:
+                CountdownView(session: session)
+                    .transition(.opacity)
+            case .workout:
+                WorkoutView(session: session)
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .move(edge: .leading).combined(with: .opacity)
                     ))
-                }
+            case .complete:
+                CompletionView(onRestart: {
+                    withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
+                        session.restart()
+                    }
+                })
+                .transition(.asymmetric(
+                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                    removal: .move(edge: .leading).combined(with: .opacity)
+                ))
             }
-            .animation(.spring(duration: 0.5, bounce: 0.08), value: session.currentIndex)
-            .animation(.spring(duration: 0.5, bounce: 0.08), value: session.phase)
+
+            if showSplash {
+                SplashView()
+                    .transition(.opacity)
+                    .zIndex(10)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var rootBackground: some View {
+        if session.phase == .home && !showSplash {
+            Theme.canvas.ignoresSafeArea()
+        } else if showSplash {
+            Theme.cream.ignoresSafeArea()
+        } else {
+            ZStack {
+                PaperBackground()
+                PaperOverlay()
+            }
+        }
+    }
+
+    private func dismissSplash() async {
+        try? await Task.sleep(for: .milliseconds(2000))
+        withAnimation(.easeInOut(duration: 0.45)) {
+            showSplash = false
         }
     }
 }
 
 #Preview {
     RootView()
+}
+
+private struct SplashView: View {
+    @State private var popped = false
+
+    var body: some View {
+        VStack(spacing: 20) {
+            ChickenMediaView(media: .video("SequenceAbs"), isPlaying: true)
+                .frame(width: 288, height: 336)
+                .scaleEffect(popped ? 1 : 0.86)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Theme.cream.ignoresSafeArea())
+        .onAppear {
+            withAnimation(.spring(duration: 0.7, bounce: 0.18)) {
+                popped = true
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Fit Coco")
+    }
+}
+
+private struct CountdownView: View {
+    let session: WorkoutSession
+    @State private var count = 3
+    @State private var tick = 0
+    @State private var runID = UUID()
+
+    var body: some View {
+        Text("\(count)")
+            .font(.workear(size: 128, relativeTo: .largeTitle))
+            .foregroundStyle(Theme.ink)
+            .id(count)
+            .transition(.asymmetric(
+                insertion: .scale(scale: 0.55).combined(with: .opacity),
+                removal: .scale(scale: 1.18).combined(with: .opacity)
+            ))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .animation(.spring(duration: 0.38, bounce: 0.18), value: count)
+            .sensoryFeedback(.impact(flexibility: .rigid, intensity: 0.9), trigger: tick)
+            .task(id: runID) {
+                for n in [3, 2, 1] {
+                    withAnimation(.spring(duration: 0.38, bounce: 0.18)) {
+                        count = n
+                    }
+                    if session.soundsEnabled {
+                        WorkoutCue.speakSet(n)
+                    }
+                    tick += 1
+                    try? await Task.sleep(for: .seconds(1))
+                    guard !Task.isCancelled else { return }
+                }
+                withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
+                    session.startWorkout()
+                }
+            }
+            .accessibilityLabel("Countdown \(count)")
+    }
 }
