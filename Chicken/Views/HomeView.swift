@@ -2,17 +2,38 @@ import SwiftUI
 
 struct HomeView: View {
     let session: WorkoutSession
+    let log: FitnessLog
     @State private var selectedTab: HomeTab = .home
-    @State private var selectedDay = Self.currentWeekdayId()
+    @State private var selectedDay = Self.todayKey()
+    /// Card pager position is derived from `selectedDay`. Swipes move exactly one day.
+    @State private var dayStripRest: CGFloat = 0
+    @State private var dayStripDrag: CGFloat = 0
+    @State private var cardDrag: CGFloat = 0
+    @State private var suppressWorkoutStart = false
     @State private var showingSettings = false
     @State private var showingNotifications = false
     @State private var unreadNoteIDs: Set<String> = []
-    @State private var weightUnit = "kg"
+    @AppStorage("weightUnit") private var weightUnit = "kg"
     @State private var showingWeightSheet = false
-    @State private var currentWeightKg = 62.4
-    @State private var lastWeekWeightKg = 63.2
-    @AppStorage("notificationsEnabled") private var notificationsEnabled = false
     @AppStorage("trainingDays") private var trainingDaysRaw = ""
+    @State private var notes: [AppNote] = []
+    @State private var scrollToStatsStreak = false
+    @State private var trainingDayTick = 0
+    @State private var noteReadTick = 0
+    @State private var loggedWeightKg: Double?
+
+    private var usesSampleWeight: Bool { log.weeklyWeightChange == nil }
+    private var currentWeightKg: Double {
+        loggedWeightKg ?? log.latestWeight?.kg ?? FitnessStats.baselineWeightKg
+    }
+    private var streakCount: Int {
+        FitnessStats.streak(trainingDays: trainingDays, log: log)
+    }
+    private var streakLabel: String { streakCount == 1 ? "day streak" : "days streak" }
+    private var shownWeeklyChange: Double? {
+        if let change = log.weeklyWeightChange { return change }
+        return currentWeightKg - FitnessStats.baselineLastWeekKg
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -24,161 +45,207 @@ struct HomeView: View {
                 } else if showingNotifications {
                     notificationsContent
                 } else {
-                    ZStack(alignment: .bottom) {
-                        Group {
-                            switch selectedTab {
-                            case .home:
-                                VStack(alignment: .leading, spacing: 16) {
-                                    weeklyPlan
+                    Group {
+                        switch selectedTab {
+                        case .home:
+                            VStack(alignment: .leading, spacing: Theme.Space.lg) {
+                                weeklyPlan
+                                VStack(alignment: .leading, spacing: Theme.Space.cardGap) {
                                     dayPager(cardWidth: cardWidth)
                                     weightCard
                                 }
-                            case .workouts:
-                                workoutsContent(cardWidth: cardWidth)
-                            case .statistics:
-                                statisticsContent
                             }
+                        case .workouts:
+                            workoutsContent(cardWidth: cardWidth)
+                        case .statistics:
+                            statisticsContent
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                        .padding(.top, 4)
-                        .padding(.bottom, 88)
-
-                        tabBar
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.top, 4)
                 }
             }
-            .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if !showingSettings && !showingNotifications {
+                ChickenTabBar(selected: $selectedTab)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Theme.canvas.ignoresSafeArea())
-        .ignoresSafeArea(.container, edges: .bottom)
-        .onAppear { seedTrainingDaysIfNeeded() }
-        .sheet(isPresented: $showingWeightSheet) {
-            WeightLogSheet(
-                initialKg: currentWeightKg,
-                unit: weightUnit,
-                onLog: { currentWeightKg = $0 }
-            )
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
-            .presentationCornerRadius(28)
-            .presentationBackground(Theme.surface)
+        .onAppear {
+            seedTrainingDaysIfNeeded()
+            if loggedWeightKg == nil {
+                loggedWeightKg = log.latestWeight?.kg
+            }
+        }
+        .overlay(alignment: .bottom) {
+            ZStack(alignment: .bottom) {
+                if showingWeightSheet {
+                    Color.black.opacity(0.25)
+                        .ignoresSafeArea()
+                        .onTapGesture { showingWeightSheet = false }
+                        .transition(.opacity)
+
+                    WeightLogSheet(
+                        initialKg: currentWeightKg,
+                        unit: weightUnit,
+                        onLog: { kg in
+                            log.logWeight(kg)
+                            loggedWeightKg = kg
+                        },
+                        onClose: { showingWeightSheet = false }
+                    )
+                    .transition(.move(edge: .bottom))
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .animation(.spring(duration: 0.4, bounce: 0), value: showingWeightSheet)
         }
         .sensoryFeedback(.selection, trigger: selectedTab)
         .sensoryFeedback(.selection, trigger: selectedDay)
         .sensoryFeedback(.selection, trigger: weightUnit)
         .sensoryFeedback(.selection, trigger: session.soundsEnabled)
-        .sensoryFeedback(.success, trigger: currentWeightKg)
+        .sensoryFeedback(.success, trigger: log.weights)
         .sensoryFeedback(.impact(weight: .light), trigger: showingSettings)
         .sensoryFeedback(.impact(weight: .light), trigger: showingNotifications)
         .sensoryFeedback(.impact(weight: .light), trigger: showingWeightSheet)
         .sensoryFeedback(.impact(weight: .light), trigger: unreadNoteIDs.isEmpty) { wasEmpty, isEmpty in
             !wasEmpty && isEmpty
         }
+        .sensoryFeedback(.selection, trigger: trainingDayTick)
+        .sensoryFeedback(.selection, trigger: noteReadTick)
     }
 
     private var weeklyPlan: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .center) {
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text("4")
-                        .font(.workear(size: 28, relativeTo: .title))
-                        .foregroundStyle(Theme.fgPrimary)
-                    Text("days streak")
-                        .font(.workear(size: 15, relativeTo: .body))
-                        .foregroundStyle(Theme.fgSecondary)
-                }
-                Spacer()
-                profileButton
+            ChickenPageHeader {
+                Text(homeTitle)
+                    .font(Theme.Text.title2)
+                    .foregroundStyle(Theme.fgPrimary)
+                    .contentTransition(.opacity)
+                    .animation(.easeInOut(duration: 0.2), value: homeTitle)
+            } trailing: {
+                headerTrailing
             }
-            .padding(.horizontal, 16)
 
             weekDays
         }
     }
 
     private var weekDays: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 9) {
-                    ForEach(WeekDay.week(starting: todayDay)) { day in
-                        Group {
-                            if day.id == selectedDay, let copy = dayCopy(for: day) {
-                                labeledDayChip(day, copy: copy)
-                            } else {
-                                dayDot(day, accent: day.id == todayDay)
-                            }
+        let index = CGFloat(homeDays.firstIndex { $0.id == selectedDay } ?? 0)
+        return GeometryReader { geo in
+            HStack(spacing: 9) {
+                ForEach(homeDays) { day in
+                    Group {
+                        if day.id == selectedDay, let copy = dayCopy(for: day) {
+                            labeledDayChip(day, copy: copy)
+                        } else {
+                            dayDot(day)
+                                .frame(width: 36, height: 56)
                         }
-                        .contentShape(Rectangle())
-                        .onTapGesture { selectedDay = day.id }
-                        .id(day.id)
-                        .accessibilityAddTraits(day.id == selectedDay ? .isSelected : [])
-                        .accessibilityAddTraits(.isButton)
                     }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            selectedDay = day.id
+                            dayStripRest = 0
+                            dayStripDrag = 0
+                            cardDrag = 0
+                        }
+                    }
+                    .accessibilityLabel(day.id == selectedDay ? "\(day.label) \(day.dayNumber), \(dayCopy(for: day) ?? "")" : "\(day.label) \(day.dayNumber)")
+                    .accessibilityAddTraits(day.id == selectedDay ? .isSelected : [])
+                    .accessibilityAddTraits(.isButton)
                 }
             }
-            .contentMargins(.horizontal, 16, for: .scrollContent)
-            .onAppear {
-                DispatchQueue.main.async {
-                    proxy.scrollTo(selectedDay, anchor: .leading)
-                }
-            }
-            .onChange(of: selectedDay) { _, day in
-                withAnimation(.easeInOut(duration: 0.35)) {
-                    proxy.scrollTo(day, anchor: .leading)
-                }
-            }
+            .padding(.trailing, geo.size.width)
+            .offset(x: 16 - index * 45 + dayStripRest + dayStripDrag)
+            .animation(.easeInOut(duration: 0.2), value: selectedDay)
+            .gesture(dayStripGesture)
         }
+        .frame(height: 56)
+        .clipped()
     }
 
-    private func dayCopy(for day: WeekDay) -> String? {
-        if day.id == todayDay { return "Let’s worko-ko!" }
+    private var dayStripGesture: some Gesture {
+        DragGesture(minimumDistance: 12)
+            .onChanged { value in
+                dayStripDrag = value.translation.width
+            }
+            .onEnded { value in
+                dayStripRest += value.translation.width
+                dayStripDrag = 0
+            }
+    }
+
+    private func dayCopy(for day: HomeDay) -> String? {
+        if day.isToday { return "Let’s worko-ko!" }
+        if day.isPast && trainingDays.contains(day.label) { return "Already done" }
         if isFutureTraining(day) { return "Future trainings" }
         return "Free day"
     }
 
-    private func labeledDayChip(_ day: WeekDay, copy: String) -> some View {
-        let selected = day.id == selectedDay
-        let isToday = day.id == todayDay
-        let isFree = !isToday && !isFutureTraining(day)
-        let fillInner = (selected || isToday) && !isFree
-        return HStack(spacing: 9) {
-            Text(day.label)
-                .font(.workear(size: 13, relativeTo: .caption))
-                .foregroundStyle(fillInner ? Color.white : Theme.fgSecondary)
-                .frame(width: 36, height: 37)
-                .background {
-                    Capsule().fill(fillInner ? Theme.fgAccent : (isFree ? Theme.fgSecondary.opacity(0.2) : Color.clear))
-                }
-                .overlay {
-                    if !fillInner {
-                        if isFutureTraining(day) {
-                            Capsule().stroke(Theme.borderAccent, lineWidth: 1)
-                        } else if isFree {
-                            Capsule().stroke(Theme.fgSecondary.opacity(0.24), lineWidth: 1)
-                        }
-                    }
-                }
-
-            Text(copy)
-                .font(.workear(size: 15, relativeTo: .body))
-                .foregroundStyle(selected || !isFree ? Theme.fgPrimary : Theme.fgSecondary)
-                .lineLimit(1)
-                .fixedSize()
-        }
-        .padding(.leading, 4)
-        .padding(.trailing, 20)
-        .padding(.vertical, 4)
-        .frame(height: 47)
-        .fixedSize(horizontal: true, vertical: true)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(isFree ? Theme.fgSecondary.opacity(0.28) : Theme.borderAccent, lineWidth: 1)
-        }
+    private func labeledDayChip(_ day: HomeDay, copy: String) -> some View {
+        WeekDayChip(
+            label: day.label,
+            copy: copy,
+            selected: day.id == selectedDay,
+            isToday: day.isToday,
+            isFree: !isTrainingPage(day),
+            isFuture: isFutureTraining(day)
+        )
     }
 
     private var todayDay: String { Self.currentWeekdayId() }
+
+    /// Seven days before today, today, and the six days after.
+    private var homeDays: [HomeDay] {
+        let calendar = FitnessLog.calendar
+        let today = calendar.startOfDay(for: Date())
+        return (-7...6).compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: offset, to: today) else { return nil }
+            return HomeDay(
+                id: FitnessLog.key(for: date),
+                label: FitnessLog.weekdayId(for: date),
+                dayNumber: "\(calendar.component(.day, from: date))",
+                isToday: offset == 0,
+                isPast: offset < 0
+            )
+        }
+    }
+
+    private var selectedHomeDay: HomeDay? {
+        homeDays.first { $0.id == selectedDay }
+    }
+
+    private var homeTitle: String {
+        guard let day = selectedHomeDay else { return "Today" }
+        if day.isToday { return "Today" }
+        let calendar = FitnessLog.calendar
+        let today = calendar.startOfDay(for: Date())
+        guard let date = FitnessLog.date(from: day.id) else { return day.label }
+        let offset = calendar.dateComponents([.day], from: today, to: calendar.startOfDay(for: date)).day ?? 0
+        switch offset {
+        case -1: return "Yesterday"
+        case 1: return "Tomorrow"
+        default: return "\(weekdayName(day.label)) \(day.dayNumber)"
+        }
+    }
+
+    private func weekdayName(_ id: String) -> String {
+        switch id {
+        case "Mo": return "Monday"
+        case "Tu": return "Tuesday"
+        case "We": return "Wednesday"
+        case "Th": return "Thursday"
+        case "Fr": return "Friday"
+        case "Sa": return "Saturday"
+        case "Su": return "Sunday"
+        default: return id
+        }
+    }
 
     private var nextDayId: String {
         let ids = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
@@ -188,10 +255,11 @@ struct HomeView: View {
 
     private var trainingDays: Set<String> {
         let saved = Set(trainingDaysRaw.split(separator: ",").map(String.init).filter { !$0.isEmpty })
-        if saved.isEmpty || saved == ["We", "Fr"] {
-            return Set(Self.everyOtherTrainingDays(from: todayDay))
-        }
-        return saved
+        var days = saved.isEmpty || saved == ["We", "Fr"]
+            ? Set(Self.everyOtherTrainingDays(from: todayDay))
+            : saved
+        days.insert(todayDay)
+        return days
     }
 
     private static func everyOtherTrainingDays(from today: String) -> [String] {
@@ -209,11 +277,16 @@ struct HomeView: View {
         }
     }
 
-    private func isFutureTraining(_ day: WeekDay) -> Bool {
-        trainingDays.contains(day.id) && day.id != todayDay && day.id != nextDayId
+    private func isFutureTraining(_ day: HomeDay) -> Bool {
+        !day.isPast && !day.isToday && trainingDays.contains(day.label) && day.label != nextDayId
+    }
+
+    private func isTrainingPage(_ day: HomeDay) -> Bool {
+        day.isToday || isFutureTraining(day) || (day.isPast && trainingDays.contains(day.label))
     }
 
     private func toggleTrainingDay(_ id: String) {
+        guard id != todayDay else { return }
         var days = trainingDays
         if days.contains(id) {
             days.remove(id)
@@ -223,60 +296,82 @@ struct HomeView: View {
         trainingDaysRaw = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
             .filter { days.contains($0) }
             .joined(separator: ",")
+        trainingDayTick += 1
     }
 
     private static func currentWeekdayId() -> String {
-        let map = [1: "Su", 2: "Mo", 3: "Tu", 4: "We", 5: "Th", 6: "Fr", 7: "Sa"]
-        let weekday = Calendar.current.component(.weekday, from: Date())
-        return map[weekday] ?? "Mo"
+        FitnessLog.weekdayId(for: Date())
     }
 
-    private func dayDot(_ day: WeekDay, accent: Bool) -> some View {
+    private static func todayKey() -> String {
+        FitnessLog.key(for: Date())
+    }
+
+    private func dayDot(_ day: HomeDay) -> some View {
         let color: Color = {
-            if accent { return .white }
-            return isFutureTraining(day) ? Theme.fgSecondary : Theme.fgRest
+            if day.isToday { return Theme.fgAccent }
+            if trainingDays.contains(day.label) { return Theme.fgSecondary }
+            return Theme.fgRest
         }()
-        return VStack(spacing: accent ? 0 : 4) {
-            Text(day.label)
-            Text(monthDay(for: day.id))
-        }
-        .font(.workear(size: 15, relativeTo: .caption))
-        .foregroundStyle(color)
-        .frame(width: 36, height: accent ? 37 : 56)
-        .background {
-            if accent {
-                Capsule().fill(Theme.fgAccent)
-            }
-        }
-    }
-
-    private func monthDay(for weekdayId: String) -> String {
-        let ids = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-        guard let offset = ids.firstIndex(of: weekdayId) else { return "" }
-        var cal = Calendar(identifier: .gregorian)
-        cal.firstWeekday = 2
-        let today = cal.startOfDay(for: Date())
-        let weekday = cal.component(.weekday, from: today)
-        let mondayOffset = (weekday + 5) % 7
-        guard let monday = cal.date(byAdding: .day, value: -mondayOffset, to: today),
-              let date = cal.date(byAdding: .day, value: offset, to: monday) else { return "" }
-        return "\(cal.component(.day, from: date))"
+        return WeekDayDot(label: day.label, date: day.dayNumber, color: color)
     }
 
     private func dayPager(cardWidth: CGFloat) -> some View {
-        TabView(selection: $selectedDay) {
-            ForEach(WeekDay.week(starting: todayDay)) { day in
-                dayPage(for: day, width: cardWidth)
-                    .padding(.horizontal, 16)
-                    .tag(day.id)
+        GeometryReader { geo in
+            let pageWidth = geo.size.width
+            let index = homeDays.firstIndex { $0.id == selectedDay } ?? 0
+            HStack(spacing: 0) {
+                ForEach(homeDays) { day in
+                    dayPage(for: day, width: cardWidth)
+                        .padding(.horizontal, Theme.Space.gutter)
+                        .frame(width: pageWidth)
+                        .mask(Rectangle().padding(.vertical, -16))
+                }
             }
+            .offset(x: -CGFloat(index) * pageWidth + cardDrag)
+            .frame(width: pageWidth, height: geo.size.height, alignment: .leading)
+            .contentShape(Rectangle())
+            .simultaneousGesture(cardSwipeGesture(pageWidth: pageWidth, index: index))
         }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        .animation(.easeInOut(duration: 0.35), value: selectedDay)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
     }
 
-    private func dayPage(for day: WeekDay, width: CGFloat) -> some View {
+    private func cardSwipeGesture(pageWidth: CGFloat, index: Int) -> some Gesture {
+        DragGesture(minimumDistance: 18)
+            .onChanged { value in
+                let dx = value.translation.width
+                if abs(dx) > 18 { suppressWorkoutStart = true }
+                let atStart = index == 0 && dx > 0
+                let atEnd = index == homeDays.count - 1 && dx < 0
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    cardDrag = (atStart || atEnd) ? dx * 0.35 : dx
+                }
+            }
+            .onEnded { value in
+                let dx = value.translation.width
+                let threshold = pageWidth * 0.18
+                var next = index
+                if dx <= -threshold { next += 1 }
+                else if dx >= threshold { next -= 1 }
+                next = min(max(next, 0), homeDays.count - 1)
+                withAnimation(.easeInOut(duration: 0.35)) {
+                    cardDrag = 0
+                    selectedDay = homeDays[next].id
+                    dayStripRest = 0
+                    dayStripDrag = 0
+                }
+                if suppressWorkoutStart {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                        suppressWorkoutStart = false
+                    }
+                }
+            }
+    }
+
+    private func dayPage(for day: HomeDay, width: CGFloat) -> some View {
         let kind = pageKind(for: day)
         return Group {
             switch kind {
@@ -288,16 +383,16 @@ struct HomeView: View {
         }
     }
 
-    private func pageKind(for day: WeekDay) -> DayPageKind {
-        if day.id == todayDay {
+    private func pageKind(for day: HomeDay) -> DayPageKind {
+        if day.isToday {
             return .train(live: true, title: "Abs & Glutes", image: "ChickenAbs")
         }
-        if isFutureTraining(day) {
-            let wing = day.id == "Fr"
+        if (day.isPast && trainingDays.contains(day.label)) || isFutureTraining(day) {
+            let wing = day.label == "Fr"
             return .train(
                 live: false,
                 title: wing ? "Wing press" : "Abs & Glutes",
-                image: wing ? "ChickenShoulderPress" : "ChickenAbs"
+                image: wing ? "ChickenWingPress" : "ChickenAbs"
             )
         }
         return .rest(title: "Free day")
@@ -308,16 +403,16 @@ struct HomeView: View {
         return VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 11) {
                 Text(title)
-                    .font(.workear(size: 26, relativeTo: .title))
+                    .font(Theme.Text.title)
                     .foregroundStyle(Theme.fgPrimary)
 
                 HStack(spacing: 6) {
-                    chip(wing ? "18 min" : "20 min", icon: "IconTime")
+                    ChickenChip(title: wing ? "18 min" : "20 min", icon: "IconTime")
                     if wing {
-                        chip("Dumbbells", icon: "IconDumbbells")
+                        ChickenChip(title: "Dumbbells", icon: "IconDumbbells")
                     } else {
-                        chip("Dumbbells", icon: "IconDumbbells")
-                        chip("Mat", icon: "IconYogaMat")
+                        ChickenChip(title: "Dumbbells", icon: "IconDumbbells")
+                        ChickenChip(title: "Mat", icon: "IconYogaMat")
                     }
                 }
             }
@@ -326,28 +421,8 @@ struct HomeView: View {
 
             Group {
                 if !wing {
-                    GeometryReader { geo in
-                        ZStack {
-                            Ellipse()
-                                .fill(
-                                    RadialGradient(
-                                        colors: [
-                                            Color(red: 206 / 255, green: 119 / 255, blue: 69 / 255),
-                                            Color(red: 244 / 255, green: 158 / 255, blue: 109 / 255).opacity(0.1),
-                                            Color.clear,
-                                        ],
-                                        center: .center,
-                                        startRadius: 0,
-                                        endRadius: geo.size.width * 0.28
-                                    )
-                                )
-                                .frame(width: geo.size.width * 0.55, height: 31)
-                                .position(x: geo.size.width * 0.5, y: geo.size.height * 0.81)
-                            ChickenMediaView(media: .video("SequenceAbs"), isPlaying: true)
-                                .scaleEffect(1.2, anchor: UnitPoint(x: 0.5, y: 0.82))
-                                .frame(width: geo.size.width, height: geo.size.height)
-                        }
-                    }
+                    ChickenMediaView(media: .video("SequenceAbs"), isPlaying: true)
+                        .offset(x: -40, y: 20)
                 } else if live {
                     ChickenMediaView(media: .video("SequenceHome"), isPlaying: true)
                 } else {
@@ -358,46 +433,43 @@ struct HomeView: View {
             }
             .padding(.horizontal, 4)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .clipped()
 
-            Button(action: startWorkout) {
-                HStack(spacing: 12) {
-                    Text(live ? "Start" : "Open workout")
-                        .font(.workear(size: 17, relativeTo: .headline))
-                        .foregroundStyle(Theme.surface)
-                    if live {
-                        Image("IconStartArrow")
-                            .frame(width: 20, height: 20)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .background(Theme.coral, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            }
-            .buttonStyle(.plain)
-            .shadow(color: .black.opacity(0.1), radius: 1.35, x: 0, y: 0.9)
+            ChickenPrimaryButton(
+                title: live ? "Start" : "Open workout",
+                icon: live ? "IconStartArrow" : nil,
+                action: { startWorkout() }
+            )
             .padding(24)
         }
         .frame(width: width)
         .frame(maxHeight: .infinity)
-        .background { duneCardBackground() }
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background {
+            DuneCardBackground(centerPeach: false)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
+                .chickenShadow()
+        }
     }
 
     private func restCard(width: CGFloat, title: String) -> some View {
         ZStack(alignment: .bottom) {
-            ChickenMediaView(media: .video("SequenceFreeDay"), isPlaying: true)
-                .scaleEffect(2, anchor: .bottom)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                .clipped()
+            ChickenMediaView(
+                media: .video("SequenceFreeDay"),
+                isPlaying: true,
+                contentAlignment: .bottom
+            )
+            .scaleEffect(2, anchor: .bottom)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
         .frame(width: width)
         .frame(maxHeight: .infinity)
-        .background { duneCardBackground() }
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background {
+            DuneCardBackground(showDune: false)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
+        .chickenShadow()
         .overlay(alignment: .topLeading) {
             Text(title)
-                .font(.workear(size: 26, relativeTo: .title))
+                .font(Theme.Text.title)
                 .foregroundStyle(Theme.fgPrimary)
                 .padding(.top, 24)
                 .padding(.horizontal, 24)
@@ -405,127 +477,114 @@ struct HomeView: View {
         }
     }
 
-    private func chip(_ title: String, icon: String? = nil) -> some View {
-        HStack(spacing: 6) {
-            if let icon {
-                Image(icon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: icon == "IconTime" ? 24 : 20, height: icon == "IconTime" ? 24 : 20)
-            }
-            Text(title)
-                .font(.workear(size: 15, relativeTo: .body))
-                .foregroundStyle(Theme.fgPrimary)
-        }
-        .padding(.leading, 8)
-        .padding(.trailing, 12)
-        .frame(height: 36)
-        .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Theme.fgSecondary.opacity(0.2), lineWidth: 1)
-        }
-    }
-
-    private var hasWeightForSelectedDay: Bool {
-        selectedDay == todayDay
+    private var pastWeightKg: Double? {
+        guard selectedHomeDay?.isPast == true else { return nil }
+        return log.weights.last { $0.day == selectedDay }?.kg
     }
 
     private var weightCard: some View {
         HStack(alignment: .bottom, spacing: 16) {
-            if hasWeightForSelectedDay {
-                weightFilled
+            if selectedHomeDay?.isToday != false {
+                weightFilled(currentWeightKg)
                 weightAddButton
+            } else if let kg = pastWeightKg {
+                weightFilled(kg, showsTrend: false)
             } else {
                 weightEmpty
             }
         }
         .frame(minHeight: 55, alignment: .center)
         .padding(24)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .padding(.horizontal, 16)
+        .background(
+            Theme.weightSurface,
+            in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous)
+        )
+        .chickenShadow()
+        .padding(.horizontal, Theme.Space.gutter)
         .animation(.easeInOut(duration: 0.25), value: selectedDay)
     }
 
-    private var weightFilled: some View {
+    private func weightFilled(_ kg: Double, showsTrend: Bool = true) -> some View {
         HStack(alignment: .bottom, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("My weight")
-                    .font(.workear(size: 14, relativeTo: .body))
+                    .font(Theme.Text.callout)
                     .foregroundStyle(Theme.fgSecondary)
-                Text(formattedWeight(currentWeightKg))
-                    .font(.workear(size: 22, relativeTo: .title2))
+                Text(formattedWeight(kg))
+                    .font(Theme.Text.title2)
                     .foregroundStyle(Theme.fgPrimary)
                     .contentTransition(.numericText())
-                    .animation(.snappy, value: currentWeightKg)
+                    .animation(.snappy, value: kg)
             }
 
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 4) {
-                    Text(formattedDelta)
-                        .font(.workear(size: 14, relativeTo: .body))
-                        .foregroundStyle(Theme.fgPositive)
-                    Image("IconDeltaDown")
-                        .frame(width: 6, height: 6.4)
+            if showsTrend, let change = shownWeeklyChange {
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: 4) {
+                        Text(formattedChange(change))
+                            .font(Theme.Text.callout)
+                            .foregroundStyle(changeColor(change))
+                        if displayChange(change) != 0 {
+                            Image("IconDeltaDown")
+                                .renderingMode(.template)
+                                .foregroundStyle(changeColor(change))
+                                .frame(width: 6, height: 6.4)
+                                .rotationEffect(.degrees(change > 0 ? 180 : 0))
+                        }
+                    }
+                    Text("vs last week")
+                        .font(Theme.Text.callout)
+                        .foregroundStyle(Theme.fgSecondary)
                 }
-                Text("vs last week")
-                    .font(.workear(size: 14, relativeTo: .body))
-                    .foregroundStyle(Theme.fgSecondary)
             }
 
-            WeightSparkline()
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
+            if showsTrend {
+                WeightSparkline(values: sparklineValues)
+                    .id(sparklineValues)
+                    .foregroundStyle(changeColor(shownWeeklyChange ?? 0))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+            }
         }
     }
 
     private var weightEmpty: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("My weight")
-                .font(.workear(size: 14, relativeTo: .body))
+                .font(Theme.Text.callout)
                 .foregroundStyle(Theme.fgSecondary)
-            Text("We’ll see… in the future.")
-                .font(.workear(size: 22, relativeTo: .title2))
+            Text(selectedHomeDay?.isPast == true ? "No weigh-in that day." : "We’ll see… in the future.")
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
+                .font(Theme.Text.title2)
                 .foregroundStyle(Theme.fgSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var weightAddButton: some View {
-        Button {
-            showingWeightSheet = true
-        } label: {
-            Image("IconPlus")
-                .frame(width: 18, height: 18)
-                .frame(width: 48, height: 48)
-                .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .shadow(color: .black.opacity(0.1), radius: 2.7, x: 0, y: 0.9)
-        .accessibilityLabel("Add weight")
+        ChickenPlusButton { showingWeightSheet = true }
     }
 
     private func workoutsContent(cardWidth: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .center) {
+            ChickenPageHeader {
                 Text("Extra workouts")
-                    .font(.workear(size: 24, relativeTo: .title2))
+                    .font(Theme.Text.title2)
                     .foregroundStyle(Theme.fgPrimary)
-                Spacer()
-                profileButton
+            } trailing: {
+                headerTrailing
             }
-            .padding(.horizontal, 16)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                HStack(spacing: 0) {
                     ForEach(ExtraWorkout.all) { item in
                         extraWorkoutCard(item, width: cardWidth)
+                            .padding(.horizontal, Theme.Space.gutter)
                     }
                 }
                 .scrollTargetLayout()
-                .padding(.leading, 16)
-                .padding(.trailing, 16)
             }
-            .scrollTargetBehavior(.viewAligned)
+            .scrollTargetBehavior(.paging)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -534,17 +593,17 @@ struct HomeView: View {
     private func extraWorkoutCard(_ item: ExtraWorkout, width: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("\(item.line1) \(item.line2)")
-                    .font(.workear(size: 28, relativeTo: .title))
+                Text([item.line1, item.line2].filter { !$0.isEmpty }.joined(separator: " "))
+                    .font(Theme.Text.streak)
                     .foregroundStyle(Theme.fgPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.72)
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
-                        chip(item.duration, icon: "IconTime")
+                        ChickenChip(title: item.duration, icon: "IconTime")
                         ForEach(item.equipment) { gear in
-                            chip(gear.title, icon: gear.icon)
+                            ChickenChip(title: gear.title, icon: gear.icon)
                         }
                     }
                 }
@@ -552,111 +611,126 @@ struct HomeView: View {
             .padding(.top, 24)
             .padding(.horizontal, 24)
 
-            Image(item.image)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.horizontal, 36)
-
-            Button(action: startWorkout) {
-                Text("Open workout")
-                    .font(.workear(size: 17, relativeTo: .headline))
-                    .foregroundStyle(Theme.surface)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(Theme.coral, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            Group {
+                if let video = item.video {
+                    ChickenMediaView(media: .video(video), isPlaying: true)
+                        .frame(width: width * 0.8)
+                        .scaleEffect(video == "Sequence01" ? ChickenMedia.video("Sequence01").displayScale : 1)
+                        .offset(x: video == "Sequence01" ? ChickenMedia.video("Sequence01").nudgeX : 0)
+                } else {
+                    Image(item.image)
+                        .resizable()
+                        .scaledToFit()
+                        .padding(.horizontal, 36)
+                }
             }
-            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            ChickenPrimaryButton(title: "Open workout", shadowed: false) {
+                startWorkout(move: item.move)
+            }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
         }
+        .frame(width: width)
+        .frame(maxHeight: .infinity)
         .background {
-            duneCardBackground(
+            DuneCardBackground(
                 referenceHeight: 702,
                 duneY: 420,
                 duneHeight: 315,
                 centerPeach: false
             )
         }
-        .frame(width: width)
-        .frame(maxHeight: .infinity)
-        .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
     }
 
     private var statisticsContent: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .center) {
+            ChickenPageHeader {
                 Text("Statistics")
-                    .font(.workear(size: 24, relativeTo: .title2))
+                    .font(Theme.Text.title2)
                     .foregroundStyle(Theme.fgPrimary)
-                Spacer()
-                profileButton
+            } trailing: {
+                headerTrailing
             }
-            .padding(.horizontal, 16)
 
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 8) {
-                    StatsTrendCard(
-                        title: "Calories burned",
-                        value: "12,480",
-                        unit: "kcal",
-                        delta: "+1840 kcal",
-                        values: FitnessStats.calorieTrend,
-                        startLabel: "Jul 12"
-                    )
-                    StatsTrendCard(
-                        title: "Weight",
-                        value: String(format: "%.1f", displayWeight(currentWeightKg)),
-                        unit: weightUnit,
-                        delta: formattedWeightLoss,
-                        values: FitnessStats.weightTrend(endingAt: currentWeightKg),
-                        startLabel: "Jul 12"
-                    )
-                    statsCalendarCard
+            ScrollViewReader { proxy in
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 8) {
+                        StatsTrendCard(
+                            title: "Calories burned",
+                            value: "12,480",
+                            unit: "kcal",
+                            delta: "+1840 kcal",
+                            values: FitnessStats.calorieTrend,
+                            startLabel: "Jul 12"
+                        )
+                        StatsTrendCard(
+                            title: "Weight",
+                            value: String(format: "%.1f", displayWeight(currentWeightKg)),
+                            unit: weightUnit,
+                            delta: formattedChange(usesSampleWeight ? currentWeightKg - FitnessStats.startWeightKg : (log.weeklyWeightChange ?? 0)),
+                            deltaColor: changeColor(usesSampleWeight ? currentWeightKg - FitnessStats.startWeightKg : (log.weeklyWeightChange ?? 0)),
+                            chartColor: changeColor(usesSampleWeight ? currentWeightKg - FitnessStats.startWeightKg : (log.weeklyWeightChange ?? 0)),
+                            values: usesSampleWeight ? FitnessStats.weightTrend(endingAt: currentWeightKg) : recentWeightValues,
+                            startLabel: usesSampleWeight ? "Jul 12" : recentWeightStartLabel
+                        )
+                        .id(currentWeightKg)
+                        statsCalendarCard
+                        Image("StatsProgress")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, -Theme.Space.gutter)
+                            .padding(.bottom, -20)
+                            .id("statsStreak")
+                            .accessibilityLabel("Progress looks good on you!")
+                    }
+                    .padding(.horizontal, Theme.Space.gutter)
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .onAppear { jumpToStatsStreak(proxy) }
+                .onChange(of: scrollToStatsStreak) { _, go in
+                    if go { jumpToStatsStreak(proxy) }
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
     private var statsCalendarCard: some View {
         VStack(spacing: 24) {
-            ForEach(FitnessStats.yearMonths) { month in
-                VStack(spacing: 12) {
-                    Text(month.name)
-                        .font(.workear(size: 16, relativeTo: .headline))
-                        .foregroundStyle(Theme.fgPrimary)
+            ForEach(FitnessStats.recentMonths(count: 2, log: log)) { month in
+                statsMonthBlock(month)
+            }
+        }
+        .padding(24)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
+    }
 
-                    HStack {
-                        ForEach(Array(FitnessStats.weekdayLetters.enumerated()), id: \.offset) { _, day in
-                            Text(day)
-                                .font(.workear(size: 12, relativeTo: .caption))
-                                .foregroundStyle(Theme.fgSecondary)
-                                .frame(maxWidth: .infinity)
-                        }
-                    }
+    private func statsMonthBlock(_ month: FitnessMonth) -> some View {
+        VStack(spacing: 12) {
+            Text(month.name)
+                .font(Theme.Text.row)
+                .foregroundStyle(Theme.fgPrimary)
+                .frame(maxWidth: .infinity)
 
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 8) {
-                        ForEach(month.cells) { cell in
-                            statsDayCell(cell)
-                        }
-                    }
+            HStack {
+                ForEach(Array(FitnessStats.weekdayLetters.enumerated()), id: \.offset) { _, day in
+                    Text(day)
+                        .font(Theme.Text.caption)
+                        .foregroundStyle(Theme.fgSecondary)
+                        .frame(maxWidth: .infinity)
                 }
             }
 
-            Image("StatsProgress")
-                .resizable()
-                .scaledToFit()
-                .padding(.horizontal, -24)
-                .padding(.bottom, -24)
-                .accessibilityLabel("Progress looks good on you!")
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 8) {
+                ForEach(month.cells) { cell in
+                    statsDayCell(cell)
+                }
+            }
         }
-        .padding(24)
-        .background(Theme.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 
     private func statsDayCell(_ cell: FitnessDay) -> some View {
@@ -666,7 +740,7 @@ struct HomeView: View {
                     cell.day == nil
                         ? Color.clear
                         : (cell.workedOut
-                            ? Color(red: 251 / 255, green: 226 / 255, blue: 225 / 255)
+                            ? Theme.calToday
                             : Theme.bgSoft)
                 )
             if let day = cell.day {
@@ -678,102 +752,66 @@ struct HomeView: View {
                         .accessibilityHidden(true)
                 } else {
                     Text("\(day)")
-                        .font(.workear(size: 12, relativeTo: .caption))
+                        .font(Theme.Text.caption)
                         .foregroundStyle(Theme.fgSecondary)
                 }
             }
         }
-        .frame(height: 43)
+        .frame(height: Theme.Space.tabHeight)
         .clipShape(Circle())
         .overlay {
             if cell.isToday && !cell.workedOut {
-                Circle().stroke(Theme.fgPrimary.opacity(0.35), lineWidth: 1.5)
+                Circle().stroke(Theme.todayRing, lineWidth: 1.5)
             }
         }
         .accessibilityLabel(cell.accessibilityLabel)
     }
 
-    private var tabBar: some View {
-        HStack(spacing: 8) {
-            ForEach(HomeTab.allCases) { tab in
-                Button {
-                    selectedTab = tab
-                } label: {
-                    Text(tab.title)
-                        .font(.workear(size: 14, relativeTo: .body))
-                        .foregroundStyle(
-                            tab == selectedTab
-                                ? Color(red: 58 / 255, green: 42 / 255, blue: 38 / 255)
-                                : Color(red: 151 / 255, green: 138 / 255, blue: 130 / 255)
-                        )
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
-                        .background(
-                            tab == selectedTab
-                                ? Color(red: 255 / 255, green: 252 / 255, blue: 250 / 255)
-                                : Color(red: 246 / 255, green: 237 / 255, blue: 224 / 255),
-                            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        )
-                        .shadow(
-                            color: tab == selectedTab ? Color.black.opacity(0.1) : .clear,
-                            radius: 2,
-                            y: 1
-                        )
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
-    }
-
     private var notificationsContent: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showingNotifications = false
-                    }
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Theme.fgPrimary)
-                        .frame(width: 32, height: 32)
-                        .background(Theme.bgMuted, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            ChickenScreenHeader(title: "Notifications") {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showingNotifications = false
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Back")
-
-                Text("Notifications")
-                    .font(.workear(size: 24, relativeTo: .title2))
-                    .foregroundStyle(Theme.fgPrimary)
-                Spacer()
+            } trailing: {
                 if !unreadNoteIDs.isEmpty {
                     Button("Read all") {
                         unreadNoteIDs.removeAll()
                     }
-                    .font(.workear(size: 14, relativeTo: .body))
+                    .font(Theme.Text.callout)
                     .foregroundStyle(Theme.fgSecondary)
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 16)
 
-            VStack(spacing: 8) {
-                Image("IconNotification")
-                    .frame(width: 24, height: 24)
-                    .frame(width: 64, height: 64)
-                    .background(Theme.bgMuted, in: Circle())
-                    .padding(.bottom, 8)
-                    .accessibilityHidden(true)
-                Text("No new notifications")
-                    .font(.workear(size: 20, relativeTo: .title3))
-                    .foregroundStyle(Theme.fgPrimary)
-                Text("Not even one egg in the nest.")
-                    .font(.workear(size: 14, relativeTo: .body))
-                    .foregroundStyle(Theme.fgSecondary)
+            if notes.isEmpty {
+                VStack(spacing: 8) {
+                    Image("IconNotification")
+                        .frame(width: 24, height: 24)
+                        .frame(width: 64, height: 64)
+                        .background(Theme.bgMuted, in: Circle())
+                        .padding(.bottom, 8)
+                        .accessibilityHidden(true)
+                    Text("No new notifications")
+                        .font(Theme.Text.title3)
+                        .foregroundStyle(Theme.fgPrimary)
+                    Text("Not even one egg in the nest.")
+                        .font(Theme.Text.callout)
+                        .foregroundStyle(Theme.fgSecondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 0) {
+                        ForEach(notes) { note in
+                            noteRow(note)
+                        }
+                    }
+                    .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
+                    .padding(.horizontal, Theme.Space.gutter)
+                    .padding(.bottom, 32)
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(.top, 4)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -782,7 +820,7 @@ struct HomeView: View {
     private func noteSection(title: String, items: [AppNote]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.workear(size: 14, relativeTo: .body))
+                .font(Theme.Text.callout)
                 .foregroundStyle(Theme.fgSecondary)
                 .padding(.horizontal, 8)
             VStack(spacing: 0) {
@@ -790,7 +828,7 @@ struct HomeView: View {
                     noteRow(note)
                 }
             }
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
         }
     }
 
@@ -799,21 +837,21 @@ struct HomeView: View {
         return HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
                 Text(note.title)
-                    .font(.workear(size: 16, relativeTo: .headline))
+                    .font(Theme.Text.row)
                     .foregroundStyle(Theme.fgPrimary)
                 Text(note.body)
-                    .font(.workear(size: 14, relativeTo: .body))
+                    .font(Theme.Text.callout)
                     .foregroundStyle(Theme.fgSecondary)
                     .multilineTextAlignment(.leading)
                 Text(note.time)
-                    .font(.workear(size: 14, relativeTo: .body))
-                    .foregroundStyle(Theme.fgSecondary.opacity(0.8))
+                    .font(Theme.Text.callout)
+                    .foregroundStyle(Theme.noteTime)
                 if note.startsWorkout {
                     Button("Continue") {
                         unreadNoteIDs.remove(note.id)
                         startWorkout()
                     }
-                    .font(.workear(size: 14, relativeTo: .body))
+                    .font(Theme.Text.callout)
                     .foregroundStyle(Theme.coral)
                     .buttonStyle(.plain)
                 }
@@ -828,232 +866,170 @@ struct HomeView: View {
         .padding(.vertical, 16)
         .contentShape(Rectangle())
         .onTapGesture {
+            let wasUnread = unreadNoteIDs.contains(note.id)
             unreadNoteIDs.remove(note.id)
+            if wasUnread && !unreadNoteIDs.isEmpty {
+                noteReadTick += 1
+            }
         }
     }
 
     private var settingsContent: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showingSettings = false
-                    }
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Theme.fgPrimary)
-                        .frame(width: 32, height: 32)
-                        .background(Theme.bgMuted, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            ChickenScreenHeader(title: "Settings") {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    showingSettings = false
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Back")
-
-                Text("Settings")
-                    .font(.workear(size: 24, relativeTo: .title2))
-                    .foregroundStyle(Theme.fgPrimary)
-                Spacer()
             }
-            .padding(.horizontal, 16)
 
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 16) {
-                    settingsGroup(title: "Preferences") {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Weight")
-                                .font(.workear(size: 16, relativeTo: .headline))
-                                .foregroundStyle(Theme.fgPrimary)
-                            HStack(spacing: 8) {
-                                ForEach(["kg", "lb"], id: \.self) { unit in
-                                    Button {
-                                        weightUnit = unit
-                                    } label: {
-                                        Text(unit)
-                                            .font(.workear(size: 14, relativeTo: .body))
-                                            .foregroundStyle(unit == weightUnit ? Theme.fgInverse : Theme.fgSecondary)
-                                            .padding(.horizontal, 16)
-                                            .frame(height: 36)
-                                            .background(
-                                                unit == weightUnit ? Theme.canvas : Theme.bgSoft,
-                                                in: Capsule()
-                                            )
-                                    }
-                                    .buttonStyle(.plain)
-                                }
+                    SettingsGroup {
+                        SettingsValueRow(
+                            title: "Notifications",
+                            value: notes.count > 0 ? "\(notes.count)" : nil
+                        ) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showingSettings = false
+                                showingNotifications = true
                             }
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 16)
-
-                        settingsToggle("Sounds", isOn: Bindable(session).soundsEnabled)
+                        .accessibilityLabel(
+                            notes.isEmpty ? "Notifications" : "Notifications, \(notes.count)"
+                        )
                     }
 
-                    settingsGroup(title: "Training") {
-                        settingsToggle("Notifications", isOn: $notificationsEnabled)
+                    SettingsGroup {
+                        SettingsToggleRow(title: "Sounds", isOn: Bindable(session).soundsEnabled)
+                    }
+
+                    SettingsGroup {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Workout days")
-                                .font(.workear(size: 16, relativeTo: .headline))
+                                .font(Theme.Text.row)
                                 .foregroundStyle(Theme.fgPrimary)
-                            HStack(spacing: 8) {
-                                ForEach(["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"], id: \.self) { day in
-                                    Button {
-                                        toggleTrainingDay(day)
-                                    } label: {
-                                        Text(day)
-                                            .font(.workear(size: 14, relativeTo: .body))
-                                            .foregroundStyle(trainingDays.contains(day) ? Theme.fgInverse : Theme.fgSecondary)
-                                            .frame(maxWidth: .infinity)
-                                            .frame(height: 36)
-                                            .background(
-                                                trainingDays.contains(day) ? Theme.canvas : Theme.bgSoft,
-                                                in: Capsule()
-                                            )
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
+                            ChickenDayChipRow(
+                                items: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
+                                title: { $0 },
+                                isSelected: { trainingDays.contains($0) },
+                                action: { toggleTrainingDay($0) }
+                            )
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 24)
                         .padding(.vertical, 16)
                     }
 
-                    settingsGroup(title: "About") {
-                        settingsInfo("Version", value: "beta")
+                    SettingsGroup {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Weight")
+                                .font(Theme.Text.row)
+                                .foregroundStyle(Theme.fgPrimary)
+                            ChickenDayChipRow(
+                                items: ["kg", "lb"],
+                                title: { $0 },
+                                isSelected: { $0 == weightUnit },
+                                action: { weightUnit = $0 }
+                            )
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 16)
                     }
 
-                    Text("made by Lisa Pasichnyk")
-                        .font(.workear(size: 14, relativeTo: .body))
-                        .foregroundStyle(Theme.fgSecondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 8)
-                        .padding(.bottom, 8)
+                    SettingsGroup {
+                        SettingsValueRow(
+                            title: "Version",
+                            value: "beta"
+                        )
+                    }
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 32)
+                .padding(.horizontal, Theme.Space.gutter)
+                .padding(.bottom, 16)
             }
+
+            Text("made by Lisa Pasichnyk")
+                .font(Theme.Text.callout)
+                .foregroundStyle(Theme.fgSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 8)
         }
         .padding(.top, 4)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
-    private func settingsGroup<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.workear(size: 14, relativeTo: .body))
-                .foregroundStyle(Theme.fgSecondary)
-                .padding(.horizontal, 8)
-            VStack(spacing: 0) {
-                content()
+    private var headerTrailing: some View {
+        HStack(spacing: 10) {
+            streakButton
+            profileButton
+        }
+    }
+
+    private var streakButton: some View {
+        Button {
+            selectedTab = .statistics
+            scrollToStatsStreak = true
+        } label: {
+            HStack(spacing: 4) {
+                Image("IconFire")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 18, height: 18)
+                    .accessibilityHidden(true)
+                Text("\(streakCount)")
+                    .font(Theme.Text.title3)
+                    .foregroundStyle(Theme.fgPrimary)
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
             }
-            .background(Theme.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .padding(.leading, 12)
+            .padding(.trailing, 20)
+            .frame(height: 40)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.sm, style: .continuous))
+            .chickenShadow()
         }
-    }
-
-    private func settingsToggle(_ title: String, isOn: Binding<Bool>) -> some View {
-        Toggle(isOn: isOn) {
-            Text(title)
-                .font(.workear(size: 16, relativeTo: .headline))
-                .foregroundStyle(Theme.fgPrimary)
-        }
-        .tint(Theme.coral)
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
-    }
-
-    private func settingsInfo(_ title: String, value: String) -> some View {
-        HStack {
-            Text(title)
-                .font(.workear(size: 16, relativeTo: .headline))
-                .foregroundStyle(Theme.fgPrimary)
-            Spacer()
-            Text(value)
-                .font(.workear(size: 14, relativeTo: .body))
-                .foregroundStyle(Theme.fgSecondary)
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
-    }
-
-    private func duneCardBackground(
-        referenceHeight: CGFloat = 525,
-        duneY: CGFloat = 271,
-        duneHeight: CGFloat = 257,
-        centerPeach: Bool = true
-    ) -> some View {
-        GeometryReader { geo in
-            let size = geo.size
-            let peach = Color(red: 254 / 255, green: 229 / 255, blue: 222 / 255)
-            let sand = Color(red: 244 / 255, green: 235 / 255, blue: 213 / 255)
-            ZStack(alignment: .topLeading) {
-                RadialGradient(
-                    colors: centerPeach ? [peach, sand] : [sand, peach],
-                    center: centerPeach ? UnitPoint(x: 0.78, y: 0.18) : UnitPoint(x: 0.76, y: 0.75),
-                    startRadius: 24,
-                    endRadius: max(size.width, size.height)
-                )
-                SandDune()
-                    .fill(Color(red: 1, green: 228 / 255, blue: 164 / 255))
-                    .frame(
-                        width: size.width * 612 / 395,
-                        height: size.height * duneHeight / referenceHeight
-                    )
-                    .offset(
-                        x: size.width * -108 / 395,
-                        y: size.height * duneY / referenceHeight
-                    )
-            }
-        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(streakCount) \(streakLabel)")
+        .accessibilityHint("Opens statistics")
     }
 
     private var profileButton: some View {
-        Button {
+        ChickenAvatarButton {
             withAnimation(.easeInOut(duration: 0.2)) {
                 showingNotifications = false
                 showingSettings = true
             }
-        } label: {
-            Image("AvatarChicken")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 40, height: 40)
-                .clipShape(Circle())
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Settings")
     }
 
-    private func iconButton(asset: String, size: CGFloat) -> some View {
-        Button {
-            if asset == "IconSettings" {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    showingNotifications = false
-                    showingSettings = true
-                }
-            } else if asset == "IconNotification" {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    showingSettings = false
-                    showingNotifications = true
-                }
-            }
-        } label: {
-            Image(asset)
-                .frame(width: size, height: size)
-                .frame(width: 32, height: 32)
-                .background(Theme.bgMuted, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(asset == "IconNotification" ? "Notifications" : "Settings")
+    private func displayChange(_ kg: Double) -> Double {
+        (displayWeight(kg) * 10).rounded() / 10
     }
 
-    private var formattedDelta: String {
-        let delta = displayWeight(currentWeightKg) - displayWeight(lastWeekWeightKg)
-        let sign = delta > 0 ? "+" : ""
-        return "\(sign)\(String(format: "%.1f", delta)) \(weightUnit)"
+    private func formattedChange(_ kg: Double) -> String {
+        let change = displayChange(kg)
+        let sign = change > 0 ? "+" : change < 0 ? "−" : ""
+        return "\(sign)\(String(format: "%.1f", abs(change))) \(weightUnit)"
     }
 
-    private var formattedWeightLoss: String {
-        let loss = displayWeight(FitnessStats.startWeightKg) - displayWeight(currentWeightKg)
-        return "−\(String(format: "%.1f", abs(loss))) \(weightUnit)"
+    private func changeColor(_ kg: Double) -> Color {
+        displayChange(kg) > 0 ? Theme.fgAccent : Theme.fgPositive
+    }
+
+    private var sparklineValues: [Double] {
+        if !usesSampleWeight { return log.weights.suffix(6).map(\.kg) }
+        return Array((FitnessStats.baselineTrend.dropLast() + [currentWeightKg]).suffix(6))
+    }
+
+    private var recentWeightValues: [Double?] {
+        let recent = log.recentWeights().map { Optional(displayWeight($0.kg)) }
+        return recent.isEmpty ? [nil] : recent
+    }
+
+    private var recentWeightStartLabel: String {
+        guard let first = log.recentWeights().first,
+              let date = FitnessLog.date(from: first.day) else { return FitnessStats.chartEndLabel }
+        return FitnessStats.shortDate(date)
     }
 
     private func displayWeight(_ kg: Double) -> Double {
@@ -1064,94 +1040,22 @@ struct HomeView: View {
         "\(String(format: "%.1f", displayWeight(kg))) \(weightUnit)"
     }
 
-    private func startWorkout() {
-        withAnimation(.spring(duration: 0.5, bounce: 0.08)) {
-            session.beginCountdown()
+    private func jumpToStatsStreak(_ proxy: ScrollViewProxy) {
+        guard scrollToStatsStreak else { return }
+        DispatchQueue.main.async {
+            withAnimation(.easeInOut(duration: 0.35)) {
+                proxy.scrollTo("statsStreak", anchor: .top)
+            }
+            scrollToStatsStreak = false
         }
+    }
+
+    private func startWorkout(move: Move? = nil) {
+        guard !suppressWorkoutStart else { return }
+        session.beginCountdown(move: move)
     }
 }
 
-private struct WeightLogSheet: View {
-    let unit: String
-    let onLog: (Double) -> Void
-    @Environment(\.dismiss) private var dismiss
-    @State private var whole: Int
-    @State private var tenth: Int
-
-    init(initialKg: Double, unit: String, onLog: @escaping (Double) -> Void) {
-        self.unit = unit
-        self.onLog = onLog
-        let display = unit == "lb" ? initialKg * 2.2046226218 : initialKg
-        let rounded = (display * 10).rounded() / 10
-        _whole = State(initialValue: min(200, max(30, Int(rounded.rounded(.down)))))
-        _tenth = State(initialValue: Int((rounded * 10).rounded()) % 10)
-    }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Text("Your current weight")
-                .font(.workear(size: 24, relativeTo: .title2))
-                .foregroundStyle(Theme.fgPrimary)
-                .padding(.top, 28)
-                .padding(.bottom, 20)
-
-            HStack(spacing: 2) {
-                Picker("Kilograms", selection: $whole) {
-                    ForEach(30...200, id: \.self) { value in
-                        Text("\(value)")
-                            .font(.workear(size: 34, relativeTo: .largeTitle))
-                            .tag(value)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(width: 96)
-                .sensoryFeedback(.selection, trigger: whole)
-
-                Text(".")
-                    .font(.workear(size: 40, relativeTo: .largeTitle))
-                    .foregroundStyle(Theme.fgPrimary)
-
-                Picker("Decimal", selection: $tenth) {
-                    ForEach(0...9, id: \.self) { value in
-                        Text("\(value)")
-                            .font(.workear(size: 34, relativeTo: .largeTitle))
-                            .tag(value)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(width: 56)
-                .sensoryFeedback(.selection, trigger: tenth)
-
-                Text(unit)
-                    .font(.workear(size: 22, relativeTo: .title3))
-                    .foregroundStyle(Theme.fgPrimary)
-                    .padding(.leading, 4)
-            }
-            .padding(.vertical, 16)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            Button {
-                let display = Double(whole) + Double(tenth) / 10
-                let kg = unit == "lb" ? display / 2.2046226218 : display
-                onLog(kg)
-                dismiss()
-            } label: {
-                Text("Log weight")
-                    .font(.workear(size: 20, relativeTo: .title3))
-                    .foregroundStyle(Theme.buttonCream)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 72)
-                    .background(Theme.coral, in: RoundedRectangle(cornerRadius: 25, style: .continuous))
-                    .shadow(color: .black.opacity(0.1), radius: 1.35, x: 0, y: 0.9)
-            }
-            .buttonStyle(.plain)
-            .padding(.bottom, 28)
-        }
-        .padding(.horizontal, 24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Theme.surface.ignoresSafeArea())
-    }
-}
 
 private struct AppNote: Identifiable {
     let id: String
@@ -1216,13 +1120,21 @@ private struct FitnessMonth: Identifiable {
 }
 
 private enum FitnessStats {
-    static let startWeightKg = 65.6
     static let weekdayLetters = ["M", "T", "W", "T", "F", "S", "S"]
     static let monthNames = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December",
     ]
     static let calorieTrend: [Double] = [980, 1120, 1340, 1510, 1680, 1840, 2040, 2200]
+    static let baselineWeightKg = 62.4
+    static let baselineLastWeekKg = 63.2
+    static let startWeightKg = 65.6
+    static let baselineTrend: [Double] = [65.6, 65.4, 65.1, 64.8, 64.5, 64.1, 63.8, 63.3, 62.4]
+
+    static func weightTrend(endingAt current: Double) -> [Double?] {
+        [65.6, 65.4, 65.1, 64.8, 64.5, 64.1, 63.8, 63.3, current, nil, nil, nil]
+    }
+    /// Days of every month that already show a finished workout.
     static let workoutDays: Set<Int> = [1, 3, 5, 8, 10, 12, 15, 17, 19, 22, 24, 26, 28, 29, 30]
     private static let calendar: Calendar = {
         var cal = Calendar(identifier: .gregorian)
@@ -1230,17 +1142,53 @@ private enum FitnessStats {
         return cal
     }()
 
-    static var yearMonths: [FitnessMonth] {
-        let currentMonth = calendar.component(.month, from: Date())
-        let order = (0..<12).map { offset in
-            ((currentMonth - 1 - offset + 12) % 12) + 1
-        }
-        return order.map { month in
-            FitnessMonth(id: month, name: monthNames[month - 1], cells: cells(year: 2026, month: month))
+    static func recentMonths(count: Int, log: FitnessLog) -> [FitnessMonth] {
+        let today = calendar.startOfDay(for: Date())
+        return (0..<count).compactMap { offset in
+            guard let date = calendar.date(byAdding: .month, value: -offset, to: today) else { return nil }
+            let year = calendar.component(.year, from: date)
+            let month = calendar.component(.month, from: date)
+            return FitnessMonth(
+                id: year * 100 + month,
+                name: monthNames[month - 1],
+                cells: cells(year: year, month: month, log: log)
+            )
         }
     }
 
-    static func cells(year: Int, month: Int) -> [FitnessDay] {
+    /// Same marks the statistics calendar draws: today, the sample days, and logged workouts.
+    static func markedWorkout(on date: Date, log: FitnessLog) -> Bool {
+        let day = calendar.startOfDay(for: date)
+        let today = calendar.startOfDay(for: Date())
+        if day > today { return false }
+        let parts = calendar.dateComponents([.year, .month, .day], from: day)
+        let todayParts = calendar.dateComponents([.year, .month, .day], from: today)
+        let dayNumber = parts.day ?? 0
+        let isToday = parts.year == todayParts.year && parts.month == todayParts.month && parts.day == todayParts.day
+        return isToday
+            || workoutDays.contains(dayNumber)
+            || log.didWorkout(year: parts.year ?? 0, month: parts.month ?? 0, day: dayNumber)
+    }
+
+    /// Consecutive calendar marks, walking back from today. A missed training day ends it.
+    static func streak(trainingDays: Set<String>, log: FitnessLog) -> Int {
+        var count = 0
+        var day = calendar.startOfDay(for: Date())
+        var isToday = true
+        for _ in 0..<800 {
+            if markedWorkout(on: day, log: log) {
+                count += 1
+            } else if !isToday && trainingDays.contains(FitnessLog.weekdayId(for: day)) {
+                break
+            }
+            guard let previous = calendar.date(byAdding: .day, value: -1, to: day) else { break }
+            day = previous
+            isToday = false
+        }
+        return count
+    }
+
+    static func cells(year: Int, month: Int, log: FitnessLog) -> [FitnessDay] {
         var firstParts = DateComponents()
         firstParts.year = year
         firstParts.month = month
@@ -1270,23 +1218,25 @@ private enum FitnessStats {
             parts.month = month
             parts.day = day
             let date = calendar.date(from: parts)
-            let isFuture = date.map { calendar.startOfDay(for: $0) > today } ?? false
+            let isToday = year == todayParts.year && month == todayParts.month && day == todayParts.day
             return FitnessDay(
                 id: year * 10000 + month * 100 + day,
                 day: day,
-                workedOut: !isFuture && workoutDays.contains(day),
-                isToday: year == todayParts.year && month == todayParts.month && day == todayParts.day,
+                workedOut: date.map { markedWorkout(on: $0, log: log) } ?? false,
+                isToday: isToday,
                 monthName: monthName
             )
         }
         return result
     }
 
-    static var chartEndLabel: String {
+    static var chartEndLabel: String { shortDate(Date()) }
+
+    static func shortDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "MMM d"
-        return formatter.string(from: Date())
+        return formatter.string(from: date)
     }
 
     static func axisLabels(for values: [Double?]) -> [String] {
@@ -1311,10 +1261,6 @@ private enum FitnessStats {
         formatter.groupingSeparator = ","
         return formatter.string(from: NSNumber(value: value)) ?? "\(Int(value))"
     }
-
-    static func weightTrend(endingAt current: Double) -> [Double?] {
-        [65.6, 65.4, 65.1, 64.8, 64.5, 64.1, 63.8, 63.3, current, nil, nil, nil]
-    }
 }
 
 private struct StatsTrendCard: View {
@@ -1322,23 +1268,22 @@ private struct StatsTrendCard: View {
     let value: String
     let unit: String
     let delta: String
+    let deltaColor: Color
+    let chartColor: Color
     let values: [Double?]
     let startLabel: String
 
-    init(title: String, value: String, unit: String, delta: String, values: [Double], startLabel: String) {
-        self.title = title
-        self.value = value
-        self.unit = unit
-        self.delta = delta
-        self.values = values.map { Optional($0) }
-        self.startLabel = startLabel
+    init(title: String, value: String, unit: String, delta: String, deltaColor: Color = Theme.fgPositive, chartColor: Color = Theme.fgAccent, values: [Double], startLabel: String) {
+        self.init(title: title, value: value, unit: unit, delta: delta, deltaColor: deltaColor, chartColor: chartColor, values: values.map { Optional($0) }, startLabel: startLabel)
     }
 
-    init(title: String, value: String, unit: String, delta: String, values: [Double?], startLabel: String) {
+    init(title: String, value: String, unit: String, delta: String, deltaColor: Color = Theme.fgPositive, chartColor: Color = Theme.fgAccent, values: [Double?], startLabel: String) {
         self.title = title
         self.value = value
         self.unit = unit
         self.delta = delta
+        self.deltaColor = deltaColor
+        self.chartColor = chartColor
         self.values = values
         self.startLabel = startLabel
     }
@@ -1350,35 +1295,37 @@ private struct StatsTrendCard: View {
             HStack(alignment: .bottom, spacing: 4) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(.workear(size: 17, relativeTo: .headline))
+                        .font(Theme.Text.headline)
                         .foregroundStyle(Theme.fgPrimary)
                     Color.clear.frame(height: 2)
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
                         Text(value)
-                            .font(.workear(size: 30, relativeTo: .title))
+                            .font(Theme.Text.stat)
                             .foregroundStyle(Theme.fgPrimary)
                             .minimumScaleFactor(0.7)
                             .lineLimit(1)
                         Text(unit)
-                            .font(.workear(size: 15, relativeTo: .body))
+                            .font(Theme.Text.body)
                             .foregroundStyle(Theme.fgSecondary)
                     }
                 }
                 Spacer(minLength: 4)
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(delta)
-                        .font(.workear(size: 15, relativeTo: .body))
-                        .foregroundStyle(Theme.fgPositive)
-                    Text("this week")
-                        .font(.workear(size: 15, relativeTo: .body))
-                        .foregroundStyle(Theme.fgSecondary)
+                    if !delta.isEmpty {
+                        Text(delta)
+                            .font(Theme.Text.body)
+                            .foregroundStyle(deltaColor)
+                        Text("this week")
+                            .font(Theme.Text.body)
+                            .foregroundStyle(Theme.fgSecondary)
+                    }
                 }
                 .padding(.bottom, 4)
             }
 
             HStack(alignment: .center, spacing: 6) {
                 VStack(spacing: 8) {
-                    WeightTrendChart(values: values)
+                    WeightTrendChart(values: values, line: chartColor)
                         .frame(height: 128)
                         .clipped()
                     HStack {
@@ -1386,13 +1333,13 @@ private struct StatsTrendCard: View {
                         Spacer()
                         Text(FitnessStats.chartEndLabel)
                     }
-                    .font(.workear(size: 12, relativeTo: .caption))
+                    .font(Theme.Text.caption)
                     .foregroundStyle(Theme.fgSecondary)
                 }
                 VStack {
                     ForEach(Array(ticks.enumerated()), id: \.offset) { index, label in
                         Text(label)
-                            .font(.workear(size: 12, relativeTo: .caption))
+                            .font(Theme.Text.caption)
                             .foregroundStyle(Theme.fgSecondary)
                         if index < ticks.count - 1 {
                             Spacer(minLength: 0)
@@ -1405,26 +1352,16 @@ private struct StatsTrendCard: View {
         .padding(.top, 20)
         .padding(.horizontal, 24)
         .padding(.bottom, 24)
-        .background(Theme.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
     }
 }
 
 private struct WeightSparkline: View {
-    private static let viewBox = CGSize(width: 52, height: 44)
-    private static let points: [CGPoint] = [
-        CGPoint(x: 1.83236, y: 14.5),
-        CGPoint(x: 10.9943, y: 18.5),
-        CGPoint(x: 18.3238, y: 16.5),
-        CGPoint(x: 27.4857, y: 26.5),
-        CGPoint(x: 36.6476, y: 22.5),
-        CGPoint(x: 49.4743, y: 32.5),
-    ]
+    let values: [Double]
 
     var body: some View {
         GeometryReader { geo in
-            let sx = geo.size.width / Self.viewBox.width
-            let sy = geo.size.height / Self.viewBox.height
-            let scaled = Self.points.map { CGPoint(x: $0.x * sx, y: $0.y * sy) }
+            let scaled = points(in: geo.size)
 
             Path { path in
                 guard let first = scaled.first else { return }
@@ -1432,30 +1369,48 @@ private struct WeightSparkline: View {
                 scaled.dropFirst().forEach { path.addLine(to: $0) }
             }
             .stroke(
-                Theme.fgPositive,
+                .foreground,
                 style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)
             )
 
             if let last = scaled.last {
                 Circle()
-                    .fill(Theme.fgPositive)
+                    .fill(.foreground)
                     .frame(width: 8, height: 8)
                     .position(last)
             }
         }
         .accessibilityHidden(true)
     }
+
+    private func points(in size: CGSize) -> [CGPoint] {
+        guard values.count > 1, let minV = values.min(), let maxV = values.max() else { return [] }
+        let span = max(maxV - minV, 0.5)
+        let mid = (maxV + minV) / 2
+        let inset: CGFloat = 4
+        let plotW = size.width - 2 * inset
+        let plotH = size.height * 0.5
+        return values.enumerated().map { index, value in
+            CGPoint(
+                x: inset + plotW * CGFloat(index) / CGFloat(values.count - 1),
+                y: size.height / 2 - plotH * CGFloat((value - mid) / span)
+            )
+        }
+    }
 }
 
 private struct WeightTrendChart: View {
     let values: [Double?]
+    let line: Color
 
-    init(values: [Double]) {
+    init(values: [Double], line: Color = Theme.fgAccent) {
         self.values = values.map { Optional($0) }
+        self.line = line
     }
 
-    init(values: [Double?]) {
+    init(values: [Double?], line: Color = Theme.fgAccent) {
         self.values = values
+        self.line = line
     }
 
     var body: some View {
@@ -1471,8 +1426,8 @@ private struct WeightTrendChart: View {
             let inset: CGFloat = 4
             let plotW = size.width - 2 * inset
             let plotH = size.height - 2 * inset
-            let weak = Theme.fgPrimary.opacity(0.06)
-            let strong = Theme.fgPrimary.opacity(0.12)
+            let weak = Theme.gridWeak
+            let strong = Theme.gridStrong
             let cell: CGFloat = 8
             var x: CGFloat = 0
             var col = 0
@@ -1509,43 +1464,17 @@ private struct WeightTrendChart: View {
             points.dropFirst().forEach { fill.addLine(to: $0) }
             fill.addLine(to: CGPoint(x: last.x, y: size.height))
             fill.closeSubpath()
-            context.fill(fill, with: .color(Theme.fgAccent.opacity(0.16)))
+            context.fill(fill, with: .color(line.opacity(0.16)))
 
             var stroke = Path()
             stroke.move(to: first)
             points.dropFirst().forEach { stroke.addLine(to: $0) }
-            context.stroke(stroke, with: .color(Theme.fgAccent), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+            context.stroke(stroke, with: .color(line), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
 
             let dot = Path(ellipseIn: CGRect(x: last.x - 4.5, y: last.y - 4.5, width: 9, height: 9))
-            context.fill(dot, with: .color(Theme.fgAccent))
+            context.fill(dot, with: .color(line))
         }
         .accessibilityHidden(true)
-    }
-}
-
-private struct SandDune: Shape {
-    func path(in rect: CGRect) -> Path {
-        let sx = rect.width / 612
-        let sy = rect.height / 257
-        func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
-            CGPoint(x: x * sx, y: y * sy)
-        }
-        var path = Path()
-        path.move(to: pt(0, 60.87))
-        path.addCurve(to: pt(32.28, 77.63), control1: pt(8.28, 63.66), control2: pt(26.32, 70.93))
-        path.addCurve(to: pt(76.16, 18.12), control1: pt(39.74, 86.02), control2: pt(37.25, 22.32))
-        path.addCurve(to: pt(138.25, 51.65), control1: pt(107.29, 14.77), control2: pt(130.52, 39.08))
-        path.addCurve(to: pt(202.82, 0.52), control1: pt(142.94, 32.37), control2: pt(162.42, -4.84))
-        path.addCurve(to: pt(279.80, 83.50), control1: pt(243.21, 5.89), control2: pt(270.97, 58.08))
-        path.addCurve(to: pt(447.02, 102.78), control1: pt(326.44, 85.46), control2: pt(425.17, 92.05))
-        path.addCurve(to: pt(447.02, 153.91), control1: pt(474.34, 116.19), control2: pt(427.98, 153.07))
-        path.addCurve(to: pt(541.39, 125.41), control1: pt(466.06, 154.74), control2: pt(514.07, 117.87))
-        path.addCurve(to: pt(558.78, 170.67), control1: pt(568.71, 132.95), control2: pt(543.05, 170.67))
-        path.addCurve(to: pt(601.82, 153.91), control1: pt(574.51, 170.67), control2: pt(589.41, 153.91))
-        path.addCurve(to: pt(611.76, 257), control1: pt(611.76, 153.91), control2: pt(612.59, 222.64))
-        path.addLine(to: pt(0, 251.97))
-        path.closeSubpath()
-        return path
     }
 }
 
@@ -1560,8 +1489,10 @@ private struct ExtraWorkout: Identifiable {
     let line1: String
     let line2: String
     let image: String
+    var video: String? = nil
     let duration: String
     let equipment: [ExtraGear]
+    let move: Move
 
     static let all: [ExtraWorkout] = [
         ExtraWorkout(
@@ -1569,20 +1500,25 @@ private struct ExtraWorkout: Identifiable {
             line1: "Dumbbell",
             line2: "shoulder press",
             image: "ChickenShoulderPress",
+            video: "Sequence04",
             duration: "4 min",
             equipment: [
                 ExtraGear(id: "db", title: "Dumbbells", icon: "IconDumbbells"),
-            ]
+            ],
+            move: Move(id: 2, name: "Dumbbell shoulder press", duration: 40, repInterval: 2, media: .video("Sequence04"))
         ),
         ExtraWorkout(
-            id: "wings",
-            line1: "Wing",
-            line2: "press",
-            image: "ChickenShoulderPress",
-            duration: "4 min",
+            id: "abs",
+            line1: "Abs",
+            line2: "",
+            image: "ChickenAbs",
+            video: "Sequence01",
+            duration: "20 min",
             equipment: [
                 ExtraGear(id: "db", title: "Dumbbells", icon: "IconDumbbells"),
-            ]
+                ExtraGear(id: "mat", title: "Mat", icon: "IconYogaMat"),
+            ],
+            move: WorkoutCatalog.moves[0]
         ),
     ]
 }
@@ -1592,43 +1528,15 @@ private enum DayPageKind {
     case rest(title: String)
 }
 
-private enum HomeTab: String, CaseIterable, Identifiable {
-    case home, workouts, statistics
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .home: return "Home"
-        case .workouts: return "Workouts"
-        case .statistics: return "Statistics"
-        }
-    }
-}
-
-private struct WeekDay: Identifiable {
+private struct HomeDay: Identifiable {
+    /// Local calendar day, `yyyy-MM-dd`.
     let id: String
     let label: String
-    let fill: Color
-    let foreground: Color
-    let showsBorder: Bool
-
-    static let all: [WeekDay] = [
-        WeekDay(id: "Mo", label: "Mo", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
-        WeekDay(id: "Tu", label: "Tu", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
-        WeekDay(id: "We", label: "We", fill: .clear, foreground: Theme.fgSecondary, showsBorder: true),
-        WeekDay(id: "Th", label: "Th", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
-        WeekDay(id: "Fr", label: "Fr", fill: .clear, foreground: Theme.fgSecondary, showsBorder: true),
-        WeekDay(id: "Sa", label: "Sa", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
-        WeekDay(id: "Su", label: "Su", fill: Theme.bgSoft, foreground: Theme.fgRest, showsBorder: false),
-    ]
-
-    static func week(starting today: String) -> [WeekDay] {
-        guard let index = all.firstIndex(where: { $0.id == today }) else { return all }
-        return Array(all[index...]) + Array(all[..<index])
-    }
+    let dayNumber: String
+    let isToday: Bool
+    let isPast: Bool
 }
 
 #Preview {
-    HomeView(session: WorkoutSession())
+    HomeView(session: WorkoutSession(), log: FitnessLog())
 }

@@ -10,7 +10,7 @@ final class WorkoutSession {
         case complete
     }
 
-    let moves: [Move]
+    private(set) var moves: [Move]
     private let startIndex: Int
     var currentIndex: Int
     var elapsed: TimeInterval
@@ -25,7 +25,6 @@ final class WorkoutSession {
         }
     }
     var phase: Phase = .home
-
     private var ticker: Timer?
     private var lastRepBucket = -1
     private let startElapsed: TimeInterval = 0
@@ -56,6 +55,8 @@ final class WorkoutSession {
         return max(1, total - Int(elapsed / repInterval))
     }
 
+    var isLastSet: Bool { currentSet == 1 }
+
     var remainingClock: String {
         let remaining = max(0, currentMove.duration - elapsed)
         let seconds = Int(remaining.rounded(.down))
@@ -66,8 +67,9 @@ final class WorkoutSession {
         isPaused.toggle()
     }
 
-    func beginCountdown() {
-        currentIndex = startIndex
+    func beginCountdown(move: Move? = nil) {
+        moves = move.map { [$0] } ?? WorkoutCatalog.moves
+        currentIndex = 0
         elapsed = startElapsed
         isPaused = true
         isAnnouncing = false
@@ -179,8 +181,6 @@ final class WorkoutSession {
     }
 
     private func cueRep() {
-        let firstCueDelay: TimeInterval = currentIndex == 0 ? 1.5 : 0
-        guard elapsed >= firstCueDelay else { return }
         let bucket = Int(elapsed / repInterval)
         guard bucket != lastRepBucket else { return }
         lastRepBucket = bucket

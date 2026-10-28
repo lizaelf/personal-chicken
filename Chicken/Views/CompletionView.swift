@@ -17,7 +17,7 @@ struct CompletionView: View {
                 VStack {
                     Spacer()
                     Text("I’ll charm you\ninto coming back!")
-                        .font(.workear(size: 32 * scale, relativeTo: .title))
+                        .font(.workear(size: Theme.Size.charm * scale, relativeTo: .title))
                         .lineSpacing(6 * scale)
                         .foregroundStyle(Theme.charmInk)
                         .multilineTextAlignment(.center)
@@ -28,14 +28,7 @@ struct CompletionView: View {
 
                 HStack {
                     Spacer()
-                    Button(action: onRestart) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16 * scale, weight: .semibold))
-                            .foregroundStyle(Theme.ink)
-                            .frame(width: 56 * scale, height: 56 * scale)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Close")
+                    ChickenCloseButton(size: 56 * scale, iconSize: 16 * scale, action: onRestart)
                 }
                 .padding(.top, 52 * scale)
                 .padding(.horizontal, 16 * scale)
@@ -45,6 +38,11 @@ struct CompletionView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .onTapGesture(perform: onRestart)
+        .task {
+            try? await Task.sleep(for: .seconds(4))
+            guard !Task.isCancelled else { return }
+            onRestart()
+        }
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel("I’ll charm you into coming back! Tap to start again.")
     }

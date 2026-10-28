@@ -6,6 +6,7 @@ struct ChickenApp: App {
         WindowGroup {
             RootView()
                 .preferredColorScheme(.light)
+                .persistentSystemOverlays(.hidden)
         }
     }
 }

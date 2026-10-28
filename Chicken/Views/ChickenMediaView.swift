@@ -5,6 +5,7 @@ struct ChickenMediaView: View {
     var isPlaying: Bool = true
     var fillsBounds: Bool = false
     var loops: Bool = true
+    var contentAlignment: Alignment = .center
 
     var body: some View {
         Group {
@@ -20,7 +21,8 @@ struct ChickenMediaView: View {
                     frameInterval: media.frameInterval,
                     loopPause: media.loopPause,
                     loops: loops,
-                    fillsBounds: fillsBounds
+                    fillsBounds: fillsBounds,
+                    contentAlignment: contentAlignment
                 )
             }
         }

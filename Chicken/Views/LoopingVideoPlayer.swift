@@ -11,6 +11,7 @@ struct LoopingVideoPlayer: View {
     var loopPause: TimeInterval = 0
     var loops: Bool = true
     var fillsBounds: Bool = false
+    var contentAlignment: Alignment = .center
 
     @State private var frames: [UIImage] = []
     @State private var startedAt: Date?
@@ -28,7 +29,7 @@ struct LoopingVideoPlayer: View {
                         .scaledToFit()
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: contentAlignment)
         }
         .task(id: resourceName) {
             frames = Self.loadJPEGs(named: resourceName)
