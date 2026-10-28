@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Chicken</title>
+  <title>Fit Coco</title>
   <style>
     @font-face {
       font-family: "Workear Font";
@@ -13,56 +13,141 @@
     }
 
     :root {
-      --cream: #fcf6ea;
+      --font: "Workear Font", ui-rounded, "SF Pro Rounded", sans-serif;
+      --cream: #fdf6ec;
       --coral: #ef6856;
       --ink: #301a1a;
       --move: #826d5e;
       --charm: #3c2117;
       --button-cream: #fefcf4;
+      --canvas: #fdf6ec;
+      --page: var(--cream);
+      --weight: #fdf8f1;
+      --tab-on: #fffcfa;
+      --tab-off: rgba(246, 237, 224, 0.8);
+      --shad: 0 0.958px 4.79px -0.958px rgba(0, 0, 0, 0.07), 0 0.958px 7.185px rgba(0, 0, 0, 0.07);
+      --surface: #fff8f1;
+      --fg-primary: #2c1f1c;
+      --fg-secondary: #978a82;
+      --fg-rest: #bcb4af;
+      --fg-accent: #e85c5c;
+      --fg-positive: #3eae6f;
+      --fg-inverse: #3a2a26;
+      --fg-muted: rgba(0, 0, 0, 0.4);
+      --bg-muted: #f0e4d8;
+      --bg-soft: rgba(151, 138, 130, 0.2);
+      --border-accent: #e8a09a;
+      --white: #ffffff;
+      --black: #000000;
+      --dune-peach: #fdf6ec;
+      --dune-sand: #f4ebd5;
+      --dune-glow: #ce7745;
+      --dune-glow-soft: rgba(244, 158, 109, 0.1);
+      --cal-today: #fbe2e1;
+      --stroke-muted: rgba(151, 138, 130, 0.2);
+      --stroke-free: rgba(151, 138, 130, 0.24);
+      --stroke-free-chip: rgba(151, 138, 130, 0.28);
+      --stroke-hairline: rgba(151, 138, 130, 0.12);
+      --today-ring: rgba(44, 31, 28, 0.35);
+      --grid-weak: rgba(44, 31, 28, 0.06);
+      --grid-strong: rgba(44, 31, 28, 0.12);
+      --gutter: 16px;
+      --radius-sm: 16px;
+      --radius-md: 18px;
+      --radius-lg: 20px;
+      --radius-xl: 30px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 24px;
+      --space-tab-top: 24px;
+      --card-gap: var(--space-sm);
+      --card-radius: var(--radius-xl);
+      --text-display: 84px;
+      --text-picker: 34px;
+      --text-charm: 32px;
+      --text-stat: 30px;
+      --text-streak: 26px;
+      --text-title: 24px;
+      --text-title2: 22px;
+      --text-title3: 20px;
+      --text-headline: 17px;
+      --text-row: 16px;
+      --text-body: 15px;
+      --text-callout: 14px;
+      --text-chip: 13px;
+      --text-caption: 12px;
+      --title: clamp(22px, 6.4cqi, 32px);
+      --body: clamp(13px, 3.6cqi, 16px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --tab-clear: 101px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
+      width: 100%;
+      max-width: 100%;
       height: 100%;
-      background: #1a1210;
-      font-family: "Workear Font", ui-rounded, "SF Pro Rounded", sans-serif;
+      overflow: hidden;
+      background: var(--page);
+      font-family: var(--font);
     }
 
     body {
-      display: grid;
-      place-items: center;
       min-height: 100%;
+      min-height: 100dvh;
     }
 
     .phone {
-      width: 402px;
-      height: 874px;
+      width: 100%;
+      max-width: 100%;
+      height: 100dvh;
+      height: 100svh;
+      margin: 0;
       position: relative;
       overflow: hidden;
-      background: var(--cream);
+      background: var(--page);
       color: var(--ink);
-      flex-shrink: 0;
+      container-type: inline-size;
+      box-sizing: border-box;
+    }
+
+    .phone[data-phase="home"],
+    .phone[data-phase="splash"],
+    .phone[data-phase="workout"],
+    .phone[data-phase="countdown"],
+    .phone[data-phase="complete"] {
+      background: var(--page);
     }
 
     .paper {
       position: absolute;
       inset: 0;
-      background: url("../Chicken/Assets.xcassets/PaperTexture.imageset/PaperTexture.png") center / cover no-repeat;
+      background: url("../Chicken/Assets.xcassets/PaperTexture.imageset/PaperTexture.png?v=5") center / cover no-repeat;
       mix-blend-mode: multiply;
       pointer-events: none;
+      z-index: 0;
     }
 
     .screen {
       position: absolute;
       inset: 0;
       padding: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: visible;
       transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.42s ease;
     }
 
     .scene {
-      position: absolute;
-      inset: 0;
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
       transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease;
     }
 
@@ -83,6 +168,1441 @@
       pointer-events: none;
     }
 
+    .home {
+      display: flex;
+      flex-direction: column;
+      z-index: 2;
+      background: transparent;
+      color: var(--fg-primary);
+      padding-top: max(12px, var(--safe-top));
+      overflow: visible;
+    }
+
+    .home.is-off {
+      opacity: 0;
+      transform: none;
+      pointer-events: none;
+      visibility: hidden;
+      transition: none;
+    }
+
+    .home-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      padding: 4px 0 calc(var(--space-md) + var(--tab-clear));
+      overflow: visible;
+    }
+
+    .weekly {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .weekly-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--gutter);
+    }
+
+    .nav-cluster {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .streak-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 40px;
+      padding: 0 20px 0 12px;
+      border: 0;
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      box-shadow: var(--shad);
+      font-family: inherit;
+      color: var(--fg-primary);
+      cursor: pointer;
+    }
+
+    .streak-chip img {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .streak-count {
+      font-size: var(--text-title3);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .avatar-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: var(--surface);
+      display: block;
+      padding: 0;
+      box-shadow: var(--shad);
+    }
+
+    .avatar-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+    }
+
+    .home-icons {
+      display: flex;
+      gap: 14px;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-muted);
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-btn img { display: block; }
+
+    .days {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      min-height: 56px;
+      min-width: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 var(--gutter);
+      scroll-padding-inline: var(--gutter);
+      box-sizing: border-box;
+      touch-action: pan-x;
+      overscroll-behavior-x: contain;
+      cursor: grab;
+      position: relative;
+      z-index: 4;
+    }
+
+    .days.is-dragging {
+      cursor: grabbing;
+      scroll-snap-type: none;
+    }
+
+    .days::-webkit-scrollbar {
+      display: none;
+    }
+
+    .days-end-spacer {
+      flex: 0 0 100%;
+      height: 1px;
+      pointer-events: none;
+    }
+
+    .today-chip {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      height: 47px;
+      padding: 4px 20px 4px 4px;
+      background: var(--surface);
+      border: 1px solid var(--stroke-free-chip);
+      border-radius: var(--radius-lg);
+      flex: 0 0 auto;
+      cursor: pointer;
+      color: inherit;
+    }
+
+    .today-chip.is-today {
+      border-color: var(--border-accent);
+    }
+
+    .today-chip:focus-visible,
+    .day-dot:focus-visible {
+      outline: 2px solid var(--fg-accent);
+      outline-offset: 2px;
+    }
+
+    .today-mo {
+      width: 36px;
+      height: 37px;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      color: var(--fg-secondary);
+      box-shadow: inset 0 0 0 1px var(--stroke-free);
+      font-size: var(--text-chip);
+      line-height: 37px;
+      text-align: center;
+      flex: 0 0 36px;
+    }
+
+    .today-chip.is-today .today-mo {
+      background: var(--fg-accent);
+      color: var(--white);
+      box-shadow: none;
+    }
+
+    .today-copy {
+      font-size: var(--text-body);
+      line-height: 1.2;
+      color: var(--fg-primary);
+      white-space: nowrap;
+    }
+
+    .today-chip.is-future .today-mo {
+      background: transparent;
+      color: var(--fg-secondary);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg-secondary) 45%, transparent);
+    }
+
+    .today-chip.is-rest .today-mo,
+    .today-chip.is-free .today-mo {
+      background: var(--bg-soft);
+      color: var(--fg-secondary);
+      box-shadow: inset 0 0 0 1px var(--stroke-free);
+    }
+
+    .today-chip.is-rest .today-mo {
+      opacity: 0.45;
+    }
+
+    .today-chip.is-rest .today-copy,
+    .today-chip.is-free .today-copy {
+      color: var(--fg-secondary);
+    }
+
+    .today-chip.is-rest,
+    .today-chip.is-free {
+      border-color: var(--stroke-free-chip);
+    }
+
+    .day-dot {
+      width: 36px;
+      height: 56px;
+      border-radius: var(--radius-sm);
+      flex: 0 0 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 8px 4px;
+      font-size: var(--text-body);
+      line-height: 1.2;
+      color: var(--fg-secondary);
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+    }
+
+    .day-dot.is-rest {
+      color: var(--fg-rest);
+      background: transparent;
+    }
+
+    .day-dot.is-train {
+      color: var(--fg-secondary);
+      background: transparent;
+    }
+
+    .day-dot.is-today {
+      color: var(--fg-accent);
+      background: transparent;
+    }
+
+    .day-dot.is-empty {
+      height: 37px;
+      padding: 0;
+      gap: 0;
+      color: color-mix(in srgb, var(--fg-secondary) 18%, transparent);
+      background: color-mix(in srgb, var(--fg-secondary) 10%, transparent);
+    }
+
+    .home-cards {
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--card-gap);
+      overflow: visible;
+    }
+
+    .day-stage {
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+      overflow-x: clip;
+      overflow-y: visible;
+    }
+
+    .day-track {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+      touch-action: pan-y;
+    }
+
+    .day-track.is-dragging {
+      transition: none;
+    }
+
+    .day-slide {
+      flex: 0 0 100%;
+      min-width: 100%;
+      width: 100%;
+      height: 100%;
+      padding: 0 var(--gutter);
+      box-sizing: border-box;
+      overflow-x: clip;
+      overflow-y: visible;
+    }
+
+    .workout-card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background-color: var(--canvas);
+      background-image: url("../Chicken/Assets.xcassets/CardFill.imageset/CardFill.svg?v=2");
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      border-radius: var(--card-radius);
+      display: flex;
+      flex-direction: column;
+      overflow: visible;
+      box-shadow: var(--shad);
+    }
+
+    .card-dune {
+      position: absolute;
+      left: -27.3%;
+      top: 51.6%;
+      width: 154.9%;
+      height: 49%;
+      pointer-events: none;
+      z-index: 0;
+      object-fit: fill;
+    }
+
+    .workout-card-head,
+    .home-start {
+      position: relative;
+      z-index: 2;
+    }
+
+    .home-chicken {
+      z-index: 1;
+    }
+
+    .workout-card-head {
+      padding: var(--space-md) var(--space-md) 0;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .workout-card-head h1 {
+      font-size: var(--text-title);
+      line-height: 1.2;
+      font-weight: 400;
+      color: var(--fg-primary);
+    }
+
+    .chips {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+    }
+
+    .chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 12px 0 8px;
+      border: 1px solid var(--stroke-muted);
+      background: transparent;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-body);
+      line-height: 1.2;
+      color: var(--fg-primary);
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .chip img {
+      display: block;
+      width: 20px;
+      height: 20px;
+    }
+
+    .chip img.chip-time {
+      width: 24px;
+      height: 24px;
+    }
+
+    .home-chicken {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      padding: 4px;
+      overflow: visible;
+    }
+
+    .home-chicken img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    .home-chicken .abs-preview-chicken {
+      transform: translate(-40px, 20px);
+    }
+
+    .workout-card.is-rest {
+      position: relative;
+      overflow: hidden;
+      background: var(--canvas);
+      background-image: none;
+    }
+
+    .workout-card.is-rest .card-dune {
+      display: none;
+    }
+
+    .workout-card.is-rest .home-chicken {
+      position: absolute;
+      inset: 0;
+      padding: 0;
+      z-index: 0;
+      display: block;
+      overflow: hidden;
+    }
+
+    .workout-card.is-rest .home-chicken img,
+    .workout-card.is-rest .free-day-chicken {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      top: auto;
+      width: 200%;
+      height: auto;
+      max-width: none;
+      max-height: none;
+      object-fit: contain;
+      object-position: bottom center;
+      transform: translateX(-50%);
+      transform-origin: 50% 100%;
+    }
+
+    .workout-card.is-rest .workout-card-head,
+    .workout-card.is-rest .home-start {
+      position: relative;
+      z-index: 1;
+    }
+
+    .workout-card.is-rest .workout-card-head h1 {
+      color: var(--fg-primary);
+    }
+
+    .today-chip.is-free.is-picked .today-copy,
+    .today-chip.is-rest.is-picked .today-copy {
+      color: var(--fg-primary);
+    }
+
+    .home-start {
+      padding: 24px;
+    }
+
+    .home-start .next {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 56px;
+      border-radius: var(--radius-lg);
+      background: var(--coral);
+      font-size: var(--text-headline);
+      gap: 12px;
+      color: var(--surface);
+      box-shadow: var(--shad);
+    }
+
+    .home-start .next img { width: 20px; height: 20px; }
+
+    .home-start .next.is-quiet {
+      background: var(--bg-muted);
+      color: var(--fg-primary);
+      box-shadow: none;
+    }
+
+    .weight-card {
+      margin: 0 var(--gutter);
+      padding: var(--space-md);
+      background: var(--weight);
+      border-radius: var(--card-radius);
+      overflow: visible;
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-md);
+      min-width: 0;
+      box-shadow: var(--shad);
+    }
+
+    .weight-main {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .weight-main > div {
+      flex-shrink: 0;
+    }
+
+    .weight-label {
+      font-size: var(--body);
+      line-height: 1.2;
+      color: var(--fg-secondary);
+    }
+
+    .weight-value {
+      margin-top: 8px;
+      font-size: clamp(20px, 5.4vw, 26px);
+      line-height: 1.2;
+      color: var(--fg-primary);
+    }
+
+    .weight-delta {
+      color: var(--fg-positive);
+      font-size: var(--text-callout);
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .weight-vs {
+      font-size: var(--text-caption);
+      line-height: 1.2;
+      color: var(--fg-secondary);
+    }
+
+    .weight-spark-wrap {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 44px;
+    }
+
+    .weight-spark {
+      display: block;
+      width: 100%;
+      height: 44px;
+      object-fit: fill;
+    }
+
+    .weight-spark-dot {
+      position: absolute;
+      left: 95.14%;
+      top: 73.86%;
+      width: 8px;
+      height: 8px;
+      margin: -4px 0 0 -4px;
+      border-radius: 50%;
+      background: var(--fg-positive);
+      pointer-events: none;
+    }
+
+    .weight-add {
+      width: 51px;
+      height: 51px;
+      border-radius: var(--radius-md);
+      background: var(--white);
+      box-shadow: var(--shad);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      overflow: visible;
+      position: relative;
+      z-index: 1;
+    }
+
+    .weight-empty {
+      display: none;
+      flex: 1;
+      min-width: 0;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .weight-card.is-empty {
+      align-items: center;
+      min-height: 103px;
+    }
+
+    .weight-card.is-empty .weight-main,
+    .weight-card.is-empty .weight-add,
+    .weight-card.is-past-logged .weight-add {
+      display: none;
+    }
+
+    .weight-card.is-empty .weight-empty {
+      display: flex;
+    }
+
+    .weight-value.is-muted {
+      color: var(--fg-secondary);
+    }
+
+    .weight-card.is-unlogged:not(.is-empty) {
+      align-items: center;
+      min-height: 103px;
+    }
+
+    .weight-card.is-unlogged .weight-main {
+      display: none;
+    }
+
+    .weight-card.is-unlogged .weight-empty {
+      display: flex;
+    }
+
+    .weight-main .is-hidden {
+      visibility: hidden;
+    }
+
+    .challenges-pane,
+    .workouts-pane,
+    .stats-pane,
+    .settings-pane,
+    .notes-pane {
+      flex: 1 1 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 4px var(--gutter) 8px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+
+    .challenges-pane::-webkit-scrollbar,
+    .workouts-pane::-webkit-scrollbar,
+    .stats-pane::-webkit-scrollbar,
+    .settings-pane::-webkit-scrollbar,
+    .notes-pane::-webkit-scrollbar { display: none; }
+
+    .workouts-pane {
+      padding-bottom: calc(8px + var(--tab-clear));
+    }
+
+    .stats-pane {
+      padding-bottom: var(--tab-clear);
+      gap: 8px;
+    }
+
+    .settings-pane,
+    .notes-pane {
+      padding-bottom: 42px;
+    }
+
+    .ch-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ch-title {
+      font-size: var(--text-title2);
+      line-height: 1.2;
+      color: var(--fg-primary);
+    }
+
+    .ch-filters {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ch-filter {
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      color: var(--fg-secondary);
+      font-size: var(--body);
+    }
+
+    .ch-filter.is-on {
+      background: var(--surface);
+      color: var(--fg-inverse);
+    }
+
+    .ch-section {
+      font-size: var(--body);
+      color: var(--fg-secondary);
+    }
+
+    .ch-hero,
+    .ch-card,
+    .stats-card {
+      background: var(--surface);
+      border-radius: var(--card-radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .ch-hero h2,
+    .ch-card h3 {
+      font-size: clamp(22px, 6cqi, 26px);
+      line-height: 1.15;
+      color: var(--fg-primary);
+    }
+
+    .stats-pane {
+      gap: 8px;
+    }
+
+    .st-card {
+      background: var(--surface);
+      border-radius: var(--card-radius);
+      padding: 20px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: visible;
+    }
+
+    .st-progress {
+      display: block;
+      margin: 0 calc(-1 * var(--gutter)) -36px;
+      width: calc(100% + (var(--gutter) * 2));
+      flex: 0 0 auto;
+    }
+
+    .st-progress img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .st-card-title {
+      font-size: var(--text-headline);
+      line-height: 1.24;
+      text-align: left;
+      color: var(--fg-primary);
+    }
+
+    .st-month .st-card-title {
+      text-align: center;
+    }
+
+    .st-card-sub {
+      font-size: var(--body);
+      text-align: center;
+      color: var(--fg-secondary);
+      line-height: 1.35;
+      margin-top: -8px;
+    }
+
+    .st-year {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .st-year-accordion {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      margin: 0;
+      padding: 4px 0;
+      border: none;
+      background: transparent;
+      font: inherit;
+      color: var(--fg-primary);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .st-year-accordion-label {
+      font-size: var(--text-headline);
+      line-height: 1.24;
+    }
+
+    .st-year-chevron {
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid var(--fg-secondary);
+      border-bottom: 2px solid var(--fg-secondary);
+      transform: rotate(45deg);
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+      margin-right: 4px;
+    }
+
+    .st-year-accordion[aria-expanded="true"] .st-year-chevron {
+      transform: rotate(-135deg);
+      margin-top: 6px;
+    }
+
+    .st-year-past {
+      margin-top: 4px;
+    }
+
+    .st-month {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .st-weekdays,
+    .st-cal {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .st-weekdays span {
+      text-align: center;
+      font-size: var(--text-caption);
+      color: var(--fg-secondary);
+    }
+
+    .st-day {
+      aspect-ratio: 1;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: var(--text-caption);
+      color: var(--fg-secondary);
+      background: var(--bg-soft);
+    }
+
+    .st-day.is-empty {
+      background: transparent;
+    }
+
+    .st-day.is-done {
+      background: var(--cal-today);
+      box-shadow: none;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .st-day.is-done img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 999px;
+    }
+
+    .st-day.is-today:not(.is-done) {
+      box-shadow: inset 0 0 0 1.5px var(--today-ring);
+    }
+
+    .st-weight-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .st-card-top {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .st-card-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 4px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .st-head-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .st-weight-now {
+      font-size: var(--text-stat);
+      color: var(--fg-primary);
+      line-height: 1.26;
+    }
+
+    .st-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .st-unit {
+      font-size: var(--text-body);
+      line-height: 1.2;
+      color: var(--fg-secondary);
+    }
+
+    .st-delta-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      flex-shrink: 0;
+      padding-bottom: 4px;
+    }
+
+    .st-weight-delta {
+      font-size: var(--text-body);
+      line-height: 1.26;
+      color: var(--fg-positive);
+    }
+
+    .st-delta-hint {
+      font-size: var(--text-body);
+      line-height: 1.2;
+      color: var(--fg-secondary);
+    }
+
+    .st-plot-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .st-plot-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .st-plot {
+      height: 128px;
+      background-color: transparent;
+      background-image:
+        linear-gradient(to right, var(--grid-weak) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-weak) 1px, transparent 1px),
+        linear-gradient(to right, var(--grid-strong) 2px, transparent 2px),
+        linear-gradient(to bottom, var(--grid-strong) 2px, transparent 2px);
+      background-size: 8px 8px, 8px 8px, 32px 32px, 32px 32px;
+      overflow: hidden;
+    }
+
+    .st-yaxis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 128px;
+      font-size: var(--text-caption);
+      color: var(--fg-secondary);
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .st-weight-chart {
+      width: 100%;
+      height: 128px;
+      display: block;
+      overflow: visible;
+    }
+
+    .st-weight-axis {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--text-caption);
+      color: var(--fg-secondary);
+    }
+
+    .ch-copy {
+      font-size: var(--body);
+      color: var(--fg-secondary);
+      line-height: 1.35;
+    }
+
+    .ch-week {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ch-dot {
+      flex: 1;
+      min-width: 0;
+      height: 36px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: var(--text-caption);
+      background: var(--bg-soft);
+      color: var(--fg-secondary);
+    }
+
+    .ch-dot.is-done {
+      background: var(--fg-accent);
+      color: var(--white);
+    }
+
+    .ch-dot.is-today {
+      background: transparent;
+      color: var(--fg-primary);
+      box-shadow: inset 0 0 0 1px var(--border-accent);
+    }
+
+    .ch-dot.is-ghost {
+      color: color-mix(in srgb, var(--fg-secondary) 35%, transparent);
+    }
+
+    .ch-progress {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      overflow: hidden;
+    }
+
+    .ch-progress > span {
+      display: block;
+      height: 100%;
+      width: 57%;
+      border-radius: inherit;
+      background: var(--coral);
+    }
+
+    .ch-meta {
+      font-size: var(--body);
+      color: var(--fg-secondary);
+    }
+
+    .ch-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .ch-badge {
+      flex-shrink: 0;
+      font-size: var(--body);
+      color: var(--fg-secondary);
+      background: var(--bg-soft);
+      border-radius: 999px;
+      padding: 8px 12px;
+    }
+
+    .ch-join {
+      height: 48px;
+      border-radius: var(--radius-sm);
+      background: var(--canvas);
+      color: var(--fg-primary);
+      font-size: var(--text-row);
+    }
+
+    .ch-join.is-joined {
+      background: var(--bg-soft);
+      color: var(--fg-positive);
+    }
+
+    #chActive,
+    #chDiscover,
+    #chJoined {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-bottom: 8px;
+    }
+
+    .ch-hero .next {
+      width: 100%;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-row);
+      gap: 10px;
+      color: var(--surface);
+    }
+
+    .ch-hero .next img { width: 18px; height: 18px; }
+
+    .set-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .set-back {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .set-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .set-label {
+      font-size: var(--body);
+      color: var(--fg-secondary);
+      padding: 0 8px;
+    }
+
+    .set-card {
+      background: var(--surface);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+    }
+
+    .set-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 24px;
+      width: 100%;
+      background: transparent;
+      color: var(--fg-primary);
+      font: inherit;
+      font-size: var(--text-row);
+      text-align: left;
+      border: 0;
+      cursor: pointer;
+    }
+
+    .set-row + .set-row {
+      box-shadow: inset 0 1px 0 var(--stroke-hairline);
+    }
+
+    .set-row-stack {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .day-chips {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+      width: 100%;
+    }
+
+    .day-chip {
+      height: 36px;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      color: var(--fg-secondary);
+      font: inherit;
+      font-size: var(--text-callout);
+      cursor: pointer;
+    }
+
+    .day-chip.is-on {
+      background: var(--coral);
+      color: var(--surface);
+    }
+
+    .set-value {
+      font-size: var(--text-callout);
+      color: var(--fg-secondary);
+    }
+
+    .set-trail {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .set-chevron {
+      width: 9px;
+      height: 9px;
+      border-right: 2px solid var(--fg-secondary);
+      border-top: 2px solid var(--fg-secondary);
+      transform: rotate(45deg);
+      margin-right: 3px;
+      flex-shrink: 0;
+    }
+
+    .set-toggle {
+      width: 44px;
+      height: 26px;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .set-toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--white);
+      transition: transform 0.18s ease;
+    }
+
+    .set-toggle.is-on {
+      background: var(--coral);
+    }
+
+    .set-toggle.is-on::after {
+      transform: translateX(18px);
+    }
+
+    .set-row .ch-filter.is-on {
+      background: var(--canvas);
+      color: var(--fg-inverse);
+    }
+
+    .settings-pane h2 {
+      font-size: clamp(22px, 6cqi, 26px);
+      line-height: 1.15;
+      color: var(--fg-primary);
+    }
+
+    .set-head .ch-title { flex: 1; }
+
+    .set-credit {
+      margin-top: auto;
+      padding: 8px 8px 16px;
+      text-align: center;
+      font-size: var(--body);
+      color: var(--fg-secondary);
+    }
+
+    .notes-readall {
+      font-size: var(--body);
+      color: var(--fg-secondary);
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    .note-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px 24px;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+    }
+
+    .note-row + .note-row {
+      box-shadow: inset 0 1px 0 var(--stroke-hairline);
+    }
+
+    .note-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .note-title {
+      font-size: var(--text-row);
+      color: var(--fg-primary);
+    }
+
+    .note-body,
+    .note-time {
+      font-size: var(--text-callout);
+      color: var(--fg-secondary);
+    }
+
+    .note-time {
+      opacity: 0.8;
+    }
+
+    .note-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: transparent;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+
+    .note-row.is-unread .note-dot {
+      background: var(--coral);
+    }
+
+    .note-continue {
+      color: var(--coral);
+      font-size: var(--text-callout);
+      background: transparent;
+      align-self: flex-start;
+      padding: 0;
+    }
+
+    .notes-list {
+      background: var(--surface);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+    }
+
+    .notes-empty {
+      flex: 1;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 48px 16px;
+      gap: 8px;
+    }
+
+    .notes-empty-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--bg-muted);
+      margin-bottom: 8px;
+    }
+
+    .notes-empty-icon img {
+      display: block;
+    }
+
+    .notes-empty-title {
+      font-size: var(--text-title3);
+      line-height: 1.2;
+      color: var(--fg-primary);
+    }
+
+    .notes-empty-copy {
+      font-size: var(--text-callout);
+      line-height: 1.3;
+      color: var(--fg-secondary);
+    }
+
+    .pane-hidden { display: none !important; }
+
+    .tab-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 6;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      flex-shrink: 0;
+      padding: var(--space-tab-top) 0 0;
+      background:
+        linear-gradient(to bottom, rgba(253, 246, 236, 0), var(--page)) top / 100% var(--space-tab-top) no-repeat,
+        var(--page);
+    }
+
+    .tab-bar-row {
+      display: flex;
+      gap: 9px;
+      padding: 0 16px;
+    }
+
+    .home-bar-space {
+      height: 2px;
+      flex-shrink: 0;
+    }
+
+    .home-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 40;
+      height: 14px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 8px;
+      pointer-events: none;
+    }
+
+    .home-bar span {
+      width: 140px;
+      height: 5px;
+      border-radius: 5px;
+      background: var(--black);
+    }
+
+    .tab {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 43px;
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--fg-secondary);
+      font-size: var(--text-body);
+      line-height: 1.2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border: 0;
+      box-shadow: none;
+    }
+
+    .tab.is-on {
+      background: var(--tab-on);
+      color: var(--fg-inverse);
+      box-shadow: var(--shad);
+    }
+
     .complete {
       cursor: pointer;
       opacity: 0;
@@ -98,14 +1618,76 @@
       visibility: visible;
     }
 
+    .countdown {
+      z-index: 3;
+      align-items: center;
+      justify-content: center;
+      background: var(--page);
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    .countdown.is-on {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .splash {
+      z-index: 8;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: transparent;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+    }
+
+    .splash.is-on {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+      transition: opacity 0.45s ease, visibility 0s;
+    }
+
+    .splash-chicken {
+      width: min(78%, 312px);
+      height: min(53dvh, 360px);
+      object-fit: contain;
+      translate: -34px 0;
+      transform: scale(0.9);
+      animation: splash-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes splash-pop {
+      to { transform: scale(1); }
+    }
+
+    .countdown-n {
+      font-size: clamp(96px, 28vw, 160px);
+      line-height: 1;
+      color: var(--ink);
+      animation: countdown-pop 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes countdown-pop {
+      from { transform: scale(0.55); opacity: 0.35; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
     .close {
       position: absolute;
-      top: 52px;
-      right: 16px;
+      top: max(24px, calc(var(--safe-top) + 12px));
+      right: var(--gutter);
       z-index: 2;
-      width: 56px;
-      height: 56px;
-      border-radius: 20px;
+      width: clamp(44px, 12vw, 56px);
+      height: clamp(44px, 12vw, 56px);
+      max-width: 56px;
+      max-height: 56px;
+      border-radius: var(--radius-sm);
       background: transparent;
       box-shadow: none;
       display: grid;
@@ -119,29 +1701,88 @@
     }
 
     .header {
-      position: absolute;
-      top: 52px;
-      left: 0;
-      right: 0;
-      padding: 0 16px;
+      position: relative;
+      flex: 0 0 auto;
+      padding: max(8px, var(--safe-top)) var(--gutter) 0;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-top: 26px;
+    }
+
+    .header-progress[hidden] { display: none; }
+
+    .header-progress {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .workout-close,
+    .workout-mute {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      box-shadow: none;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      color: var(--ink);
+    }
+
+    .workout-close svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .workout-mute svg {
+      width: 18px;
+      height: 18px;
+    }
+
     .move-label {
-      font-size: 12px;
-      line-height: 14px;
-      color: var(--move);
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: calc(100% + 8px);
+      font-size: var(--text-callout);
+      line-height: 18px;
+      color: var(--ink);
+      text-align: center;
+      width: 100%;
     }
 
     .pips {
       display: flex;
-      gap: 10px;
+      align-items: center;
+      flex: 1 1 auto;
+      min-width: 0;
+      gap: 8px;
     }
 
     .pip {
-      flex: 1;
+      flex: 1 1 0;
+      min-width: 0;
       height: 8px;
       border-radius: 999px;
       border: 1px solid var(--coral);
@@ -150,75 +1791,101 @@
 
     .pip.filled { background: var(--coral); }
 
+    .pip.is-back { cursor: pointer; }
+
     .timer-block {
-      position: absolute;
-      top: 133px;
-      left: 0;
-      right: 0;
+      position: relative;
+      flex: 0 0 auto;
+      padding-top: clamp(12px, 6dvh, 49px);
       text-align: center;
     }
 
-    .time {
-      font-size: 84px;
-      line-height: 84px;
+    .timer-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      padding: 0 var(--gutter);
+    }
+
+    .set-n {
+      font-size: clamp(48px, 18vw, 84px);
+      line-height: 1;
       color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      text-align: center;
     }
 
     .move-name {
-      font-size: 20px;
-      line-height: 32px;
-      color: rgba(0, 0, 0, 0.4);
-      padding: 0 24px;
+      font-size: clamp(16px, 4.6vw, 20px);
+      line-height: 1.4;
+      color: var(--fg-muted);
+      padding: 7px var(--gutter) 0;
+    }
+
+    .spacer {
+      flex: 0.12 1 8px;
+      min-height: 8px;
+    }
+
+    .spacer-sm {
+      flex: 0.08 1 4px;
+      min-height: 4px;
     }
 
     .chicken-wrap {
-      position: absolute;
-      top: 250px;
-      left: 0;
-      width: 402px;
-      height: 510px;
+      position: relative;
+      flex: 1 1 auto;
+      width: 100%;
+      max-width: 100%;
+      max-height: none;
+      min-height: 0;
+      margin: 0 auto;
+      padding: 0;
       display: grid;
       place-items: center;
-      padding: 0;
-      box-sizing: border-box;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .chicken-wrap img {
-      max-width: 370px;
-      max-height: 336px;
-      width: auto;
+      width: 80%;
       height: auto;
+      max-width: 80%;
       object-fit: contain;
-    }
-
-    .chicken-wrap video {
-      width: 402px;
-      max-width: none;
-      max-height: none;
-      height: auto;
-      object-fit: contain;
+      object-position: center;
       background: transparent;
     }
 
-    .chicken-wrap video.zoomed {
-      transform: translateX(-14px) scale(1.14);
-      transform-origin: center center;
+    .one-more {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: auto;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      z-index: 3;
+      pointer-events: none;
+      line-height: 0;
     }
 
-    .chicken-wrap video.larger {
-      transform: translateX(-6px) scale(1.22);
-      transform-origin: center center;
+    .one-more[hidden] { display: none; }
+
+    .one-more img {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0;
     }
 
     .controls {
-      position: absolute;
-      top: 770px;
-      left: 0;
-      right: 0;
+      position: relative;
+      z-index: 2;
+      flex: 0 0 auto;
       display: flex;
-      gap: 12px;
-      padding: 0 16px;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      padding: 8px var(--gutter) max(42px, calc(var(--safe-bottom) + 8px));
     }
 
     button {
@@ -227,53 +1894,64 @@
       cursor: pointer;
     }
 
-    .pause {
-      width: 72px;
-      height: 72px;
-      border-radius: 25.125px;
-      background: #fff;
-      box-shadow: 0 0.9px 1.35px rgba(0,0,0,0.1);
+    .pause,
+    .prev,
+    .next {
+      flex-shrink: 0;
+      background: var(--white);
+      color: var(--ink);
+      box-shadow: var(--shad);
       display: grid;
       place-items: center;
     }
 
-    .pause img, .pause svg { width: 32px; height: 32px; }
-
+    .prev,
     .next {
-      flex: 1;
-      height: 72px;
-      border-radius: 25.125px;
-      background: var(--coral);
-      color: var(--button-cream);
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      box-shadow: 0 0.9px 1.35px rgba(0,0,0,0.1);
+      width: 76px;
+      height: 76px;
+      border-radius: var(--radius-sm);
     }
 
-    .next img { width: 32px; height: 32px; }
+    .pause {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--radius-lg);
+    }
+
+    .prev svg, .next svg { width: 28px; height: 28px; }
+    .pause img, .pause svg { width: 36px; height: 36px; }
+
+    .prev:disabled {
+      opacity: 1;
+      background: var(--bg-muted);
+      color: var(--fg-rest);
+    }
+
+    .prev:disabled svg {
+      opacity: 0.55;
+    }
 
     .complete img,
     .complete video {
       position: absolute;
-      top: 140px;
+      top: clamp(48px, 12dvh, 132px);
       left: 50%;
-      transform: translateX(-50%);
-      width: 530px;
-      height: 640px;
+      transform: translateX(-50%) scale(1.5);
+      transform-origin: center top;
+      width: min(70cqi, 55dvh);
+      height: min(86cqi, 62dvh);
       object-fit: contain;
       background: transparent;
     }
 
     .charm {
       position: absolute;
-      top: 682px;
-      left: 12px;
-      width: 373px;
-      font-size: 32px;
-      line-height: 38px;
+      left: var(--gutter);
+      right: var(--gutter);
+      width: auto;
+      bottom: max(72px, calc(var(--safe-bottom) + 48px));
+      font-size: clamp(24px, 8vw, 32px);
+      line-height: 1.2;
       text-align: center;
       color: var(--charm);
     }
@@ -283,179 +1961,2140 @@
     @media (prefers-reduced-motion: reduce) {
       .screen, .scene { transition: none; }
     }
+
+    @media (max-height: 700px) {
+      .home-body { gap: 10px; padding-bottom: calc(10px + var(--tab-clear)); }
+      .workout-card-head,
+      .home-start,
+      .weight-card { padding: 14px 16px; }
+      .workout-card-head { padding-top: 14px; padding-bottom: 0; }
+      .timer-block { padding-top: 8px; }
+      .set-n { font-size: clamp(40px, 12vh, 64px); }
+    }
+
+    @media (max-width: 360px) {
+      :root { --gutter: 12px; }
+      .weight-card { gap: 10px; }
+    }
+
+    @media (min-width: 600px) {
+      :root { --gutter: 24px; }
+    }
+
+    @media (min-width: 720px) {
+      .days { justify-content: flex-start; }
+    }
+
+    .ios-sheet-root {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    .ios-sheet-root.is-on {
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .ios-sheet-scrim {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.18);
+      opacity: 0;
+      transition: opacity 0.32s ease;
+    }
+
+    .ios-sheet-root.is-on .ios-sheet-scrim { opacity: 1; }
+
+    .ios-sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 50%;
+      background: var(--surface);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: var(--font);
+      transform: translateY(108%);
+      transition: transform 0.44s cubic-bezier(0.32, 0.72, 0, 1);
+      padding: 8px 24px max(28px, calc(var(--safe-bottom) + 18px));
+    }
+
+    .ios-sheet-root.is-on .ios-sheet { transform: none; }
+
+    .phone.is-sheet[data-phase="home"] #home {
+      transform: scale(0.94);
+      transform-origin: center top;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .ios-sheet-grabber {
+      width: 36px;
+      height: 5px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--fg-secondary) 35%, transparent);
+      margin: 6px 0 28px;
+      flex-shrink: 0;
+    }
+
+    .ios-sheet-title {
+      font-size: var(--text-title2);
+      line-height: 1.2;
+      color: var(--fg-primary);
+      margin-bottom: 12px;
+    }
+
+    .ios-sheet-hint {
+      font-size: var(--text-callout);
+      line-height: 1.3;
+      color: var(--fg-secondary);
+      margin-bottom: 20px;
+    }
+
+    .ios-wheels {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 220px;
+      flex: 1;
+      padding: 16px 0;
+      box-sizing: content-box;
+    }
+
+    .ios-wheel {
+      height: 220px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      mask-image: linear-gradient(to bottom, transparent 0%, #000 28%, #000 72%, transparent 100%);
+    }
+
+    .ios-wheel::-webkit-scrollbar { display: none; }
+
+    .ios-wheel-kg { width: 92px; }
+    .ios-wheel-dec { width: 52px; }
+
+    .ios-wheel-item {
+      height: 44px;
+      scroll-snap-align: center;
+      display: grid;
+      place-items: center;
+      font-size: var(--text-picker, 34px);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: color-mix(in srgb, var(--fg-secondary) 55%, transparent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ios-wheel-item.is-sel { color: var(--fg-primary); }
+
+    .ios-wheel-static {
+      width: 18px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      font-size: var(--text-picker, 34px);
+      color: var(--fg-primary);
+      pointer-events: none;
+      margin-bottom: 2px;
+    }
+
+    .ios-wheel-unit {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center start;
+      font-size: var(--text-title2);
+      color: var(--fg-primary);
+      pointer-events: none;
+      margin-left: 6px;
+    }
+
+    .ios-sheet-log {
+      width: 100%;
+      height: 72px;
+      border-radius: var(--radius-lg);
+      background: var(--coral);
+      color: var(--button-cream);
+      font-size: var(--text-title3);
+      font-family: inherit;
+      flex-shrink: 0;
+      margin-top: 12px;
+      box-shadow: var(--shad);
+    }
+
+    .workouts-pane {
+      overflow: hidden;
+    }
+
+    .wo-rail {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      gap: calc(var(--gutter) * 2);
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 calc(var(--gutter) * -1);
+      padding: 0 var(--gutter) 8px;
+    }
+
+    .wo-rail::-webkit-scrollbar { display: none; }
+
+    .wo-card {
+      flex: 0 0 100%;
+      height: 100%;
+      position: relative;
+      background-color: var(--canvas);
+      background-image: url("../Chicken/Assets.xcassets/CardFill.imageset/CardFill.svg?v=2");
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .wo-card .card-dune {
+      left: -27.3%;
+      top: 59.8%;
+      width: 154.9%;
+      height: 44.9%;
+      bottom: auto;
+    }
+
+    .wo-head,
+    .wo-visual,
+    .wo-open {
+      position: relative;
+      z-index: 1;
+    }
+
+    .wo-head {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .wo-name {
+      font-size: var(--text-streak);
+      line-height: 1.2;
+      color: var(--fg-primary);
+      white-space: nowrap;
+    }
+
+    .wo-card .chip {
+      height: 36px;
+      padding: 0 12px 0 8px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: 1px solid var(--stroke-muted);
+      font-size: var(--text-body);
+      box-sizing: border-box;
+    }
+
+    .wo-visual {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      margin: 0;
+    }
+
+    .wo-visual img {
+      width: 82%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .wo-visual.is-video img,
+    .wo-visual .wo-frames {
+      width: calc((100% + 48px) * 0.8);
+      max-width: none;
+    }
+
+    .wo-visual.is-video img {
+      transform: translateX(-32px);
+    }
+
+    .wo-open {
+      width: 100%;
+      height: 56px;
+      border-radius: var(--radius-lg);
+      background: var(--coral);
+      color: var(--surface);
+      font-size: var(--text-headline);
+      flex-shrink: 0;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="phone">
+  <div class="phone" data-phase="splash">
     <div class="paper"></div>
-    <div id="workout" class="screen workout">
+    <div id="splash" class="screen splash is-on">
+      <img id="splashChicken" class="splash-chicken" alt="" />
+    </div>
+    <div id="home" class="screen home">
+      <div class="home-body" id="pane-home">
+        <div class="weekly">
+          <div class="weekly-top">
+            <div class="ch-title" id="homeTitle">Today</div>
+            <div class="nav-cluster">
+              <button class="streak-chip" type="button" aria-label="0 days streak">
+                <img src="../Chicken/Assets.xcassets/IconFire.imageset/icon-fire.svg" width="18" height="18" alt="" />
+                <span class="streak-count">0</span>
+              </button>
+              <span data-ui="avatar"></span>
+            </div>
+          </div>
+          <div class="days" id="days"></div>
+        </div>
+
+        <div class="home-cards">
+        <div class="day-stage" id="dayStage">
+          <div class="day-track" id="dayTrack"></div>
+        </div>
+
+        <div class="weight-card" id="weightCard">
+          <div class="weight-main">
+            <div>
+              <div class="weight-label">My weight</div>
+              <div class="weight-value" id="weightValue"></div>
+            </div>
+            <div id="weightDeltaBlock">
+              <div class="weight-delta" id="weightDeltaRow">
+                <span id="weightDelta"></span>
+                <img id="weightDeltaIcon" src="../Chicken/Assets.xcassets/IconDeltaDown.imageset/icon-delta-down.svg" width="6" height="6" alt="" />
+              </div>
+              <div class="weight-vs">vs last week</div>
+            </div>
+            <div class="weight-spark-wrap" id="weightSparkWrap">
+              <svg class="weight-spark" viewBox="0 0 52 44" preserveAspectRatio="none" aria-hidden="true">
+                <path
+                  id="weightSparkPath"
+                  d=""
+                  stroke="var(--fg-positive)"
+                  stroke-width="1.5"
+                  fill="none"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  vector-effect="non-scaling-stroke"
+                />
+              </svg>
+              <span class="weight-spark-dot" id="weightSparkDot" aria-hidden="true"></span>
+            </div>
+          </div>
+          <div class="weight-empty">
+            <div class="weight-label">My weight</div>
+            <div class="weight-value is-muted" id="weightEmptyText">We’ll see… in the future.</div>
+          </div>
+          <button class="weight-add" type="button" aria-label="Add weight">
+            <img src="../Chicken/Assets.xcassets/IconPlus.imageset/icon-plus.svg" width="18" height="18" alt="" />
+          </button>
+        </div>
+        </div>
+      </div>
+      <div class="workouts-pane pane-hidden" id="pane-workouts">
+        <div data-ui="page-top" data-title="Extra workouts"></div>
+        <div class="wo-rail" id="woRail"></div>
+      </div>
+      <div class="stats-pane pane-hidden" id="pane-stats">
+        <div data-ui="page-top" data-title="Statistics"></div>
+        <div id="stCaloriesCard"></div>
+        <div id="stWeightCard"></div>
+        <article class="st-card">
+          <div class="st-year" id="stCalRecent"></div>
+        </article>
+        <div class="st-progress" id="stProgress">
+          <img src="../Chicken/Assets.xcassets/StatsProgress.imageset/StatsProgress.png?v=3" alt="Progress looks good on you!" />
+        </div>
+      </div>
+      <div class="settings-pane pane-hidden" id="pane-settings">
+        <div data-ui="screen-head" data-title="Settings" data-back-id="settingsBack"></div>
+        <div class="set-group">
+          <div class="set-card">
+            <button class="set-row js-notes" type="button" aria-label="Notifications">
+              Notifications
+              <span class="set-trail">
+                <span class="set-value" id="notesCount"></span>
+                <span class="set-chevron" aria-hidden="true"></span>
+              </span>
+            </button>
+          </div>
+        </div>
+        <div class="set-group">
+          <div class="set-card">
+            <div class="set-row">
+              Sounds
+              <button class="set-toggle is-on" type="button" role="switch" aria-checked="true" aria-label="Sounds"></button>
+            </div>
+          </div>
+        </div>
+        <div class="set-group">
+          <div class="set-card">
+            <div class="set-row set-row-stack">
+              <span>Workout days</span>
+              <div class="day-chips" id="setDays">
+                <button class="day-chip" type="button" data-train="Mo">Mo</button>
+                <button class="day-chip" type="button" data-train="Tu">Tu</button>
+                <button class="day-chip" type="button" data-train="We">We</button>
+                <button class="day-chip" type="button" data-train="Th">Th</button>
+                <button class="day-chip" type="button" data-train="Fr">Fr</button>
+                <button class="day-chip" type="button" data-train="Sa">Sa</button>
+                <button class="day-chip" type="button" data-train="Su">Su</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="set-group">
+          <div class="set-card">
+            <div class="set-row set-row-stack">
+              <span>Weight</span>
+              <div class="day-chips" id="setUnits">
+                <button class="day-chip is-on" type="button" data-unit="kg">kg</button>
+                <button class="day-chip" type="button" data-unit="lb">lb</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="set-group">
+          <div class="set-card">
+            <div class="set-row">
+              Version
+              <span class="set-value">beta</span>
+            </div>
+          </div>
+        </div>
+        <p class="set-credit">made by Lisa Pasichnyk</p>
+      </div>
+      <div class="notes-pane pane-hidden" id="pane-notes">
+        <div data-ui="screen-head" data-title="Notifications" data-back-id="notesBack">
+          <button class="notes-readall pane-hidden" id="notesReadAll" type="button">Read all</button>
+        </div>
+        <div class="notes-list pane-hidden" id="notesList"></div>
+        <div class="notes-empty" id="notesEmpty">
+          <div class="notes-empty-icon" aria-hidden="true">
+            <img src="../Chicken/Assets.xcassets/IconNotification.imageset/icon-notification.svg" width="24" height="24" alt="" />
+          </div>
+          <div class="notes-empty-title">No new notifications</div>
+          <div class="notes-empty-copy">Not even one egg in the nest.</div>
+        </div>
+      </div>
+      <nav class="tab-bar" id="tabBar">
+        <div class="tab-bar-row">
+          <button class="tab is-on" type="button" data-tab="home">Home</button>
+          <button class="tab" type="button" data-tab="workouts">Workouts</button>
+          <button class="tab" type="button" data-tab="statistics">Statistics</button>
+        </div>
+        <div class="home-bar-space" aria-hidden="true"></div>
+      </nav>
+    </div>
+    <div id="countdown" class="screen countdown">
+      <div class="countdown-n" id="countdownN">3</div>
+    </div>
+    <div id="workout" class="screen workout is-leave">
       <div class="scene" id="scene">
       <div class="header">
-        <div class="move-label" id="moveLabel">Move 3 of 4</div>
-        <div class="pips" id="pips"></div>
+        <div class="header-top">
+          <button class="workout-close" id="workoutClose" type="button" aria-label="Close">
+            <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="header-progress">
+            <div class="move-label" id="moveLabel">1/2</div>
+            <div class="pips" id="pips"></div>
+          </div>
+          <button class="workout-mute" id="workoutMute" type="button" aria-pressed="false" aria-label="Mute sounds">
+            <svg class="mute-on" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M3.2 7.2h2.1l3.2-2.7v9L5.3 10.8H3.2A1.2 1.2 0 0 1 2 9.6V8.4a1.2 1.2 0 0 1 1.2-1.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M12.1 6.3a3.4 3.4 0 0 1 0 5.4M13.9 4.6a6 6 0 0 1 0 8.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            <svg class="mute-off" viewBox="0 0 18 18" fill="none" aria-hidden="true" hidden>
+              <path d="M3.2 7.2h2.1l3.2-2.7v9L5.3 10.8H3.2A1.2 1.2 0 0 1 2 9.6V8.4a1.2 1.2 0 0 1 1.2-1.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M12.2 6.8l3.6 4.4M15.8 6.8l-3.6 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="timer-block">
-        <div class="time" id="time">4:38</div>
+        <div class="timer-row">
+          <div class="set-n" id="setN" aria-label="Sets remaining">20</div>
+        </div>
         <div class="move-name" id="moveName">Overhead press</div>
       </div>
+      <div class="spacer"></div>
       <div class="chicken-wrap">
-        <img id="chicken" class="hidden" alt="" />
-        <video id="chickenVideo" class="hidden zoomed" muted loop playsinline autoplay></video>
+        <img id="chicken" alt="" />
       </div>
+      <div class="spacer spacer-sm"></div>
+      </div>
+      <div class="one-more" id="oneMore" hidden>
+        <img src="../Chicken/Assets.xcassets/OneMore.imageset/OneMore.png" alt="" />
       </div>
       <div class="controls">
+        <button class="prev" id="prevBtn" aria-label="Previous" disabled>
+          <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M11 3.5L5.5 9l5.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
         <button class="pause" id="pauseBtn" aria-label="Pause">
           <img src="../Chicken/Assets.xcassets/IconPause.imageset/icon-pause.svg" alt="" />
         </button>
-        <button class="next" id="nextBtn">
-          <span id="nextLabel">Next</span>
-          <img id="nextArrow" src="../Chicken/Assets.xcassets/IconArrow.imageset/icon-arrow.svg" alt="" />
+        <button class="next" id="nextBtn" aria-label="Next">
+          <svg id="nextArrow" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M7 3.5L12.5 9 7 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
+      </div>
+    </div>
+    <div class="ios-sheet-root" id="weightSheet" hidden>
+      <div class="ios-sheet-scrim" id="weightScrim"></div>
+      <div class="ios-sheet" id="weightSheetPanel" role="dialog" aria-modal="true" aria-labelledby="weightSheetTitle">
+        <div class="ios-sheet-grabber" aria-hidden="true"></div>
+        <div class="ios-sheet-title" id="weightSheetTitle">Your current weight</div>
+        <div class="ios-wheels">
+          <div class="ios-wheel ios-wheel-kg" id="weightWhole"></div>
+          <div class="ios-wheel-static">.</div>
+          <div class="ios-wheel ios-wheel-dec" id="weightTenth"></div>
+          <div class="ios-wheel-unit" id="weightUnitLabel">kg</div>
+        </div>
+        <button class="ios-sheet-log" id="weightLog" type="button">Log weight</button>
       </div>
     </div>
     <div id="complete" class="screen complete">
       <button class="close" id="closeBtn" type="button" aria-label="Close">
         <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
-          <path d="M2 2l14 14M16 2L2 16" stroke="#301A1A" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M2 2l14 14M16 2L2 16" stroke="var(--ink)" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
       </button>
-      <video id="charmVideo" muted loop playsinline src="../Chicken/Videos/SequenceCharm.webm?v=02b"></video>
+      <img id="charmChicken" alt="" />
       <p class="charm">I’ll charm you<br />into coming back!</p>
     </div>
+    <div class="home-bar" aria-hidden="true"><span></span></div>
   </div>
   <script>
-    const moves = [
-      { name: "ABS", duration: 28, src: "../Chicken/Assets.xcassets/ChickenAbs.imageset/ChickenAbs.png" },
-      { name: "Dumbbell shoulder press", duration: 5 * 60 + 28, src: "../Chicken/Assets.xcassets/ChickenShoulderPress.imageset/ChickenShoulderPress.png" },
-      { name: "Overhead press", duration: 45, video: "../Chicken/Videos/Sequence01.webm", zoomed: true },
-      { name: "Dumbbell shoulder press", duration: 5 * 60 + 28, video: "../Chicken/Videos/Sequence04.webm?v=desk", larger: true },
-    ];
+    function makeFrames(folder, count, ext = "jpg", version = "") {
+      const query = version ? `?v=${version}` : "";
+      return Array.from({ length: count }, (_, i) =>
+        `../Chicken/Frames/${folder}/frame_${String(i + 1).padStart(3, "0")}.${ext}${query}`
+      );
+    }
 
-    const startIndex = 2;
+    const seq01 = makeFrames("Sequence01", 46, "png", "2");
+    const seqAbs = makeFrames("SequenceAbs", 22, "png", "2");
+    const seq04 = makeFrames("Sequence04", 6, "png", "2");
+    const seqCharm = makeFrames("SequenceCharm", 9, "png");
+    const homeFrames = makeFrames("SequenceHome", 44);
+    const freeDayFrames = makeFrames("SequenceFreeDay", 10, "png");
+
+    const setCount = 20;
+    let lastRepBucket = -1;
+    const catalog = [
+      { name: "ABS", duration: 20 * 5, interval: 5, frames: seq01, fps: 9 },
+      { name: "Dumbbell shoulder press", duration: 20 * 2, interval: 2, frames: seq04, fps: 3, larger: true },
+    ];
+    const extraMoves = {
+      press: { name: "Dumbbell shoulder press", duration: 20 * 2, interval: 2, frames: seq04, fps: 3, larger: true },
+      abs: { name: "ABS", duration: 20 * 5, interval: 5, frames: seq01, fps: 9 },
+    };
+    let moves = catalog;
+
+    const startIndex = 0;
     let index = startIndex;
-    const startElapsed = 4 * 60 + 38;
+    const startElapsed = 0;
     let elapsed = startElapsed;
     let paused = false;
-    let phase = "workout";
+    let announcing = false;
+    let phase = "home";
 
     const pips = document.getElementById("pips");
     const chicken = document.getElementById("chicken");
-    const chickenVideo = document.getElementById("chickenVideo");
-    const charmVideo = document.getElementById("charmVideo");
+    const charmChicken = document.getElementById("charmChicken");
+    charmChicken.src = seqCharm[0];
+    chicken.src = seq01[0];
+    let workoutFrame = 0;
+    let charmFrame = 0;
     const pauseBtn = document.getElementById("pauseBtn");
     const scene = document.getElementById("scene");
+    const homeEl = document.getElementById("home");
     const workoutEl = document.getElementById("workout");
     const completeEl = document.getElementById("complete");
+    const countdownEl = document.getElementById("countdown");
+    const countdownN = document.getElementById("countdownN");
+    let homeChicken = null;
+    const splashEl = document.getElementById("splash");
+    const splashChicken = document.getElementById("splashChicken");
+    let splashOn = true;
+    let homeTab = "home";
+    let settingsOpen = false;
+    let notesOpen = false;
+    let homeFrame = 0;
+    splashChicken.src = seqAbs[0];
     let transitioning = false;
 
-    function format(t) {
-      const n = Math.max(0, Math.floor(t));
-      return `${Math.floor(n / 60)}:${String(n % 60).padStart(2, "0")}`;
+    const haptic = {
+      play(pattern) {
+        try {
+          if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+            navigator.vibrate(pattern);
+          }
+        } catch (_) { /* unsupported */ }
+      },
+      selection() { this.play(8); },
+      light() { this.play(12); },
+      medium() { this.play(20); },
+      rigid() { this.play(16); },
+      success() { this.play([12, 40, 24]); },
+    };
+
+    const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+    const weekdayLabels = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+    function dateKey(date) {
+      const p = (n) => String(n).padStart(2, "0");
+      return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
+    }
+    function addDays(date, n) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate() + n);
+    }
+    const homeNow = new Date();
+    const todayKey = dateKey(homeNow);
+    const todayDay = weekdayLabels[homeNow.getDay()];
+    const homeDays = Array.from({ length: 14 }, (_, index) => {
+      const offset = index - 7;
+      const date = addDays(homeNow, offset);
+      return {
+        id: dateKey(date),
+        label: weekdayLabels[date.getDay()],
+        dayNumber: String(date.getDate()),
+        offset,
+        isToday: offset === 0,
+        isPast: offset < 0,
+      };
+    });
+    function dayRecord(id) {
+      return homeDays.find((day) => day.id === id);
+    }
+    function everyOtherTrainingDays() {
+      const start = weekDays.indexOf(todayDay);
+      return weekDays.filter((_, index) => ((index - start + 7) % 7) % 2 === 0);
+    }
+    function loadTrainingDays() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("trainingDays") || "null");
+        if (Array.isArray(saved) && saved.length) {
+          const days = saved.filter((day) => weekDays.includes(day));
+          const isLegacy = days.length === 2 && days.includes("We") && days.includes("Fr");
+          if (!isLegacy) return days;
+        }
+      } catch (_) {}
+      return everyOtherTrainingDays();
+    }
+    let trainingDays = new Set(loadTrainingDays());
+    trainingDays.add(todayDay);
+    localStorage.setItem("trainingDays", JSON.stringify(weekDays.filter((day) => trainingDays.has(day))));
+    const dayIds = homeDays.map((day) => day.id);
+    const daysEl = document.getElementById("days");
+    daysEl.innerHTML = homeDays.map((day) =>
+      `<button class="day-dot" type="button" data-day="${day.id}" aria-label="${day.label} ${day.dayNumber}" aria-pressed="false"><span>${day.label}</span><span>${day.dayNumber}</span></button>`
+    ).join("") + `<div class="days-end-spacer" aria-hidden="true"></div>`;
+    let selectedDay = todayKey;
+    const dayTrack = document.getElementById("dayTrack");
+    const dayStage = document.getElementById("dayStage");
+    const iconDumbbells = "../Chicken/Assets.xcassets/IconDumbbells.imageset/icon-dumbbells.svg";
+    const iconMat = "../Chicken/Assets.xcassets/IconYogaMat.imageset/icon-yoga-mat.svg";
+    const iconTime = "../Chicken/Assets.xcassets/IconTime.imageset/icon-time.svg";
+    const iconStart = "../Chicken/Assets.xcassets/IconStartArrow.imageset/icon-arrow-right.svg";
+    const avatarSrc = "../Chicken/Assets.xcassets/AvatarChicken.imageset/AvatarChicken.png?v=3";
+    const duneSrc = "../Chicken/Assets.xcassets/CardDune.imageset/CardDune.svg?v=4";
+    const wingImg = "../Chicken/Assets.xcassets/ChickenWingPress.imageset/ChickenWingPress.png";
+
+    const ui = {
+      avatar() {
+        return `<button class="avatar-btn js-settings" type="button" aria-label="Settings">
+          <img src="${avatarSrc}" alt="" />
+        </button>`;
+      },
+      streakChip() {
+        return `<button class="streak-chip" type="button" aria-label="0 days streak">
+          <img src="../Chicken/Assets.xcassets/IconFire.imageset/icon-fire.svg" width="18" height="18" alt="" />
+          <span class="streak-count">0</span>
+        </button>`;
+      },
+      pageTop(title) {
+        return `<div class="ch-top"><div class="ch-title">${title}</div><div class="nav-cluster">${this.streakChip()}${this.avatar()}</div></div>`;
+      },
+      back(id) {
+        return `<button class="set-back" ${id ? `id="${id}"` : ""} type="button" aria-label="Back">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M8.5 2.5L3.5 7l5 4.5" stroke="var(--fg-primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>`;
+      },
+      screenHead(title, { backId = "", extra = "" } = {}) {
+        return `<div class="set-head">${this.back(backId)}<div class="ch-title">${title}</div>${extra}</div>`;
+      },
+      chip(label, icon) {
+        const isTime = icon === iconTime;
+        const size = isTime ? 24 : 20;
+        const mark = icon
+          ? `<img class="${isTime ? "chip-time" : ""}" src="${icon}" width="${size}" height="${size}" alt="" />`
+          : "";
+        return `<span class="chip">${mark}${label}</span>`;
+      },
+      primary({ label, className, icon = "", type = "button", attrs = "" }) {
+        return `<button class="${className}" type="${type}" ${attrs}>${label}${icon}</button>`;
+      },
+      dune() {
+        return `<img class="card-dune" src="${duneSrc}" alt="" />`;
+      },
+      extraCard(name, minutes, image, { mat = false, animated = false, frames = "", move = "" } = {}) {
+        const matChip = mat ? this.chip("Mat", iconMat) : "";
+        const visual = animated
+          ? `<img class="abs-preview-chicken" src="${image}" alt="" />`
+          : `<img${frames ? ` class="wo-frames" data-frames="${frames}"` : ""} src="${image}" alt="" />`;
+        return `<article class="wo-card">
+          ${this.dune()}
+          <div class="wo-head">
+            <div class="wo-name">${name}</div>
+            <div class="chips">${this.chip(minutes, iconTime)}${this.chip("Dumbbells", iconDumbbells)}${matChip}</div>
+          </div>
+          <div class="wo-visual${animated ? " is-video" : ""}">${visual}</div>
+          ${this.primary({ label: "Open workout", className: "wo-open js-open-move", attrs: `data-move="${move}"` })}
+        </article>`;
+      },
+      mount() {
+        document.querySelectorAll("[data-ui=avatar]").forEach((el) => {
+          el.outerHTML = this.avatar();
+        });
+        document.querySelectorAll("[data-ui=page-top]").forEach((el) => {
+          el.outerHTML = this.pageTop(el.dataset.title);
+        });
+        document.querySelectorAll("[data-ui=screen-head]").forEach((el) => {
+          el.outerHTML = this.screenHead(el.dataset.title, {
+            backId: el.dataset.backId,
+            extra: el.innerHTML,
+          });
+        });
+      },
+    };
+
+    ui.mount();
+    document.getElementById("woRail").innerHTML =
+      ui.extraCard("Dumbbell shoulder press", "4 min", seq04[0], { frames: "shoulder", move: "press" }) +
+      ui.extraCard("Abs", "20 min", seq01[0], { mat: true, frames: "abs", move: "abs" });
+
+    function dayKind(id) {
+      const day = dayRecord(id);
+      if (!day) return "free";
+      if (day.isToday) return "today";
+      if (day.offset === 1) return "free";
+      if (trainingDays.has(day.label)) return day.isPast ? "past" : "future";
+      return "free";
+    }
+
+    function chipHTML(label, icon) {
+      return ui.chip(label, icon);
+    }
+
+    function workoutSlide(title, minutes, chips, visual, cta, start, rest = false) {
+      const chipsRow = rest || (!minutes && !chips)
+        ? ""
+        : `<div class="chips">${chipHTML(minutes, iconTime)}${chips}</div>`;
+      const startIcon = start ? `<img src="${iconStart}" width="18" height="18" alt="" />` : "";
+      const startRow = rest
+        ? ""
+        : `<div class="home-start">${ui.primary({
+            label: cta,
+            className: `next ${start ? "js-start" : "js-extra is-quiet"}`,
+            icon: startIcon,
+          })}</div>`;
+      const dune = rest ? "" : ui.dune();
+      return `
+        <article class="workout-card${rest ? " is-rest" : ""}">
+          ${dune}
+          <div class="workout-card-head">
+            <h1>${title}</h1>
+            ${chipsRow}
+          </div>
+          <div class="home-chicken">${visual}</div>
+          ${startRow}
+        </article>`;
+    }
+
+    function slideMarkup(id) {
+      const kind = dayKind(id);
+      const day = dayRecord(id);
+      if (kind === "today" || kind === "future" || kind === "past") {
+        const wing = kind !== "today" && day?.label === "Fr";
+        const title = wing ? "Wing press" : "Abs &amp; Glutes";
+        const minutes = wing ? "18 min" : "20 min";
+        const chips = wing
+          ? chipHTML("Dumbbells", iconDumbbells)
+          : chipHTML("Dumbbells", iconDumbbells) + chipHTML("Mat", iconMat);
+        const visual = wing
+          ? `<img src="${wingImg}" alt="" />`
+          : `<img class="abs-preview-chicken"${kind === "today" ? ' id="homeChicken"' : ""} src="${seqAbs[0]}" alt="" />`;
+        const cta = kind === "today" ? "Start" : "Open workout";
+        return workoutSlide(title, minutes, chips, visual, cta, true);
+      }
+      const visual = `<img class="free-day-chicken" src="${freeDayFrames[0]}" alt="" />`;
+      return workoutSlide("Free day", "", "", visual, "See extra workouts", false, true);
+    }
+
+    function renderDayTrack() {
+      dayTrack.innerHTML = dayIds.map((day) => `<section class="day-slide" data-slide="${day}">${slideMarkup(day)}</section>`).join("");
+      homeChicken = document.getElementById("homeChicken");
+      if (homeChicken) homeChicken.src = seqAbs[0];
+    }
+    renderDayTrack();
+
+    function slideOffset(index) {
+      return -Math.max(0, index) * dayStage.clientWidth;
+    }
+
+    function slideHome(immediate) {
+      const index = Math.max(0, dayIds.indexOf(selectedDay));
+      if (immediate) dayTrack.classList.add("is-dragging");
+      dayTrack.style.transform = `translate3d(${slideOffset(index)}px, 0, 0)`;
+      if (immediate) requestAnimationFrame(() => dayTrack.classList.remove("is-dragging"));
+    }
+
+    function scrollSelectedDayChip(smooth, onlyIfHidden) {
+      const scroller = document.getElementById("days");
+      const btn = scroller?.querySelector(`[data-day="${selectedDay}"]`);
+      if (!scroller || !btn) return;
+      const viewLeft = scroller.scrollLeft;
+      const viewRight = viewLeft + scroller.clientWidth;
+      const btnLeft = btn.offsetLeft;
+      const btnRight = btnLeft + btn.offsetWidth;
+      if (onlyIfHidden && btnLeft >= viewLeft - 1 && btnRight <= viewRight + 1) return;
+      const padL = parseFloat(getComputedStyle(scroller).paddingLeft) || 0;
+      const target = Math.max(0, btnLeft - padL);
+      const max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+      scroller.scrollTo({ left: Math.min(target, max), behavior: smooth ? "smooth" : "auto" });
+    }
+
+    function homeTitle(day) {
+      if (!day || day.isToday) return "Today";
+      if (day.offset === -1) return "Yesterday";
+      if (day.offset === 1) return "Tomorrow";
+      const names = {
+        Mo: "Monday",
+        Tu: "Tuesday",
+        We: "Wednesday",
+        Th: "Thursday",
+        Fr: "Friday",
+        Sa: "Saturday",
+        Su: "Sunday",
+      };
+      return `${names[day.label] || day.label} ${day.dayNumber}`;
+    }
+
+    function selectDay(day) {
+      if (!day || day === selectedDay) return;
+      haptic.selection();
+      selectedDay = day;
+      paintDays();
+      scrollSelectedDayChip(false);
+      slideHome();
+    }
+
+    function paintDays() {
+      document.querySelectorAll("#days [data-day]").forEach((dayBtn) => {
+        const day = dayRecord(dayBtn.dataset.day);
+        if (!day) return;
+        const isOn = day.id === selectedDay;
+        const kind = dayKind(day.id);
+        const isFuture = kind === "future";
+        const isFree = kind === "free" || kind === "past";
+        const copy = day.isToday
+          ? "Let’s worko-ko!"
+          : kind === "past"
+            ? "Already done"
+            : isFuture
+              ? "Future trainings"
+              : "Free day";
+        dayBtn.setAttribute("aria-pressed", String(isOn));
+        const title = document.getElementById("homeTitle");
+        if (title) title.textContent = homeTitle(dayRecord(selectedDay));
+        dayBtn.setAttribute("aria-label", isOn ? `${day.label} ${day.dayNumber}, ${copy}` : `${day.label} ${day.dayNumber}`);
+        if (isOn) {
+          dayBtn.className = [
+            "today-chip",
+            "is-picked",
+            day.isToday ? "is-today" : "",
+            isFuture ? "is-future" : "",
+            isFree ? "is-free" : "",
+          ].filter(Boolean).join(" ");
+          dayBtn.innerHTML = `<span class="today-mo">${day.label}</span><span class="today-copy">${copy}</span>`;
+          return;
+        }
+        dayBtn.className = [
+          "day-dot",
+          day.isToday ? "is-today" : trainingDays.has(day.label) ? "is-train" : "is-rest",
+        ].join(" ");
+        dayBtn.innerHTML = `<span>${day.label}</span><span>${day.dayNumber}</span>`;
+      });
+      paintWeightCard();
+    }
+
+    function paintWeightCard() {
+      const card = document.getElementById("weightCard");
+      const emptyText = document.getElementById("weightEmptyText");
+      const day = dayRecord(selectedDay);
+      if (!card || !day) return;
+      card.classList.remove("is-empty", "is-past-logged");
+      if (day.isToday) {
+        paintWeight();
+        return;
+      }
+      if (day.isPast) {
+        const entry = fitnessLog.weights.find((item) => item.day === day.id);
+        if (entry) {
+          card.classList.add("is-past-logged");
+          document.getElementById("weightValue").textContent = formatWeight(entry.kg);
+          document.getElementById("weightDeltaBlock").classList.add("is-hidden");
+          document.getElementById("weightSparkWrap").classList.add("is-hidden");
+          return;
+        }
+        card.classList.add("is-empty");
+        if (emptyText) emptyText.textContent = "No weigh-in that day.";
+        return;
+      }
+      card.classList.add("is-empty");
+      if (emptyText) emptyText.textContent = "We’ll see… in the future.";
+    }
+
+    let daysDragX = null;
+    let daysDragScroll = 0;
+    let daysSkipClick = false;
+    const daysScroller = document.getElementById("days");
+    daysScroller.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-day]");
+      if (!btn) return;
+      if (daysSkipClick) {
+        daysSkipClick = false;
+        return;
+      }
+      selectDay(btn.dataset.day);
+    });
+    daysScroller.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      daysDragX = event.clientX;
+      daysDragScroll = daysScroller.scrollLeft;
+      daysSkipClick = false;
+    });
+    daysScroller.addEventListener("pointermove", (event) => {
+      if (daysDragX == null) return;
+      if (event.pointerType === "mouse" && event.buttons === 0) return;
+      const dx = event.clientX - daysDragX;
+      if (Math.abs(dx) < 24) return;
+      daysSkipClick = true;
+      daysScroller.classList.add("is-dragging");
+      daysScroller.scrollLeft = daysDragScroll - dx;
+    });
+    function endDaysDrag() {
+      daysDragX = null;
+      daysScroller.classList.remove("is-dragging");
+      scrollSelectedDayChip(true, true);
+    }
+    daysScroller.addEventListener("pointerup", endDaysDrag);
+    daysScroller.addEventListener("pointercancel", endDaysDrag);
+    daysScroller.addEventListener("wheel", (event) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      daysScroller.scrollLeft += event.deltaY;
+      event.preventDefault();
+    }, { passive: false });
+
+    let dragStartX = null;
+    let dragFrom = 0;
+    dayStage.addEventListener("pointerdown", (event) => {
+      if (event.target.closest("button")) return;
+      dragStartX = event.clientX;
+      dragFrom = slideOffset(dayIds.indexOf(selectedDay));
+      dayTrack.classList.add("is-dragging");
+      dayStage.setPointerCapture(event.pointerId);
+    });
+    dayStage.addEventListener("pointermove", (event) => {
+      if (dragStartX == null) return;
+      dayTrack.style.transform = `translate3d(${dragFrom + (event.clientX - dragStartX)}px, 0, 0)`;
+    });
+    function endDayDrag(event) {
+      if (dragStartX == null) return;
+      const dx = event.clientX - dragStartX;
+      dragStartX = null;
+      dayTrack.classList.remove("is-dragging");
+      const width = dayStage.clientWidth || 1;
+      let next = dayIds.indexOf(selectedDay);
+      if (dx < -width * 0.18) next += 1;
+      else if (dx > width * 0.18) next -= 1;
+      const day = dayIds[next];
+      if (day && day !== selectedDay) selectDay(day);
+      else slideHome();
+    }
+    dayStage.addEventListener("pointerup", endDayDrag);
+    dayStage.addEventListener("pointercancel", endDayDrag);
+    window.addEventListener("resize", () => slideHome(true));
+
+    const WHEEL_ITEM = 44;
+    const fitnessLog = (() => {
+      const read = (key, fallback) => {
+        try { return JSON.parse(localStorage.getItem(key) || "null") ?? fallback; } catch (_) { return fallback; }
+      };
+      const dayKey = (date) => {
+        const p = (n) => String(n).padStart(2, "0");
+        return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
+      };
+      const fromKey = (key) => {
+        const [y, m, d] = key.split("-").map(Number);
+        return new Date(y, m - 1, d);
+      };
+      const addDays = (date, n) => new Date(date.getFullYear(), date.getMonth(), date.getDate() + n);
+      let weights = read("fitness.weights", []).filter((e) => e && typeof e.day === "string" && typeof e.kg === "number");
+      weights.sort((a, b) => a.day.localeCompare(b.day));
+      const workouts = new Set(read("fitness.workoutDays", []));
+      return {
+        dayKey,
+        fromKey,
+        get weights() { return weights; },
+        latest() { return weights[weights.length - 1] || null; },
+        logWeight(kg, date = new Date()) {
+          const day = dayKey(date);
+          weights = weights.filter((e) => e.day !== day).concat({ day, kg: Math.round(kg * 10) / 10 });
+          weights.sort((a, b) => a.day.localeCompare(b.day));
+          localStorage.setItem("fitness.weights", JSON.stringify(weights));
+        },
+        recordWorkout(date = new Date()) {
+          workouts.add(dayKey(date));
+          localStorage.setItem("fitness.workoutDays", JSON.stringify([...workouts].sort()));
+        },
+        didWorkout(year, month, day) {
+          const p = (n) => String(n).padStart(2, "0");
+          return workouts.has(`${year}-${p(month)}-${p(day)}`);
+        },
+        weeklyChange() {
+          const latest = this.latest();
+          if (!latest) return null;
+          const cutoff = dayKey(addDays(fromKey(latest.day), -7));
+          const base = [...weights].reverse().find((e) => e.day <= cutoff);
+          return base ? latest.kg - base.kg : null;
+        },
+        recentWeights(weeks = 12) {
+          const cutoff = dayKey(addDays(new Date(), -7 * weeks));
+          return weights.filter((e) => e.day >= cutoff);
+        },
+        streak(trainingDays) {
+          const first = [...workouts].sort()[0];
+          if (!first) return 4;
+          const ids = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+          let count = 0;
+          let day = new Date();
+          for (let isToday = true; ; isToday = false) {
+            const key = dayKey(day);
+            if (key < first) break;
+            if (workouts.has(key)) count += 1;
+            else if (!isToday && trainingDays.has(ids[day.getDay()])) break;
+            day = addDays(day, -1);
+          }
+          return count;
+        },
+      };
+    })();
+
+    const weightWholeEl = document.getElementById("weightWhole");
+    const weightTenthEl = document.getElementById("weightTenth");
+    const weightSheet = document.getElementById("weightSheet");
+    const weightPanel = document.getElementById("weightSheetPanel");
+
+    function currentUnit() {
+      return document.querySelector("[data-unit].is-on")?.dataset.unit || "kg";
+    }
+
+    const savedUnit = localStorage.getItem("weightUnit");
+    if (savedUnit === "kg" || savedUnit === "lb") {
+      document.querySelectorAll("[data-unit]").forEach((tab) => tab.classList.toggle("is-on", tab.dataset.unit === savedUnit));
+    }
+
+    function displayChange(kg) {
+      return Math.round(kgToDisplay(kg) * 10) / 10;
+    }
+
+    function formatChange(kg) {
+      const change = displayChange(kg);
+      const sign = change > 0 ? "+" : change < 0 ? "−" : "";
+      return `${sign}${Math.abs(change).toFixed(1)} ${currentUnit()}`;
+    }
+
+    function changeColor(kg) {
+      return displayChange(kg) > 0 ? "var(--fg-accent)" : "var(--fg-positive)";
+    }
+
+    function paintSparkline(values, color) {
+      const path = document.getElementById("weightSparkPath");
+      const dot = document.getElementById("weightSparkDot");
+      const wrap = document.getElementById("weightSparkWrap");
+      wrap.classList.toggle("is-hidden", values.length < 2);
+      if (values.length < 2) return;
+      const minV = Math.min(...values);
+      const maxV = Math.max(...values);
+      const span = Math.max(maxV - minV, 0.5);
+      const mid = (maxV + minV) / 2;
+      const pts = values.map((v, i) => [2 + (48 * i) / (values.length - 1), 22 - 22 * ((v - mid) / span)]);
+      path.setAttribute("d", pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(2)} ${y.toFixed(2)}`).join(""));
+      path.setAttribute("stroke", color);
+      const [lx, ly] = pts[pts.length - 1];
+      dot.style.left = `${(lx / 52) * 100}%`;
+      dot.style.top = `${(ly / 44) * 100}%`;
+      dot.style.background = color;
+    }
+
+    function calendarMarked(date) {
+      const day = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      if (day > todayStart) return false;
+      const isToday = day.getTime() === todayStart.getTime();
+      return isToday
+        || presetWorkoutDays.has(day.getDate())
+        || fitnessLog.didWorkout(day.getFullYear(), day.getMonth() + 1, day.getDate());
+    }
+
+    function calendarStreak() {
+      const ids = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+      let count = 0;
+      let day = new Date();
+      for (let isToday = true, guard = 0; guard < 800; guard += 1, isToday = false) {
+        if (calendarMarked(day)) count += 1;
+        else if (!isToday && trainingDays.has(ids[day.getDay()])) break;
+        day = addDays(day, -1);
+      }
+      return count;
+    }
+
+    function paintStreak() {
+      const count = calendarStreak();
+      const copy = count === 1 ? "day streak" : "days streak";
+      document.querySelectorAll(".streak-count").forEach((el) => {
+        el.textContent = String(count);
+      });
+      document.querySelectorAll(".streak-chip").forEach((el) => {
+        el.setAttribute("aria-label", `${count} ${copy}`);
+      });
+    }
+
+    function kgToDisplay(kg) {
+      const unit = currentUnit();
+      return unit === "lb" ? kg * 2.2046226218 : kg;
+    }
+
+    function displayToKg(value) {
+      return currentUnit() === "lb" ? value / 2.2046226218 : value;
+    }
+
+    function formatWeight(kg) {
+      return `${kgToDisplay(kg).toFixed(1)} ${currentUnit()}`;
+    }
+
+    const baselineWeightKg = 62.4;
+    const baselineLastWeekKg = 63.2;
+    const startWeightKg = 65.6;
+    const baselineTrend = [65.6, 65.4, 65.1, 64.8, 64.5, 64.1, 63.8, 63.3, 62.4];
+
+    function paintWeight() {
+      const latest = fitnessLog.latest();
+      const kg = latest ? latest.kg : baselineWeightKg;
+      const change = fitnessLog.weeklyChange();
+      const usingSample = change == null;
+      const shownChange = usingSample ? kg - baselineLastWeekKg : change;
+      document.getElementById("weightCard").classList.toggle("is-unlogged", false);
+      document.getElementById("weightValue").textContent = formatWeight(kg);
+      document.getElementById("weightDeltaBlock").classList.toggle("is-hidden", shownChange == null);
+      if (shownChange != null) {
+        const row = document.getElementById("weightDeltaRow");
+        row.style.color = changeColor(shownChange);
+        document.getElementById("weightDelta").textContent = formatChange(shownChange);
+        const icon = document.getElementById("weightDeltaIcon");
+        icon.hidden = displayChange(shownChange) === 0;
+        icon.style.transform = shownChange > 0 ? "rotate(180deg)" : "";
+      }
+      const spark = usingSample
+        ? baselineTrend.slice(0, -1).concat(kg).slice(-6)
+        : fitnessLog.weights.slice(-6).map((e) => e.kg);
+      paintSparkline(spark, changeColor(shownChange ?? 0));
+
+      document.getElementById("stWeight").textContent = kgToDisplay(kg).toFixed(1);
+      document.getElementById("stWeightUnit").textContent = currentUnit();
+      const stDelta = document.getElementById("stLossChart");
+      const statsChange = usingSample ? kg - startWeightKg : change;
+      stDelta.textContent = statsChange == null ? "" : formatChange(statsChange);
+      stDelta.style.color = changeColor(statsChange ?? 0);
+      stDelta.nextElementSibling.hidden = statsChange == null;
+      const recent = fitnessLog.recentWeights();
+      document.getElementById("stWeightAxisStart").textContent = usingSample
+        ? "Jul 12"
+        : (recent.length
+          ? fitnessLog.fromKey(recent[0].day).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+          : new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }));
+      const weightSeries = (usingSample ? baselineTrend.slice(0, -1).concat(kg) : recent.map((e) => e.kg)).map(kgToDisplay);
+      paintAxis("stWeightAxis", weightSeries.length ? axisLabels(weightSeries) : []);
+      document.getElementById("weightUnitLabel").textContent = currentUnit();
+      if (weightSeries.length) drawTrendChart("stWeightChart", weightSeries, changeColor(statsChange ?? 0));
+      else {
+        delete chartValues.stWeightChart;
+        document.getElementById("stWeightChart").innerHTML = "";
+      }
+    }
+
+    function fillWheel(el, values) {
+      const pad = `<div class="ios-wheel-item" aria-hidden="true"></div>`.repeat(2);
+      el.innerHTML = pad + values.map((v) => `<div class="ios-wheel-item">${v}</div>`).join("") + pad;
+    }
+
+    fillWheel(weightWholeEl, Array.from({ length: 171 }, (_, i) => 30 + i));
+    fillWheel(weightTenthEl, Array.from({ length: 10 }, (_, i) => i));
+
+    function wheelIndex(el) {
+      return Math.max(0, Math.round(el.scrollTop / WHEEL_ITEM));
+    }
+
+    function paintWheelSel(el) {
+      const items = [...el.querySelectorAll(".ios-wheel-item")].filter((n) => n.textContent !== "");
+      const i = Math.min(wheelIndex(el), items.length - 1);
+      items.forEach((item, idx) => item.classList.toggle("is-sel", idx === i));
+    }
+
+    function scrollWheelTo(el, index, smooth) {
+      el._lockHaptic = true;
+      el._wheelIndex = index;
+      el.scrollTo({ top: index * WHEEL_ITEM, behavior: smooth ? "smooth" : "auto" });
+      paintWheelSel(el);
+      window.setTimeout(() => { el._lockHaptic = false; }, smooth ? 280 : 32);
+    }
+
+    function readPickerDisplay() {
+      const whole = 30 + wheelIndex(weightWholeEl);
+      const tenth = wheelIndex(weightTenthEl);
+      return whole + tenth / 10;
+    }
+
+    function syncPickerFromWeight() {
+      const display = kgToDisplay(fitnessLog.latest()?.kg ?? baselineWeightKg);
+      const rounded = Math.round(display * 10) / 10;
+      const whole = Math.min(200, Math.max(30, Math.floor(rounded)));
+      const tenth = Math.round((rounded - Math.floor(rounded)) * 10);
+      scrollWheelTo(weightWholeEl, whole - 30, false);
+      scrollWheelTo(weightTenthEl, tenth, false);
+    }
+
+    [weightWholeEl, weightTenthEl].forEach((el) => {
+      let snapTimer = 0;
+      el._wheelIndex = 0;
+      el.addEventListener("scroll", () => {
+        paintWheelSel(el);
+        const i = wheelIndex(el);
+        if (!el._lockHaptic && i !== el._wheelIndex) {
+          el._wheelIndex = i;
+          haptic.selection();
+        }
+        window.clearTimeout(snapTimer);
+        snapTimer = window.setTimeout(() => {
+          const snapped = wheelIndex(el);
+          if (Math.abs(el.scrollTop - snapped * WHEEL_ITEM) > 1) {
+            scrollWheelTo(el, snapped, true);
+          }
+        }, 80);
+      }, { passive: true });
+    });
+
+    function openWeightSheet() {
+      haptic.light();
+      weightSheet.hidden = false;
+      requestAnimationFrame(() => {
+        syncPickerFromWeight();
+        document.querySelector(".phone").classList.add("is-sheet");
+        weightSheet.classList.add("is-on");
+      });
+    }
+
+    function closeWeightSheet() {
+      document.querySelector(".phone").classList.remove("is-sheet");
+      weightSheet.classList.remove("is-on");
+      window.setTimeout(() => {
+        if (!weightSheet.classList.contains("is-on")) weightSheet.hidden = true;
+      }, 440);
+    }
+
+    document.querySelector(".weight-add").addEventListener("click", openWeightSheet);
+    document.getElementById("weightScrim").addEventListener("click", closeWeightSheet);
+    document.getElementById("weightLog").addEventListener("click", () => {
+      haptic.success();
+      fitnessLog.logWeight(displayToKg(readPickerDisplay()));
+      paintWeight();
+      closeWeightSheet();
+    });
+
+    let sheetDrag = null;
+    weightPanel.addEventListener("pointerdown", (event) => {
+      if (event.target.closest(".ios-wheel") || event.target.closest(".ios-sheet-log")) return;
+      sheetDrag = { y: event.clientY, start: 0 };
+    });
+    window.addEventListener("pointermove", (event) => {
+      if (!sheetDrag) return;
+      const dy = Math.max(0, event.clientY - sheetDrag.y);
+      weightPanel.style.transition = "none";
+      weightPanel.style.transform = `translateY(${dy}px)`;
+    });
+    window.addEventListener("pointerup", () => {
+      if (!sheetDrag) return;
+      const match = /translateY\(([-\d.]+)px\)/.exec(weightPanel.style.transform || "");
+      const dy = match ? Number(match[1]) : 0;
+      weightPanel.style.transition = "";
+      weightPanel.style.transform = "";
+      sheetDrag = null;
+      if (dy > 90) closeWeightSheet();
+    });
+
+    function currentInterval() {
+      return moves[index]?.interval ?? 5;
+    }
+
+    function currentSet() {
+      return Math.max(1, setCount - Math.floor(elapsed / currentInterval()));
+    }
+
+    function remainingClock() {
+      const rem = Math.max(0, (moves[index]?.duration ?? 0) - elapsed);
+      const seconds = Math.floor(rem);
+      return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+    }
+
+    function paintLastSet() {
+      const el = document.getElementById("oneMore");
+      if (!el) return;
+      el.hidden = !(phase === "workout" && !splashOn && currentSet() === 1);
+    }
+
+    function paintTimer() {
+      document.getElementById("setN").textContent = String(currentSet());
+      paintLastSet();
+    }
+
+    let soundsOn = localStorage.getItem("soundsEnabled") !== "false";
+    let currentCue = null;
+
+    function soundsEnabled() {
+      return soundsOn;
+    }
+
+    function paintSoundToggles() {
+      const settingsBtn = document.querySelector('[aria-label="Sounds"]');
+      if (settingsBtn) {
+        settingsBtn.classList.toggle("is-on", soundsOn);
+        settingsBtn.setAttribute("aria-checked", String(soundsOn));
+      }
+      const muteBtn = document.getElementById("workoutMute");
+      if (muteBtn) {
+        muteBtn.setAttribute("aria-pressed", String(!soundsOn));
+        muteBtn.setAttribute("aria-label", soundsOn ? "Mute sounds" : "Unmute sounds");
+        const onIcon = muteBtn.querySelector(".mute-on");
+        const offIcon = muteBtn.querySelector(".mute-off");
+        if (onIcon) onIcon.hidden = !soundsOn;
+        if (offIcon) offIcon.hidden = soundsOn;
+      }
+    }
+
+    function setSoundsEnabled(on) {
+      soundsOn = on;
+      localStorage.setItem("soundsEnabled", String(on));
+      if (!on && currentCue) {
+        currentCue.pause();
+        currentCue = null;
+      }
+      paintSoundToggles();
+    }
+
+    function setSoundUrl(n) {
+      if (n >= 1 && n <= 20) return `../Chicken/Sounds/sets/${n}.m4a`;
+      return `../Chicken/Sounds/sets/${n}.wav`;
+    }
+
+    function nameSoundUrl(name) {
+      const slug = String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      if (slug === "abs" || slug === "done" || slug === "dumbbell-shoulder-press") {
+        return `../Chicken/Sounds/names/${slug}.mp3`;
+      }
+      return `../Chicken/Sounds/names/${slug}.wav`;
+    }
+
+    function playCue(url) {
+      return new Promise((resolve) => {
+        if (!soundsEnabled()) {
+          resolve();
+          return;
+        }
+        if (currentCue) {
+          currentCue.pause();
+          currentCue = null;
+        }
+        const hit = new Audio(url);
+        hit.volume = 0.95;
+        currentCue = hit;
+        const done = () => {
+          if (currentCue === hit) currentCue = null;
+          resolve();
+        };
+        hit.addEventListener("ended", done, { once: true });
+        hit.addEventListener("error", done, { once: true });
+        hit.play().catch(done);
+      });
+    }
+
+    function unlockRepSound() {
+      const warm = new Audio(setSoundUrl(20));
+      warm.volume = 0;
+      warm.play().then(() => {
+        warm.pause();
+        warm.currentTime = 0;
+      }).catch(() => {});
+    }
+
+    function playNumber(n) {
+      playCue(setSoundUrl(n));
+    }
+
+    async function introduceMove() {
+      paused = true;
+      announcing = true;
+      lastRepBucket = -1;
+      render();
+      await playCue(nameSoundUrl(moves[index].name));
+      if (phase !== "workout") {
+        announcing = false;
+        return;
+      }
+      announcing = false;
+      paused = false;
+      lastRepBucket = -1;
+      cueRep();
+      render();
+    }
+
+    function playRep() {
+      playNumber(currentSet());
+    }
+
+    function cueRep() {
+      const bucket = Math.floor(elapsed / currentInterval());
+      if (bucket === lastRepBucket) return;
+      lastRepBucket = bucket;
+      playRep();
     }
 
     function render() {
-      workoutEl.classList.toggle("is-leave", phase !== "workout");
-      completeEl.classList.toggle("is-on", phase === "complete");
-      if (phase !== "workout") return;
-      document.getElementById("moveLabel").textContent = `Move ${index + 1} of ${moves.length}`;
-      document.getElementById("time").textContent = format(elapsed);
+      document.querySelector(".phone").dataset.phase = splashOn ? "splash" : phase;
+      splashEl.classList.toggle("is-on", splashOn);
+      homeEl.classList.toggle("is-off", !splashOn && phase !== "home");
+      countdownEl.classList.toggle("is-on", !splashOn && phase === "countdown");
+      workoutEl.classList.toggle("is-leave", splashOn || phase !== "workout");
+      completeEl.classList.toggle("is-on", !splashOn && phase === "complete");
+      paintLastSet();
+      if (splashOn || phase !== "workout") return;
+      paintTimer();
       document.getElementById("moveName").textContent = moves[index].name;
       const move = moves[index];
-      if (move.video) {
-        chicken.classList.add("hidden");
-        chickenVideo.classList.remove("hidden");
-        chickenVideo.classList.toggle("zoomed", Boolean(move.zoomed));
-        chickenVideo.classList.toggle("larger", Boolean(move.larger));
-        chickenVideo.muted = true;
-        chickenVideo.playsInline = true;
-        const abs = new URL(move.video, window.location.href).href;
-        if (chickenVideo.src !== abs) chickenVideo.src = move.video;
-        if (paused) chickenVideo.pause();
-        else chickenVideo.play().catch(() => {});
+      chicken.classList.remove("zoomed", "larger");
+      if (move.frames) {
+        chicken.src = move.frames[workoutFrame % move.frames.length];
       } else {
-        chickenVideo.pause();
-        chickenVideo.classList.add("hidden");
-        chicken.classList.remove("hidden");
         chicken.src = move.src;
       }
-      pips.innerHTML = moves.map((_, i) => `<div class="pip${i <= index ? " filled" : ""}"></div>`).join("");
+      const moveLabel = document.getElementById("moveLabel");
+      if (moveLabel) moveLabel.textContent = `${index + 1}/${moves.length}`;
+      pips.innerHTML = moves.map((_, i) => {
+        const state = i <= index ? " filled" : "";
+        const back = i < index ? " is-back" : "";
+        return `<div class="pip${state}${back}" data-index="${i}"></div>`;
+      }).join("");
       pauseBtn.innerHTML = paused
-        ? `<svg width="22" height="22" viewBox="0 0 22 22" fill="#301A1A"><path d="M6 3.5v15l13-7.5L6 3.5z"/></svg>`
+        ? `<img src="../Chicken/Assets.xcassets/IconPlay.imageset/icon-play.svg" width="32" height="32" alt="" />`
         : `<img src="../Chicken/Assets.xcassets/IconPause.imageset/icon-pause.svg" alt="" />`;
       pauseBtn.setAttribute("aria-label", paused ? "Resume" : "Pause");
-      const isLast = index === moves.length - 1;
-      document.getElementById("nextLabel").textContent = isLast ? "Done" : "Next";
-      document.getElementById("nextArrow").classList.toggle("hidden", isLast);
+      document.getElementById("prevBtn").disabled = index === 0;
+      document.getElementById("nextBtn").setAttribute("aria-label", "Next");
+    }
+
+    function prev() {
+      if (index <= 0 || transitioning || phase !== "workout") return;
+      haptic.medium();
+      goToMove(index - 1);
+    }
+
+    function enterMove(target) {
+      index = target;
+      elapsed = startElapsed;
+      lastRepBucket = -1;
+      paused = true;
+      announcing = true;
+      workoutFrame = 0;
+      render();
+      introduceMove();
+      scene.classList.remove("is-leave");
+      scene.classList.add("is-enter");
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scene.classList.remove("is-enter");
+          transitioning = false;
+        });
+      });
+    }
+
+    function goToMove(target) {
+      if (transitioning || phase !== "workout") return;
+      if (target < 0 || target >= index) return;
+      transitioning = true;
+      scene.classList.add("is-leave");
+      window.setTimeout(() => enterMove(target), 320);
     }
 
     function next() {
       if (transitioning || phase !== "workout") return;
+      haptic.medium();
       transitioning = true;
       const goingComplete = index + 1 >= moves.length;
       scene.classList.add("is-leave");
       window.setTimeout(() => {
         if (goingComplete) {
+          fitnessLog.recordWorkout();
+          paintStreak();
+          paintCalendar();
           phase = "complete";
           paused = true;
-          chickenVideo.pause();
-          charmVideo.muted = true;
-          charmVideo.play().catch(() => {});
+          announcing = false;
+          charmFrame = 0;
+          charmChicken.src = seqCharm[0];
           render();
+          playCue("../Chicken/Sounds/names/done.mp3");
           transitioning = false;
+          window.clearTimeout(completeTimer);
+          completeTimer = window.setTimeout(() => restart(), 4000);
           return;
         }
-        index += 1;
-        paused = false;
-        render();
-        scene.classList.remove("is-leave");
-        scene.classList.add("is-enter");
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            scene.classList.remove("is-enter");
-            transitioning = false;
-          });
-        });
+        enterMove(index + 1);
       }, 320);
     }
 
+    pips.addEventListener("click", (event) => {
+      const pip = event.target.closest(".pip");
+      if (!pip) return;
+      goToMove(Number(pip.dataset.index));
+    });
+
+    let completeTimer = null;
+
     function restart() {
       if (transitioning) return;
+      window.clearTimeout(completeTimer);
+      completeTimer = null;
       index = startIndex;
       elapsed = startElapsed;
+      lastRepBucket = -1;
       paused = false;
-      phase = "workout";
-      charmVideo.pause();
+      announcing = false;
+      moves = catalog;
+      document.querySelector(".header-progress").hidden = false;
+      phase = "home";
+      if (countdownTimer) {
+        window.clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      workoutFrame = 0;
+      charmFrame = 0;
       scene.classList.remove("is-leave", "is-enter");
       render();
     }
 
+    let countdownTimer = null;
+
+    function popCountdown(n) {
+      countdownN.textContent = String(n);
+      countdownN.style.animation = "none";
+      void countdownN.offsetWidth;
+      countdownN.style.animation = "";
+      playNumber(n);
+    }
+
+    function beginCountdown(single) {
+      if (phase !== "home") return;
+      unlockRepSound();
+      settingsOpen = false;
+      notesOpen = false;
+      applyPanes();
+      moves = single ? [single] : catalog;
+      document.querySelector(".header-progress").hidden = moves.length < 2;
+      index = startIndex;
+      elapsed = startElapsed;
+      lastRepBucket = -1;
+      paused = false;
+      phase = "countdown";
+      let n = 3;
+      popCountdown(n);
+      render();
+      if (countdownTimer) window.clearInterval(countdownTimer);
+      countdownTimer = window.setInterval(() => {
+        n -= 1;
+        if (n < 1) {
+          window.clearInterval(countdownTimer);
+          countdownTimer = null;
+      workoutFrame = 0;
+      lastRepBucket = -1;
+      elapsed = startElapsed;
+      paused = true;
+      announcing = true;
+      phase = "workout";
+      render();
+      introduceMove();
+          return;
+        }
+        popCountdown(n);
+      }, 1000);
+    }
+
+    document.querySelectorAll(".js-start").forEach((btn) => {
+      btn.addEventListener("click", () => beginCountdown());
+    });
+    document.getElementById("woRail").addEventListener("click", (event) => {
+      const btn = event.target.closest(".js-open-move");
+      if (!btn) return;
+      const single = extraMoves[btn.dataset.move];
+      if (single) beginCountdown(single);
+    });
+    document.querySelectorAll(".js-extra").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tab = document.querySelector('#tabBar [data-tab="workouts"]');
+        tab?.click();
+      });
+    });
+
+    const notes = [];
+
+    function paintNotesCount() {
+      const el = document.getElementById("notesCount");
+      if (!el) return;
+      el.textContent = notes.length > 0 ? String(notes.length) : "";
+    }
+
+    function paintNotes() {
+      const list = document.getElementById("notesList");
+      const empty = document.getElementById("notesEmpty");
+      if (!list || !empty) return;
+      if (!notes.length) {
+        list.classList.add("pane-hidden");
+        list.innerHTML = "";
+        empty.classList.remove("pane-hidden");
+        updateReadAll();
+        return;
+      }
+      empty.classList.add("pane-hidden");
+      list.classList.remove("pane-hidden");
+      list.innerHTML = notes
+        .map(
+          (note) => `
+        <button class="note-row${note.unread ? " is-unread" : ""}" type="button" data-note="${note.id}">
+          <span class="note-main">
+            <span class="note-title">${note.title}</span>
+            <span class="note-body">${note.body}</span>
+            <span class="note-time">${note.time}</span>
+            ${note.startsWorkout ? `<span class="note-continue">Continue</span>` : ""}
+          </span>
+          <span class="note-dot" aria-hidden="true"></span>
+        </button>`
+        )
+        .join("");
+      updateReadAll();
+    }
+
+    function applyPanes() {
+      const overlay = settingsOpen || notesOpen;
+      document.getElementById("pane-settings").classList.toggle("pane-hidden", !settingsOpen);
+      document.getElementById("pane-notes").classList.toggle("pane-hidden", !notesOpen);
+      document.getElementById("tabBar").classList.toggle("pane-hidden", overlay);
+      document.getElementById("pane-home").classList.toggle("pane-hidden", overlay || homeTab !== "home");
+      document.getElementById("pane-workouts").classList.toggle("pane-hidden", overlay || homeTab !== "workouts");
+      document.getElementById("pane-stats").classList.toggle("pane-hidden", overlay || homeTab !== "statistics");
+      if (notesOpen) paintNotes();
+      if (!overlay && homeTab === "statistics") requestAnimationFrame(redrawCharts);
+    }
+
+    function openStatistics(scrollTo) {
+      haptic.selection();
+      settingsOpen = false;
+      notesOpen = false;
+      homeTab = "statistics";
+      document.querySelectorAll("#tabBar .tab").forEach((tab) => {
+        tab.classList.toggle("is-on", tab.dataset.tab === "statistics");
+      });
+      applyPanes();
+      if (scrollTo) {
+        requestAnimationFrame(() => {
+          document.getElementById(scrollTo)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+    }
+
+    document.querySelectorAll(".streak-chip").forEach((btn) => {
+      btn.addEventListener("click", () => openStatistics("stProgress"));
+    });
+
+    document.getElementById("tabBar").addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-tab]");
+      if (!btn) return;
+      if (btn.classList.contains("is-on")) return;
+      haptic.selection();
+      homeTab = btn.dataset.tab;
+      document.querySelectorAll("#tabBar .tab").forEach((tab) => {
+        tab.classList.toggle("is-on", tab === btn);
+      });
+      applyPanes();
+    });
+
+    document.querySelectorAll(".js-settings").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        haptic.light();
+        notesOpen = false;
+        settingsOpen = true;
+        applyPanes();
+      });
+    });
+
+    document.getElementById("settingsBack").addEventListener("click", () => {
+      haptic.light();
+      settingsOpen = false;
+      applyPanes();
+    });
+
+    document.querySelectorAll(".js-notes").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        haptic.light();
+        settingsOpen = false;
+        notesOpen = true;
+        applyPanes();
+      });
+    });
+
+    document.getElementById("notesBack").addEventListener("click", () => {
+      haptic.light();
+      notesOpen = false;
+      applyPanes();
+    });
+
+    function updateReadAll() {
+      const any = document.querySelector("[data-note].is-unread");
+      document.getElementById("notesReadAll").classList.toggle("pane-hidden", !any);
+    }
+
+    document.getElementById("notesReadAll").addEventListener("click", () => {
+      const hadUnread = Boolean(document.querySelector("[data-note].is-unread"));
+      document.querySelectorAll("[data-note]").forEach((row) => row.classList.remove("is-unread"));
+      updateReadAll();
+      if (hadUnread) haptic.light();
+    });
+
+    document.getElementById("pane-notes").addEventListener("click", (event) => {
+      const row = event.target.closest("[data-note]");
+      if (!row) return;
+      const wasUnread = row.classList.contains("is-unread");
+      row.classList.remove("is-unread");
+      updateReadAll();
+      if (wasUnread && !document.querySelector("[data-note].is-unread")) haptic.light();
+    });
+
+    function paintTrainingDays() {
+      document.querySelectorAll("[data-train]").forEach((btn) => {
+        btn.classList.toggle("is-on", trainingDays.has(btn.dataset.train));
+      });
+    }
+
+    function persistTrainingDays() {
+      localStorage.setItem("trainingDays", JSON.stringify(weekDays.filter((day) => trainingDays.has(day))));
+      renderDayTrack();
+      paintDays();
+      slideHome(true);
+    }
+
+    paintTrainingDays();
+    paintNotesCount();
+    paintNotes();
+
+    document.querySelectorAll(".set-toggle").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        haptic.selection();
+        const on = !btn.classList.contains("is-on");
+        if (btn.getAttribute("aria-label") === "Sounds") {
+          setSoundsEnabled(on);
+        } else {
+          btn.classList.toggle("is-on", on);
+          btn.setAttribute("aria-checked", String(on));
+        }
+      });
+    });
+
+    document.getElementById("setDays").addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-train]");
+      if (!btn) return;
+      haptic.selection();
+      const day = btn.dataset.train;
+      if (day === todayDay) return;
+      if (trainingDays.has(day)) trainingDays.delete(day);
+      else trainingDays.add(day);
+      paintTrainingDays();
+      persistTrainingDays();
+      paintStreak();
+    });
+
+    document.getElementById("workoutMute")?.addEventListener("click", () => {
+      setSoundsEnabled(!soundsOn);
+    });
+
+    paintSoundToggles();
+
+    document.getElementById("setUnits").addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-unit]");
+      if (!btn) return;
+      if (btn.classList.contains("is-on")) return;
+      haptic.selection();
+      document.querySelectorAll("[data-unit]").forEach((tab) => {
+        tab.classList.toggle("is-on", tab === btn);
+      });
+      localStorage.setItem("weightUnit", btn.dataset.unit);
+      paintWeight();
+    });
+
+    function axisLabels(values) {
+      const known = values.filter((v) => v != null);
+      const minV = Math.min(...known);
+      const maxV = Math.max(...known);
+      if (maxV > 100) {
+        const top = Math.ceil(maxV / 200) * 200;
+        return [top, top - 600, top - 1200].map((n) => n.toLocaleString("en-US"));
+      }
+      const top = Math.ceil(maxV);
+      const bot = Math.floor(minV);
+      const mid = (top + bot) / 2;
+      return [top, mid, bot].map((n) => n.toFixed(1));
+    }
+
+    function paintAxis(id, labels) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = labels.map((label) => `<span>${label}</span>`).join("");
+    }
+
+    function statsTrendCard({ title, value, unit, delta, chartId, start, startId, endId, valueId, unitId, deltaId, axisId }) {
+      const valueAttr = valueId ? ` id="${valueId}"` : "";
+      const unitAttr = unitId ? ` id="${unitId}"` : "";
+      const deltaAttr = deltaId ? ` id="${deltaId}"` : "";
+      return `<article class="st-card">
+          <div class="st-card-top">
+            <div class="st-card-head">
+              <div class="st-head-main">
+                <div class="st-card-title">${title}</div>
+                <div class="st-value-row">
+                  <div class="st-weight-now"${valueAttr}>${value}</div>
+                  <div class="st-unit"${unitAttr}>${unit}</div>
+                </div>
+              </div>
+              <div class="st-delta-col">
+                <div class="st-weight-delta"${deltaAttr}>${delta}</div>
+                <div class="st-delta-hint">this week</div>
+              </div>
+            </div>
+          </div>
+          <div class="st-plot-row">
+            <div class="st-plot-col">
+              <div class="st-plot">
+                <svg class="st-weight-chart" id="${chartId}" viewBox="0 0 300 128" preserveAspectRatio="none" aria-hidden="true"></svg>
+              </div>
+              <div class="st-weight-axis"><span${startId ? ` id="${startId}"` : ""}>${start}</span><span id="${endId}"></span></div>
+            </div>
+            <div class="st-yaxis" id="${axisId}"></div>
+          </div>
+        </article>`;
+    }
+
+    document.getElementById("stCaloriesCard").outerHTML = statsTrendCard({
+      title: "Calories burned",
+      value: "12,480",
+      unit: "kcal",
+      delta: "+1840 kcal",
+      chartId: "stCalorieChart",
+      start: "Jul 12",
+      endId: "stCalorieAxisEnd",
+      axisId: "stCalorieAxis",
+    });
+    document.getElementById("stWeightCard").outerHTML = statsTrendCard({
+      title: "Weight",
+      value: "—",
+      unit: "kg",
+      delta: "",
+      chartId: "stWeightChart",
+      start: "",
+      startId: "stWeightAxisStart",
+      endId: "stWeightAxisEnd",
+      valueId: "stWeight",
+      unitId: "stWeightUnit",
+      deltaId: "stLossChart",
+      axisId: "stWeightAxis",
+    });
+
+    const chartEndLabel = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    document.getElementById("stCalorieAxisEnd").textContent = chartEndLabel;
+    document.getElementById("stWeightAxisEnd").textContent = chartEndLabel;
+
+    const chickenMark = `<img src="../Chicken/Assets.xcassets/CalendarChicken.imageset/calendar-chicken.png?v=2" alt="" />`;
+    const presetWorkoutDays = new Set([1, 3, 5, 8, 10, 12, 15, 17, 19, 22, 24, 26, 28, 29, 30]);
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December",
+    ];
+    const calendarYear = new Date().getFullYear();
+    const now = new Date();
+    const todayMonth = now.getMonth() + 1;
+    const todayDate = now.getDate();
+
+    function statsMonthHTML(year, monthIndex) {
+      const name = monthNames[monthIndex];
+      const month = monthIndex + 1;
+      const leading = (new Date(year, monthIndex, 1).getDay() + 6) % 7;
+      const dim = new Date(year, month, 0).getDate();
+      const todayStamp = Date.UTC(calendarYear, now.getMonth(), now.getDate());
+      const blanks = Array.from({ length: leading }, () => `<span class="st-day is-empty"></span>`).join("");
+      const days = Array.from({ length: dim }, (_, i) => {
+        const day = i + 1;
+        const stamp = Date.UTC(year, monthIndex, day);
+        const inCurrentYear = year === calendarYear;
+        const isTodayCell = inCurrentYear && month === todayMonth && day === todayDate;
+        const done = (!inCurrentYear || stamp <= todayStamp) && (isTodayCell || presetWorkoutDays.has(day) || fitnessLog.didWorkout(year, month, day));
+        const today = isTodayCell ? " is-today" : "";
+        return `<span class="st-day${done ? " is-done" : ""}${today}">${done ? chickenMark : day}</span>`;
+      }).join("");
+      return `<div class="st-month"><div class="st-card-title">${name}</div><div class="st-weekdays"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="st-cal">${blanks}${days}</div></div>`;
+    }
+
+    function paintCalendar() {
+      const html = Array.from({ length: 2 }, (_, offset) => {
+        const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+        return statsMonthHTML(date.getFullYear(), date.getMonth());
+      }).join("");
+      document.getElementById("stCalRecent").innerHTML = html;
+    }
+    paintCalendar();
+
+    const chartValues = {};
+    function drawTrendChart(id, values, color = "var(--fg-accent)") {
+      chartValues[id] = { values, color };
+      const svg = document.getElementById(id);
+      const w = 300;
+      const h = 128;
+      const known = values.filter((v) => v != null);
+      const rawMin = Math.min(...known);
+      const rawMax = Math.max(...known);
+      const pad = Math.max((rawMax - rawMin) * 0.08, 0.2);
+      const minV = rawMin - pad;
+      const maxV = rawMax + pad;
+      const span = Math.max(maxV - minV, 0.1);
+      const slots = Math.max(known.length - 1, 1);
+      const edge = 6;
+      const plotW = w - 2 * edge;
+      const plotH = h - 2 * edge;
+      const pts = known.map((v, i) => {
+        const x = edge + (plotW * i) / slots;
+        const y = edge + plotH * (1 - (v - minV) / span);
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      });
+      const first = pts[0].split(",");
+      const last = pts[pts.length - 1].split(",");
+      const fill = `${first[0]},${h} ${pts.join(" ")} ${last[0]},${h}`;
+      const box = svg.getBoundingClientRect();
+      const rx = box.width > 0 ? (4 * w) / box.width : 4;
+      const ry = box.height > 0 ? (4 * h) / box.height : 4;
+      svg.innerHTML = `
+        <polygon points="${fill}" fill="color-mix(in srgb, ${color} 16%, transparent)" />
+        <polyline points="${pts.join(" ")}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+        <ellipse cx="${last[0]}" cy="${last[1]}" rx="${rx.toFixed(2)}" ry="${ry.toFixed(2)}" fill="${color}" />
+      `;
+    }
+
+    const redrawCharts = () => {
+      Object.entries(chartValues).forEach(([id, entry]) => drawTrendChart(id, entry.values, entry.color));
+    };
+    new ResizeObserver(() => {
+      if (homeTab === "statistics") redrawCharts();
+    }).observe(document.getElementById("pane-stats"));
+
+    const calorieSeries = [980, 1120, 1340, 1510, 1680, 1840, 2040, 2200];
+    drawTrendChart("stCalorieChart", calorieSeries);
+    paintAxis("stCalorieAxis", axisLabels(calorieSeries));
+    paintDays();
+    slideHome(true);
+    scrollSelectedDayChip(false);
+    paintStreak();
+
     pauseBtn.addEventListener("click", () => {
+      haptic.light();
       paused = !paused;
       render();
     });
     document.getElementById("nextBtn").addEventListener("click", next);
+    document.getElementById("prevBtn").addEventListener("click", prev);
+    document.getElementById("workoutClose").addEventListener("click", restart);
     document.getElementById("complete").addEventListener("click", restart);
     window.goNext = next;
 
-    chickenVideo.addEventListener("canplay", () => {
-      if (phase === "workout" && !paused && moves[index].video) {
-        chickenVideo.muted = true;
-        chickenVideo.play().catch(() => {});
+    let lastHomeTick = 0;
+    let lastHomeAbsTick = 0;
+    let lastFreeDayTick = 0;
+    let freeDayFrame = 0;
+    let lastShoulderTick = 0;
+    let shoulderFrame = 0;
+    let lastAbsCardTick = 0;
+    let absCardFrame = 0;
+    let lastWorkoutTick = 0;
+    let lastCharmTick = 0;
+    let absHolding = false;
+    let homeAbsHolding = false;
+    let homeAbsFrame = 0;
+    const absLoopPauseMs = 500;
+    function paintSplashAbs() {
+      splashChicken.src = seqAbs[homeFrame];
+    }
+    function paintHomeAbs() {
+      const src = seqAbs[homeAbsFrame];
+      document.querySelectorAll(".abs-preview-chicken").forEach((img) => {
+        img.src = src;
+      });
+    }
+    function advanceAbs(now) {
+      const wait = absHolding ? absLoopPauseMs : 1000 / 10;
+      if (now - lastHomeTick < wait) return;
+      lastHomeTick = now;
+      if (absHolding) {
+        absHolding = false;
+        homeFrame = 0;
+        paintSplashAbs();
+        return;
       }
-    });
-    charmVideo.addEventListener("canplay", () => {
-      if (phase === "complete") {
-        charmVideo.muted = true;
-        charmVideo.play().catch(() => {});
+      if (homeFrame >= seqAbs.length - 1) {
+        absHolding = true;
+        return;
       }
-    });
+      homeFrame += 1;
+      paintSplashAbs();
+    }
+    function advanceHomeAbs(now) {
+      const wait = homeAbsHolding ? absLoopPauseMs : 1000 / 10;
+      if (now - lastHomeAbsTick < wait) return;
+      lastHomeAbsTick = now;
+      if (homeAbsHolding) {
+        homeAbsHolding = false;
+        homeAbsFrame = 0;
+        paintHomeAbs();
+        return;
+      }
+      if (homeAbsFrame >= seqAbs.length - 1) {
+        homeAbsHolding = true;
+        return;
+      }
+      homeAbsFrame += 1;
+      paintHomeAbs();
+    }
+    function mediaLoop(now) {
+      requestAnimationFrame(mediaLoop);
+      if (splashOn) {
+        advanceAbs(now);
+        return;
+      }
+      if (phase === "home" && homeTab === "workouts" && !settingsOpen && !notesOpen) {
+        advanceHomeAbs(now);
+        if (now - lastShoulderTick >= 1000 / 3) {
+          lastShoulderTick = now;
+          shoulderFrame = (shoulderFrame + 1) % seq04.length;
+          document.querySelectorAll('.wo-frames[data-frames="shoulder"]').forEach((img) => {
+            img.src = seq04[shoulderFrame];
+          });
+        }
+        if (now - lastAbsCardTick >= 1000 / 9) {
+          lastAbsCardTick = now;
+          absCardFrame = (absCardFrame + 1) % seq01.length;
+          document.querySelectorAll('.wo-frames[data-frames="abs"]').forEach((img) => {
+            img.src = seq01[absCardFrame];
+          });
+        }
+      }
+      if (phase === "home" && homeTab === "home" && !settingsOpen && !notesOpen) {
+        advanceHomeAbs(now);
+        if (now - lastFreeDayTick >= 1000 / 6) {
+          lastFreeDayTick = now;
+          freeDayFrame = (freeDayFrame + 1) % freeDayFrames.length;
+          document.querySelectorAll(".free-day-chicken").forEach((img) => {
+            img.src = freeDayFrames[freeDayFrame];
+          });
+        }
+      }
+      if (phase === "workout" && (!paused || announcing)) {
+        const move = moves[index];
+        if (move.frames && now - lastWorkoutTick >= 1000 / (move.fps || 10)) {
+          lastWorkoutTick = now;
+          workoutFrame = (workoutFrame + 1) % move.frames.length;
+          chicken.src = move.frames[workoutFrame];
+        }
+      }
+      if (phase === "complete" && now - lastCharmTick >= 1000 / 10) {
+        lastCharmTick = now;
+        charmFrame = (charmFrame + 1) % seqCharm.length;
+        charmChicken.src = seqCharm[charmFrame];
+      }
+    }
+    requestAnimationFrame(mediaLoop);
 
     setInterval(() => {
-      if (phase === "workout" && !paused) {
+      if (phase === "workout" && !paused && !transitioning) {
         elapsed += 0.25;
-        document.getElementById("time").textContent = format(elapsed);
+        if (elapsed >= (moves[index]?.duration ?? 100)) {
+          elapsed = moves[index]?.duration ?? 100;
+          paintTimer();
+          next();
+          return;
+        }
+        paintTimer();
+        cueRep();
       }
     }, 250);
+
+    window.setTimeout(() => haptic.medium(), 160);
+    window.setTimeout(() => {
+      haptic.light();
+      splashOn = false;
+      render();
+    }, 2000);
 
     render();
   </script>

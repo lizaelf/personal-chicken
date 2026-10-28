@@ -19,12 +19,37 @@
 		53AEC853BFC84F6B99516B64 /* CompletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76E22030C69F4D9D8B12233F /* CompletionView.swift */; };
 		58B54CDCA385422C87148280 /* ProgressPips.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB8AE2095FC4445B40C7A65 /* ProgressPips.swift */; };
 		527A23BBC8A9475E913A73BB /* WorkoutControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D993AFFD4E4776BEFF37E5 /* WorkoutControls.swift */; };
+		B7E1HOMEBUILD00000000001 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1HOMEFILE00000000001 /* HomeView.swift */; };
+		B7E1COMPBUILD00000000001 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E1COMPFILE00000000001 /* Components.swift */; };
+		A22CUEBUILD000000000001 /* WorkoutCue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22CUEFILE000000000001 /* WorkoutCue.swift */; };
+		A22WAVBUILD000000000001 /* rep.wav in Resources */ = {isa = PBXBuildFile; fileRef = A22WAVFILE000000000001 /* rep.wav */; };
+		A22SETSBUILD00000000001 /* sets in Resources */ = {isa = PBXBuildFile; fileRef = A22SETSFILE000000000001 /* sets */; };
+		A22NAMEBUILD00000000001 /* names in Resources */ = {isa = PBXBuildFile; fileRef = A22NAMEFILE000000000001 /* names */; };
 		4B2A81F2DC0B4EC7890A6CA5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 117ED6727B9F486DAB85DB37 /* Assets.xcassets */; };
 		6D7F5875484C420390E2215D /* WorkearFont-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D172FFA461974BD68D2D64FE /* WorkearFont-Regular.ttf */; };
-		A11VIDEOBUILD00000000001 /* Sequence01.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000001 /* Sequence01.mov */; };
-		A11VIDEOBUILD00000000002 /* Sequence04.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000002 /* Sequence04.mov */; };
-		A11VIDEOBUILD00000000003 /* SequenceCharm.mov in Resources */ = {isa = PBXBuildFile; fileRef = A11VIDEOFILE000000000003 /* SequenceCharm.mov */; };
+		A11FRAMEBUILD00000000001 /* Frames in Resources */ = {isa = PBXBuildFile; fileRef = A11FRAMEFOLDER00000000001 /* Frames */; };
+		C33PRIVBUILD00000000001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C33PRIVFILE000000000001 /* PrivacyInfo.xcprivacy */; };
+		D44UITBUILD000000000001 /* ChickenUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44UITFILE0000000000001 /* ChickenUITests.swift */; };
+		E55LOGBUILD000000000001 /* FitnessLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55LOGFILE0000000000001 /* FitnessLog.swift */; };
+		F66UNITBUILD00000000001 /* FitnessLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66UNITFILE000000000001 /* FitnessLogTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D44UITPROXY000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DB7DD6171E740B49A7F8377 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 04DE852E2AB34D6584BA70BB;
+			remoteInfo = Chicken;
+		};
+		F66UNITPROXY00000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6DB7DD6171E740B49A7F8377 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 04DE852E2AB34D6584BA70BB;
+			remoteInfo = Chicken;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		6254AF8A3CC34BE0B5B02B88 /* Chicken.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Chicken.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -34,6 +59,10 @@
 		A11VIDEOFILE000000000001 /* Sequence01.mov */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence01.mov; sourceTree = "<group>"; };
 		A11VIDEOFILE000000000002 /* Sequence04.mov */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence04.mov; sourceTree = "<group>"; };
 		A11VIDEOFILE000000000003 /* SequenceCharm.mov */ = {isa = PBXFileReference; lastKnownFileType = file; path = SequenceCharm.mov; sourceTree = "<group>"; };
+		A11VIDEOFILE000000000004 /* Sequence01.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence01.mp4; sourceTree = "<group>"; };
+		A11VIDEOFILE000000000005 /* Sequence04.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Sequence04.mp4; sourceTree = "<group>"; };
+		A11VIDEOFILE000000000006 /* SequenceCharm.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = SequenceCharm.mp4; sourceTree = "<group>"; };
+		A11FRAMEFOLDER00000000001 /* Frames */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Frames; sourceTree = "<group>"; };
 		ED6C91918BE148E58730BAD6 /* ChickenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenApp.swift; sourceTree = "<group>"; };
 		A6EB6077B16341DE851559E2 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		8207082F42834AE785EBB36E /* Move.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Move.swift; sourceTree = "<group>"; };
@@ -46,10 +75,36 @@
 		76E22030C69F4D9D8B12233F /* CompletionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionView.swift; sourceTree = "<group>"; };
 		ABB8AE2095FC4445B40C7A65 /* ProgressPips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressPips.swift; sourceTree = "<group>"; };
 		06D993AFFD4E4776BEFF37E5 /* WorkoutControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutControls.swift; sourceTree = "<group>"; };
+		B7E1HOMEFILE00000000001 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		B7E1COMPFILE00000000001 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		A22CUEFILE000000000001 /* WorkoutCue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCue.swift; sourceTree = "<group>"; };
+		A22WAVFILE000000000001 /* rep.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = rep.wav; sourceTree = "<group>"; };
+		A22SETSFILE000000000001 /* sets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = sets; sourceTree = "<group>"; };
+		A22NAMEFILE000000000001 /* names */ = {isa = PBXFileReference; lastKnownFileType = folder; path = names; sourceTree = "<group>"; };
+		C33PRIVFILE000000000001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		D44UITFILE0000000000001 /* ChickenUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChickenUITests.swift; sourceTree = "<group>"; };
+		D44UITPRODUCT0000000001 /* ChickenUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChickenUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E55LOGFILE0000000000001 /* FitnessLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessLog.swift; sourceTree = "<group>"; };
+		F66UNITFILE000000000001 /* FitnessLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessLogTests.swift; sourceTree = "<group>"; };
+		F66UNITPRODUCT000000001 /* ChickenTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChickenTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		7B5062E9525F43AA83729A51 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D44UITFRAMEWORKS0000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F66UNITFRAMEWORKS000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -63,6 +118,8 @@
 			isa = PBXGroup;
 			children = (
 				DD6C878E4F2A46579B5799DD /* Chicken */,
+				F66UNITGROUP00000000001 /* ChickenTests */,
+				D44UITGROUP000000000001 /* ChickenUITests */,
 				143138B42AF94A72905CB7B3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -77,7 +134,10 @@
 				117ED6727B9F486DAB85DB37 /* Assets.xcassets */,
 				03FC146E56114C9AA8021CFC /* Fonts */,
 				A11VIDEOGROUP00000000001 /* Videos */,
+				A22SOUNDGROUP0000000001 /* Sounds */,
+				A11FRAMEFOLDER00000000001 /* Frames */,
 				2FB77763CD9046638C58A97E /* Info.plist */,
+				C33PRIVFILE000000000001 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Chicken;
 			sourceTree = "<group>";
@@ -87,6 +147,8 @@
 			children = (
 				8207082F42834AE785EBB36E /* Move.swift */,
 				362631EE3AC44BE8969C6974 /* WorkoutSession.swift */,
+				A22CUEFILE000000000001 /* WorkoutCue.swift */,
+				E55LOGFILE0000000000001 /* FitnessLog.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -95,6 +157,8 @@
 			isa = PBXGroup;
 			children = (
 				D781FA0AF3C149089C77CA90 /* RootView.swift */,
+				B7E1HOMEFILE00000000001 /* HomeView.swift */,
+				B7E1COMPFILE00000000001 /* Components.swift */,
 				6CCE4B0CFA1F420FA9B64C06 /* PaperBackground.swift */,
 				1C0DD10DD94A4349A46A4BC8 /* ChickenMediaView.swift */,
 				89D125A7B67049A0B1C04BCB /* LoopingVideoPlayer.swift */,
@@ -120,16 +184,47 @@
 				A11VIDEOFILE000000000001 /* Sequence01.mov */,
 				A11VIDEOFILE000000000002 /* Sequence04.mov */,
 				A11VIDEOFILE000000000003 /* SequenceCharm.mov */,
+				A11VIDEOFILE000000000004 /* Sequence01.mp4 */,
+				A11VIDEOFILE000000000005 /* Sequence04.mp4 */,
+				A11VIDEOFILE000000000006 /* SequenceCharm.mp4 */,
 			);
 			path = Videos;
+			sourceTree = "<group>";
+		};
+		A22SOUNDGROUP0000000001 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				A22WAVFILE000000000001 /* rep.wav */,
+				A22SETSFILE000000000001 /* sets */,
+				A22NAMEFILE000000000001 /* names */,
+			);
+			path = Sounds;
 			sourceTree = "<group>";
 		};
 		143138B42AF94A72905CB7B3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				6254AF8A3CC34BE0B5B02B88 /* Chicken.app */,
+				D44UITPRODUCT0000000001 /* ChickenUITests.xctest */,
+				F66UNITPRODUCT000000001 /* ChickenTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D44UITGROUP000000000001 /* ChickenUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D44UITFILE0000000000001 /* ChickenUITests.swift */,
+			);
+			path = ChickenUITests;
+			sourceTree = "<group>";
+		};
+		F66UNITGROUP00000000001 /* ChickenTests */ = {
+			isa = PBXGroup;
+			children = (
+				F66UNITFILE000000000001 /* FitnessLogTests.swift */,
+			);
+			path = ChickenTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -152,6 +247,40 @@
 			productReference = 6254AF8A3CC34BE0B5B02B88 /* Chicken.app */;
 			productType = "com.apple.product-type.application";
 		};
+		D44UITTARGET00000000001 /* ChickenUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D44UITCONFLIST000000001 /* Build configuration list for PBXNativeTarget "ChickenUITests" */;
+			buildPhases = (
+				D44UITSOURCES0000000001 /* Sources */,
+				D44UITFRAMEWORKS0000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D44UITDEP00000000000001 /* PBXTargetDependency */,
+			);
+			name = ChickenUITests;
+			productName = ChickenUITests;
+			productReference = D44UITPRODUCT0000000001 /* ChickenUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		F66UNITTARGET0000000001 /* ChickenTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F66UNITCONFLIST00000001 /* Build configuration list for PBXNativeTarget "ChickenTests" */;
+			buildPhases = (
+				F66UNITSOURCES000000001 /* Sources */,
+				F66UNITFRAMEWORKS000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F66UNITDEP0000000000001 /* PBXTargetDependency */,
+			);
+			name = ChickenTests;
+			productName = ChickenTests;
+			productReference = F66UNITPRODUCT000000001 /* ChickenTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -164,6 +293,14 @@
 				TargetAttributes = {
 					04DE852E2AB34D6584BA70BB = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					F66UNITTARGET0000000001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = 04DE852E2AB34D6584BA70BB;
+					};
+					D44UITTARGET00000000001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = 04DE852E2AB34D6584BA70BB;
 					};
 				};
 			};
@@ -181,6 +318,8 @@
 			projectRoot = "";
 			targets = (
 				04DE852E2AB34D6584BA70BB /* Chicken */,
+				D44UITTARGET00000000001 /* ChickenUITests */,
+				F66UNITTARGET0000000001 /* ChickenTests */,
 			);
 		};
 /* End PBXProject section */
@@ -192,9 +331,11 @@
 			files = (
 				4B2A81F2DC0B4EC7890A6CA5 /* Assets.xcassets in Resources */,
 				6D7F5875484C420390E2215D /* WorkearFont-Regular.ttf in Resources */,
-				A11VIDEOBUILD00000000001 /* Sequence01.mov in Resources */,
-				A11VIDEOBUILD00000000002 /* Sequence04.mov in Resources */,
-				A11VIDEOBUILD00000000003 /* SequenceCharm.mov in Resources */,
+				A11FRAMEBUILD00000000001 /* Frames in Resources */,
+				A22WAVBUILD000000000001 /* rep.wav in Resources */,
+				A22SETSBUILD00000000001 /* sets in Resources */,
+				A22NAMEBUILD00000000001 /* names in Resources */,
+				C33PRIVBUILD00000000001 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,10 +358,43 @@
 				53AEC853BFC84F6B99516B64 /* CompletionView.swift in Sources */,
 				58B54CDCA385422C87148280 /* ProgressPips.swift in Sources */,
 				527A23BBC8A9475E913A73BB /* WorkoutControls.swift in Sources */,
+				B7E1HOMEBUILD00000000001 /* HomeView.swift in Sources */,
+				B7E1COMPBUILD00000000001 /* Components.swift in Sources */,
+				A22CUEBUILD000000000001 /* WorkoutCue.swift in Sources */,
+				E55LOGBUILD000000000001 /* FitnessLog.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D44UITSOURCES0000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D44UITBUILD000000000001 /* ChickenUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F66UNITSOURCES000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F66UNITBUILD00000000001 /* FitnessLogTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D44UITDEP00000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 04DE852E2AB34D6584BA70BB /* Chicken */;
+			targetProxy = D44UITPROXY000000000001 /* PBXContainerItemProxy */;
+		};
+		F66UNITDEP0000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 04DE852E2AB34D6584BA70BB /* Chicken */;
+			targetProxy = F66UNITPROXY00000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		12D3DDBD117F4D05BECEA42E /* Debug */ = {
@@ -268,11 +442,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3627J93R87;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Chicken/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Chicken;
+				INFOPLIST_KEY_CFBundleDisplayName = "Fit Coco";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -298,11 +473,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3627J93R87;
 				DEVELOPMENT_ASSET_PATHS = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Chicken/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Chicken;
+				INFOPLIST_KEY_CFBundleDisplayName = "Fit Coco";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -318,6 +494,76 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		D44UITCONFDEBUG00000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3627J93R87;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.chickenUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Chicken;
+			};
+			name = Debug;
+		};
+		D44UITCONFRELEASE000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3627J93R87;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.chickenUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Chicken;
+			};
+			name = Release;
+		};
+		F66UNITCONFDEBUG0000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3627J93R87;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.chickenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Chicken.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Chicken";
+			};
+			name = Debug;
+		};
+		F66UNITCONFRELEASE00001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3627J93R87;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.chickenTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Chicken.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Chicken";
 			};
 			name = Release;
 		};
@@ -338,6 +584,24 @@
 			buildConfigurations = (
 				685515AC761B4A7DB56E662C /* Debug */,
 				A7DD6AA5EA8E47548E873355 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D44UITCONFLIST000000001 /* Build configuration list for PBXNativeTarget "ChickenUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D44UITCONFDEBUG00000001 /* Debug */,
+				D44UITCONFRELEASE000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F66UNITCONFLIST00000001 /* Build configuration list for PBXNativeTarget "ChickenTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F66UNITCONFDEBUG0000001 /* Debug */,
+				F66UNITCONFRELEASE00001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fit Coco — iOS preview</title>
+  <style>
+    @font-face {
+      font-family: "Workear Font";
+      src: url("../Chicken/Fonts/WorkearFont-Regular.ttf") format("truetype");
+    }
+    :root {
+      --font: "Workear Font", ui-rounded, "SF Pro Rounded", sans-serif;
+      --cream: #fdf6ec;
+      --coral: #ef6856;
+      --ink: #301a1a;
+      --move: #826d5e;
+      --button-cream: #fefcf4;
+      --white: #ffffff;
+      --fg-muted: rgba(0, 0, 0, 0.4);
+      --radius-lg: 20px;
+      --gutter: 16px;
+      --text-display: 84px;
+      --text-title3: 20px;
+      --text-caption: 12px;
+      --shad: 0 0.958px 1.916px -0.958px rgba(0, 0, 0, 0.1), 0 0.958px 2.874px rgba(0, 0, 0, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--cream);
+      font-family: var(--font);
+    }
+    body { min-height: 100dvh; }
+    .phone {
+      width: 100%;
+      max-width: 430px;
+      height: 100dvh;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      background: var(--cream);
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      padding-top: max(12px, env(safe-area-inset-top, 0px));
+      box-sizing: border-box;
+    }
+    .paper {
+      position: absolute;
+      inset: 0;
+      background: url("../Chicken/Assets.xcassets/PaperTexture.imageset/PaperTexture.png?v=5") center / cover no-repeat;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .header {
+      position: relative;
+      padding: 8px 16px 0;
+      z-index: 2;
+      flex: 0 0 auto;
+    }
+    .move-label { font-size: var(--text-caption); line-height: 1.2; color: var(--move); }
+    .pips { display: flex; width: 100%; gap: 10px; margin-top: 10px; }
+    .pip { flex: 1 1 0; min-width: 0; height: 8px; border-radius: 999px; border: 1px solid var(--coral); }
+    .pip.filled { background: var(--coral); }
+    .timer-block {
+      position: relative;
+      padding-top: 49px;
+      text-align: center;
+      z-index: 2;
+      flex: 0 0 auto;
+    }
+    .time { font-size: var(--text-display); line-height: 1; }
+    .move-name { font-size: var(--text-title3); line-height: 1.4; color: var(--fg-muted); padding: 7px 24px 0; }
+    .spacer { flex: 1 1 23px; min-height: 23px; }
+    .spacer-sm { flex: 1 1 8px; min-height: 8px; }
+    .chicken {
+      position: relative;
+      flex: 1 1 auto;
+      width: 90%;
+      max-width: 90%;
+      min-height: 0;
+      height: auto;
+      margin: 0 auto;
+      display: grid;
+      place-items: center;
+      z-index: 1;
+    }
+    .chicken img {
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .controls {
+      position: relative;
+      display: flex;
+      gap: 12px;
+      padding: 8px 16px 42px;
+      z-index: 2;
+      flex: 0 0 auto;
+    }
+    .pause {
+      width: 72px;
+      height: 72px;
+      border: 0;
+      border-radius: var(--radius-lg);
+      background: var(--white);
+      box-shadow: var(--shad);
+    }
+    .next {
+      flex: 1;
+      height: 72px;
+      border: 0;
+      border-radius: var(--radius-lg);
+      background: var(--coral);
+      color: var(--button-cream);
+      font: var(--text-title3)/1 var(--font);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: var(--shad);
+    }
+    .home-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 5;
+      height: 34px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 8px;
+      pointer-events: none;
+    }
+    .home-bar span {
+      width: 140px;
+      height: 5px;
+      border-radius: 5px;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="paper"></div>
+    <div class="header">
+      <div class="move-label">Move 3 of 4</div>
+      <div class="pips">
+        <div class="pip filled"></div>
+        <div class="pip filled"></div>
+        <div class="pip filled"></div>
+        <div class="pip"></div>
+      </div>
+    </div>
+    <div class="timer-block">
+      <div class="time">20</div>
+      <div class="move-name">Overhead press</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="chicken">
+      <img src="../Chicken/Frames/Sequence01/frame_005.png" alt="ABS" />
+    </div>
+    <div class="spacer spacer-sm"></div>
+    <div class="controls">
+      <button class="pause" aria-label="Pause">
+        <img src="../Chicken/Assets.xcassets/IconPause.imageset/icon-pause.svg" width="32" height="32" alt="" />
+      </button>
+      <button class="next">
+        Next
+        <img src="../Chicken/Assets.xcassets/IconArrow.imageset/icon-arrow.svg" width="32" height="32" alt="" />
+      </button>
+    </div>
+    <div class="home-bar" aria-hidden="true"><span></span></div>
+  </div>
+</body>
+</html>
