@@ -17,7 +17,7 @@ struct RootView: View {
                 HomeBar()
                     .ignoresSafeArea()
             }
-            .task { await dismissSplash() }
+            .task { await runSplash() }
             .onChange(of: session.phase) { _, phase in
                 if phase == .complete { log.recordWorkout() }
                 keepScreenAwake(phase)
@@ -72,6 +72,23 @@ struct RootView: View {
 
     private func keepScreenAwake(_ phase: WorkoutSession.Phase) {
         UIApplication.shared.isIdleTimerDisabled = phase == .countdown || phase == .workout
+    }
+
+    private func runSplash() async {
+        async let voice: Void = playLaunchVoice()
+        async let away: Void = dismissSplash()
+        _ = await (voice, away)
+    }
+
+    /// Says “Coco” once the app is actually on screen. Launch-time audio is otherwise dropped.
+    private func playLaunchVoice() async {
+        while UIApplication.shared.applicationState != .active, !Task.isCancelled {
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        guard !Task.isCancelled, session.soundsEnabled else { return }
+        try? await Task.sleep(for: .milliseconds(1280))
+        guard !Task.isCancelled, session.soundsEnabled, UIApplication.shared.applicationState == .active else { return }
+        WorkoutCue.speakCoco()
     }
 
     private func dismissSplash() async {

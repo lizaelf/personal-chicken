@@ -8,6 +8,12 @@ struct HomeView: View {
     @State private var selectedDay = Self.todayKey()
     /// Card pager position is derived from `selectedDay`. Swipes move exactly one day.
     @State private var cardDrag: CGFloat = 0
+    @State private var loadedForwardOffset = 16
+    @State private var dayStripFrames: [DayStripFrame] = []
+    @State private var dayStripOffset: CGFloat = 0
+    @State private var dayStripCenter: CGFloat = 0
+    @State private var showDayMonth = false
+    @State private var settledDayTitle: String?
     @State private var suppressWorkoutStart = false
     @State private var showingSettings = false
     @State private var showingNotifications = false
@@ -121,11 +127,11 @@ struct HomeView: View {
     private var weeklyPlan: some View {
         VStack(alignment: .leading, spacing: 16) {
             ChickenPageHeader {
-                Text(homeTitle)
+                Text(displayedHomeTitle)
                     .font(Theme.Text.title2)
                     .foregroundStyle(Theme.fgPrimary)
                     .contentTransition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: homeTitle)
+                    .animation(.easeInOut(duration: 0.2), value: displayedHomeTitle)
             } trailing: {
                 headerTrailing
             }
@@ -137,48 +143,151 @@ struct HomeView: View {
     private var weekDays: some View {
         GeometryReader { geo in
             ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 9) {
-                        ForEach(homeDays) { day in
-                            Group {
-                                if day.id == selectedDay, let copy = dayCopy(for: day) {
-                                    labeledDayChip(day, copy: copy)
-                                } else {
-                                    dayDot(day)
-                                        .frame(width: 36, height: 56)
-                                }
-                            }
-                            .id(day.id)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                var transaction = Transaction()
-                                transaction.disablesAnimations = true
-                                withTransaction(transaction) {
-                                    selectedDay = day.id
-                                    cardDrag = 0
-                                }
-                            }
-                            .accessibilityLabel(day.id == selectedDay ? "\(day.label) \(day.dayNumber), \(dayCopy(for: day) ?? "")" : "\(day.label) \(day.dayNumber)")
-                            .accessibilityAddTraits(day.id == selectedDay ? .isSelected : [])
-                            .accessibilityAddTraits(.isButton)
-                        }
-                    }
-                    .padding(.leading, 16)
-                    .padding(.trailing, geo.size.width)
-                }
-                .onAppear {
-                    proxy.scrollTo(selectedDay, anchor: .leading)
-                }
-                .onChange(of: selectedDay) { _, id in
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        proxy.scrollTo(id, anchor: .leading)
-                    }
-                }
-                .scrollTickHaptic(axis: .horizontal, step: 45)
+                dayStrip(width: geo.size.width, proxy: proxy)
             }
         }
         .frame(height: 56)
-        .clipped()
+    }
+
+    private func dayStrip(width: CGFloat, proxy: ScrollViewProxy) -> some View {
+        let scroller = ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(spacing: 9) {
+                ForEach(homeDays) { day in
+                    Group {
+                        if day.id == selectedDay, let copy = dayCopy(for: day) {
+                            labeledDayChip(day, copy: copy)
+                        } else {
+                            dayDot(day)
+                                .frame(width: 36, height: 56)
+                        }
+                    }
+                    .id(day.id)
+                    .background {
+                        GeometryReader { cell in
+                            Color.clear.preference(
+                                key: DayStripFramesKey.self,
+                                value: [DayStripFrame(
+                                    id: day.id,
+                                    minX: cell.frame(in: .named("dayStrip")).minX,
+                                    maxX: cell.frame(in: .named("dayStrip")).maxX
+                                )]
+                            )
+                        }
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            selectedDay = day.id
+                            cardDrag = 0
+                        }
+                    }
+                    .accessibilityLabel(day.id == selectedDay ? "\(day.label) \(day.dayNumber), \(dayCopy(for: day) ?? "")" : "\(day.label) \(day.dayNumber)")
+                    .accessibilityAddTraits(day.id == selectedDay ? .isSelected : [])
+                    .accessibilityAddTraits(.isButton)
+                }
+            }
+            .padding(.leading, 16)
+            .padding(.trailing, width)
+            .coordinateSpace(name: "dayStrip")
+        }
+        .onAppear {
+            proxy.scrollTo(selectedDay, anchor: .leading)
+        }
+        .onChange(of: selectedDay) { _, id in
+            ensureForwardDays(near: id)
+            withAnimation(.easeInOut(duration: 0.2)) {
+                proxy.scrollTo(id, anchor: .leading)
+            }
+        }
+        .onPreferenceChange(DayStripFramesKey.self) { dayStripFrames = $0 }
+        .scrollTickHaptic(
+            axis: .horizontal,
+            step: 45,
+            feedback: .impact(weight: .light, intensity: 0.62)
+        )
+
+        return trackDayStrip(scroller)
+    }
+
+    @ViewBuilder
+    private func trackDayStrip<V: View>(_ scroller: V) -> some View {
+        if #available(iOS 18.0, *) {
+            scroller
+                .onScrollPhaseChange { _, phase in
+                    switch phase {
+                    case .interacting, .decelerating:
+                        revealDayMonth()
+                    case .idle:
+                        if let title = centeredDayTitle {
+                            settledDayTitle = title
+                        }
+                    default:
+                        break
+                    }
+                }
+                .onScrollGeometryChange(for: DayStripScroll.self) { geo in
+                    DayStripScroll(offset: geo.contentOffset.x, center: geo.visibleRect.midX)
+                } action: { _, scroll in
+                    dayStripOffset = scroll.offset
+                    dayStripCenter = scroll.center
+                    if showDayMonth, let title = centeredDayTitle {
+                        settledDayTitle = title
+                    }
+                    if let id = edgeDayId {
+                        ensureForwardDays(near: id)
+                    }
+                }
+        } else {
+            scroller
+        }
+    }
+
+    private var edgeDayId: String? {
+        let frames = Dictionary(dayStripFrames.map { ($0.id, $0) }, uniquingKeysWith: { _, next in next })
+            .values
+            .sorted { $0.minX < $1.minX }
+        return (frames.first { $0.maxX > dayStripOffset + 0.5 } ?? frames.last)?.id
+    }
+
+    /// Day whose chip sits on the midpoint of the visible strip.
+    private var centerDayId: String? {
+        let frames = Dictionary(dayStripFrames.map { ($0.id, $0) }, uniquingKeysWith: { _, next in next }).values
+        guard !frames.isEmpty else { return nil }
+        let center = dayStripCenter
+        if let hit = frames.first(where: { $0.minX <= center && center <= $0.maxX }) {
+            return hit.id
+        }
+        return frames.min { lhs, rhs in
+            abs((lhs.minX + lhs.maxX) / 2 - center) < abs((rhs.minX + rhs.maxX) / 2 - center)
+        }?.id
+    }
+
+    /// Month and day number of the centered day. Today keeps the word Today.
+    private var centeredDayTitle: String? {
+        guard let id = centerDayId, let date = FitnessLog.date(from: id) else { return nil }
+        let calendar = FitnessLog.calendar
+        if calendar.isDateInToday(date) { return "Today" }
+        let month = calendar.component(.month, from: date)
+        guard FitnessStats.monthNames.indices.contains(month - 1) else { return nil }
+        let name = FitnessStats.monthNames[month - 1]
+        let number = calendar.component(.day, from: date)
+        let year = calendar.component(.year, from: date)
+        let thisYear = calendar.component(.year, from: Date())
+        return year == thisYear ? "\(name) \(number)" : "\(name) \(number), \(year)"
+    }
+
+    private var displayedHomeTitle: String {
+        guard showDayMonth else { return homeTitle }
+        return settledDayTitle ?? centeredDayTitle ?? homeTitle
+    }
+
+    private func revealDayMonth() {
+        showDayMonth = true
+        if let title = centeredDayTitle {
+            settledDayTitle = title
+        }
     }
 
     private func dayCopy(for day: HomeDay) -> String? {
@@ -201,13 +310,15 @@ struct HomeView: View {
 
     private var todayDay: String { Self.currentWeekdayId() }
 
-    /// 365 days before today, today, and 365 days after. Not a calendar year.
-    private static let dayHorizon = 365
+    /// Days already behind today. The forward end is today plus 365 days and grows while scrolling.
+    private static let pastDaySpan = 365
+    private static let forwardDaySpan = 365
 
     private var homeDays: [HomeDay] {
         let calendar = FitnessLog.calendar
         let today = calendar.startOfDay(for: Date())
-        return (-Self.dayHorizon...Self.dayHorizon).compactMap { offset in
+        let future = min(loadedForwardOffset, Self.forwardDaySpan)
+        return (-Self.pastDaySpan...future).compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: offset, to: today) else { return nil }
             return HomeDay(
                 id: FitnessLog.key(for: date),
@@ -217,6 +328,15 @@ struct HomeView: View {
                 isPast: offset < 0
             )
         }
+    }
+
+    private func ensureForwardDays(near id: String) {
+        let calendar = FitnessLog.calendar
+        let today = calendar.startOfDay(for: Date())
+        guard let date = FitnessLog.date(from: id) else { return }
+        let offset = calendar.dateComponents([.day], from: today, to: calendar.startOfDay(for: date)).day ?? 0
+        guard offset >= loadedForwardOffset - 10, loadedForwardOffset < Self.forwardDaySpan else { return }
+        loadedForwardOffset = min(Self.forwardDaySpan, loadedForwardOffset + 45)
     }
 
     private var selectedHomeDay: HomeDay? {
@@ -347,6 +467,7 @@ struct HomeView: View {
             .onChanged { value in
                 let dx = value.translation.width
                 if abs(dx) > 18 { suppressWorkoutStart = true }
+                if dx < -18 { ensureForwardDays(near: selectedDay) }
                 let atStart = index == 0 && dx > 0
                 let atEnd = index == homeDays.count - 1 && dx < 0
                 var transaction = Transaction()
@@ -1561,6 +1682,7 @@ private struct ScrollTickHaptic: ViewModifier {
     var axis: Axis = .vertical
     /// Distance between ticks. `nil` on a horizontal scroller means one tick per page.
     var step: CGFloat? = nil
+    var feedback: SensoryFeedback = .impact(flexibility: .soft, intensity: 0.5)
     @State private var lastBucket: Int?
     @State private var userScrolling = false
     @State private var tick = 0
@@ -1576,7 +1698,7 @@ private struct ScrollTickHaptic: ViewModifier {
     @available(iOS 18.0, *)
     private func tracked(_ content: Content) -> some View {
         content
-            .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.5), trigger: tick)
+            .sensoryFeedback(feedback, trigger: tick)
             .onScrollPhaseChange { _, phase in
                 userScrolling = phase != .idle && phase != .animating
             }
@@ -1594,8 +1716,30 @@ private struct ScrollTickHaptic: ViewModifier {
 }
 
 extension View {
-    fileprivate func scrollTickHaptic(axis: Axis = .vertical, step: CGFloat? = nil) -> some View {
-        modifier(ScrollTickHaptic(axis: axis, step: step))
+    fileprivate func scrollTickHaptic(
+        axis: Axis = .vertical,
+        step: CGFloat? = nil,
+        feedback: SensoryFeedback = .impact(flexibility: .soft, intensity: 0.5)
+    ) -> some View {
+        modifier(ScrollTickHaptic(axis: axis, step: step, feedback: feedback))
+    }
+}
+
+private struct DayStripScroll: Equatable {
+    var offset: CGFloat
+    var center: CGFloat
+}
+
+private struct DayStripFrame: Equatable {
+    var id: String
+    var minX: CGFloat
+    var maxX: CGFloat
+}
+
+private struct DayStripFramesKey: PreferenceKey {
+    static var defaultValue: [DayStripFrame] = []
+    static func reduce(value: inout [DayStripFrame], nextValue: () -> [DayStripFrame]) {
+        value.append(contentsOf: nextValue())
     }
 }
 

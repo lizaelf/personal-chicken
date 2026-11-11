@@ -2589,9 +2589,10 @@
     const homeNow = new Date();
     const todayKey = dateKey(homeNow);
     const todayDay = weekdayLabels[homeNow.getDay()];
-    const dayHorizon = 365;
-    const homeDays = Array.from({ length: dayHorizon * 2 + 1 }, (_, index) => {
-      const offset = index - dayHorizon;
+    const forwardSpan = 365;
+    const pastSpan = 365;
+    let loadedForward = 16;
+    function dayFromOffset(offset) {
       const date = addDays(homeNow, offset);
       return {
         id: dateKey(date),
@@ -2601,10 +2602,16 @@
         isToday: offset === 0,
         isPast: offset < 0,
       };
-    });
-    const homeDayById = new Map(homeDays.map((day) => [day.id, day]));
+    }
+    const homeDays = [];
+    const homeDayById = new Map();
     function dayRecord(id) {
       return homeDayById.get(id);
+    }
+    for (let offset = -pastSpan; offset <= loadedForward; offset += 1) {
+      const day = dayFromOffset(offset);
+      homeDays.push(day);
+      homeDayById.set(day.id, day);
     }
     function everyOtherTrainingDays() {
       const start = weekDays.indexOf(todayDay);
@@ -2623,7 +2630,7 @@
     let trainingDays = new Set(loadTrainingDays());
     trainingDays.add(todayDay);
     localStorage.setItem("trainingDays", JSON.stringify(weekDays.filter((day) => trainingDays.has(day))));
-    const dayIds = homeDays.map((day) => day.id);
+    let dayIds = homeDays.map((day) => day.id);
     const daysEl = document.getElementById("days");
     daysEl.innerHTML = homeDays.map((day) =>
       `<button class="day-dot" type="button" data-day="${day.id}" aria-label="${day.label} ${day.dayNumber}" aria-pressed="false"><span>${day.label}</span><span>${day.dayNumber}</span></button>`
@@ -2778,6 +2785,28 @@
     }
     renderDayTrack();
 
+    function extendForwardDays(nearOffset) {
+      if (typeof nearOffset !== "number" || nearOffset < loadedForward - 10) return;
+      if (loadedForward >= forwardSpan) return;
+      const next = Math.min(forwardSpan, loadedForward + 45);
+      const buttons = [];
+      const slides = [];
+      for (let offset = loadedForward + 1; offset <= next; offset += 1) {
+        const day = dayFromOffset(offset);
+        homeDays.push(day);
+        homeDayById.set(day.id, day);
+        dayIds.push(day.id);
+        buttons.push(`<button class="day-dot" type="button" data-day="${day.id}" aria-label="${day.label} ${day.dayNumber}" aria-pressed="false"><span>${day.label}</span><span>${day.dayNumber}</span></button>`);
+        slides.push(`<section class="day-slide" data-slide="${day.id}">${slideMarkup(day.id)}</section>`);
+      }
+      loadedForward = next;
+      const spacer = daysEl.querySelector(".days-end-spacer");
+      if (spacer) spacer.insertAdjacentHTML("beforebegin", buttons.join(""));
+      else daysEl.insertAdjacentHTML("beforeend", buttons.join(""));
+      dayTrack.insertAdjacentHTML("beforeend", slides.join(""));
+      paintDays();
+    }
+
     function slideOffset(index) {
       return -Math.max(0, index) * dayStage.clientWidth;
     }
@@ -2821,8 +2850,18 @@
       return `${names[day.label] || day.label} ${month} ${day.dayNumber}`;
     }
 
+    function paintHomeTitle() {
+      const title = document.getElementById("homeTitle");
+      if (!title) return;
+      title.textContent = dayMonthScrolling
+        ? centerDayScrollTitle()
+        : homeTitle(dayRecord(selectedDay));
+    }
+
     function selectDay(day) {
       if (!day || day === selectedDay) return;
+      const near = dayRecord(day);
+      if (near) extendForwardDays(near.offset);
       haptic.selection();
       selectedDay = day;
       paintDays();
@@ -2847,8 +2886,7 @@
               ? "Future trainings"
               : "Free day";
         dayBtn.setAttribute("aria-pressed", String(isOn));
-        const title = document.getElementById("homeTitle");
-        if (title) title.textContent = homeTitle(dayRecord(selectedDay));
+        if (!dayMonthScrolling) paintHomeTitle();
         dayBtn.setAttribute("aria-label", isOn ? `${day.label} ${day.dayNumber}, ${copy}` : `${day.label} ${day.dayNumber}`);
         if (isOn) {
           dayBtn.className = [
@@ -2932,6 +2970,71 @@
       daysScroller._tickUser = false;
       scrollSelectedDayChip(true, true);
     }
+    let dayMonthScrolling = false;
+    let dayMonthArmedUntil = 0;
+    function dayAtStripEdge() {
+      const edge = daysScroller.scrollLeft + 1;
+      const buttons = daysScroller.querySelectorAll("[data-day]");
+      let chosen = buttons[0];
+      for (const btn of buttons) {
+        if (btn.offsetLeft + btn.offsetWidth > edge) {
+          chosen = btn;
+          break;
+        }
+      }
+      return dayRecord(chosen?.dataset.day);
+    }
+    function dayAtStripCenter() {
+      const center = daysScroller.scrollLeft + daysScroller.clientWidth / 2;
+      const buttons = daysScroller.querySelectorAll("[data-day]");
+      let containing = null;
+      let nearest = null;
+      let best = Infinity;
+      for (const btn of buttons) {
+        const left = btn.offsetLeft;
+        const right = left + btn.offsetWidth;
+        if (center >= left && center <= right) containing = btn;
+        const dist = Math.abs((left + right) / 2 - center);
+        if (dist < best) {
+          best = dist;
+          nearest = btn;
+        }
+      }
+      return dayRecord((containing || nearest)?.dataset.day);
+    }
+    function centerDayScrollTitle() {
+      const day = dayAtStripCenter();
+      if (!day || day.isToday) return "Today";
+      const date = new Date(`${day.id}T12:00:00`);
+      const name = monthNames[date.getMonth()] || "";
+      if (!name) return "Today";
+      const label = `${name} ${day.dayNumber}`;
+      return date.getFullYear() === homeNow.getFullYear() ? label : `${label}, ${date.getFullYear()}`;
+    }
+    function showDayMonth() {
+      dayMonthScrolling = true;
+      const title = document.getElementById("homeTitle");
+      const text = centerDayScrollTitle();
+      if (title && title.textContent !== text) title.textContent = text;
+    }
+    function settleDayMonth() {
+      if (!dayMonthScrolling) return;
+      showDayMonth();
+    }
+    function noteDayMonthScroll() {
+      const edgeDay = dayAtStripEdge();
+      if (edgeDay) extendForwardDays(edgeDay.offset);
+      const dragging = daysScroller.classList.contains("is-dragging");
+      if (dragging) dayMonthArmedUntil = performance.now() + 700;
+      if (!dragging && !dayMonthScrolling && performance.now() > dayMonthArmedUntil) return;
+      showDayMonth();
+    }
+    daysScroller.addEventListener("scroll", noteDayMonthScroll, { passive: true });
+    daysScroller.addEventListener("scrollend", settleDayMonth);
+    daysScroller.addEventListener("wheel", () => {
+      dayMonthArmedUntil = performance.now() + 700;
+      showDayMonth();
+    }, { passive: true });
     daysScroller.addEventListener("pointerup", endDaysDrag);
     daysScroller.addEventListener("pointercancel", endDaysDrag);
     daysScroller.addEventListener("wheel", (event) => {
@@ -2940,7 +3043,7 @@
       event.preventDefault();
     }, { passive: false });
 
-    function bindScrollTicks(el, { axis = "y", step = 48 } = {}) {
+    function bindScrollTicks(el, { axis = "y", step = 48, buzz = () => haptic.tick() } = {}) {
       if (!el) return;
       let last = null;
       const arm = () => { el._tickUser = true; };
@@ -2961,11 +3064,11 @@
         }
         if (bucket === last) return;
         last = bucket;
-        haptic.tick();
+        buzz();
       }, { passive: true });
     }
 
-    bindScrollTicks(daysScroller, { axis: "x", step: 45 });
+    bindScrollTicks(daysScroller, { axis: "x", step: 45, buzz: () => haptic.play(9) });
     bindScrollTicks(document.getElementById("pane-stats"));
     bindScrollTicks(document.getElementById("pane-settings"));
     bindScrollTicks(document.getElementById("pane-notes"));
@@ -3020,8 +3123,11 @@
       dayTrack.classList.remove("is-dragging");
       const width = dayStage.clientWidth || 1;
       let next = dayIds.indexOf(selectedDay);
-      if (dx < -width * 0.18) next += 1;
-      else if (dx > width * 0.18) next -= 1;
+      if (dx < -width * 0.18) {
+        const current = dayRecord(selectedDay);
+        if (current) extendForwardDays(current.offset);
+        next += 1;
+      } else if (dx > width * 0.18) next -= 1;
       const day = dayIds[next];
       if (day && day !== selectedDay) selectDay(day);
       else slideHome();
@@ -3424,7 +3530,7 @@
       return `../Chicken/Sounds/names/${slug}.wav`;
     }
 
-    function playCue(url) {
+    function playCue(url, volume = 0.95) {
       return new Promise((resolve) => {
         if (!soundsEnabled()) {
           resolve();
@@ -3435,7 +3541,7 @@
           currentCue = null;
         }
         const hit = new Audio(url);
-        hit.volume = 0.95;
+        hit.volume = volume;
         currentCue = hit;
         const done = () => {
           if (currentCue === hit) currentCue = null;
@@ -4171,6 +4277,7 @@
     }, 250);
 
     window.setTimeout(() => haptic.play([22, 80, 16]), 450);
+    window.setTimeout(() => playCue("../Chicken/Sounds/names/coco.wav", 0.475), 1280);
     window.setTimeout(() => {
       haptic.light();
       splashOn = false;

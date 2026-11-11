@@ -25,6 +25,10 @@ enum WorkoutCue {
         play(resource: "done", subdirectory: "names")
     }
 
+    static func speakCoco() {
+        play(resource: "coco", subdirectory: "names", volume: 0.5)
+    }
+
     static func speakName(_ name: String) async {
         prepare()
         let slug = slugify(name)
@@ -40,12 +44,12 @@ enum WorkoutCue {
         try? await Task.sleep(for: .seconds(wait))
     }
 
-    private static func play(resource: String, subdirectory: String) {
+    private static func play(resource: String, subdirectory: String, volume: Float = 1) {
         prepare()
         guard let url = resourceURL(for: resource, subdirectory: subdirectory) else { return }
         player?.stop()
         player = try? AVAudioPlayer(contentsOf: url)
-        player?.volume = 1
+        player?.volume = volume
         player?.play()
     }
 
