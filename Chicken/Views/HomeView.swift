@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct HomeView: View {
     let session: WorkoutSession
@@ -6,8 +7,6 @@ struct HomeView: View {
     @State private var selectedTab: HomeTab = .home
     @State private var selectedDay = Self.todayKey()
     /// Card pager position is derived from `selectedDay`. Swipes move exactly one day.
-    @State private var dayStripRest: CGFloat = 0
-    @State private var dayStripDrag: CGFloat = 0
     @State private var cardDrag: CGFloat = 0
     @State private var suppressWorkoutStart = false
     @State private var showingSettings = false
@@ -20,6 +19,8 @@ struct HomeView: View {
     @State private var scrollToStatsStreak = false
     @State private var trainingDayTick = 0
     @State private var noteReadTick = 0
+    @State private var workoutCardID: String? = ExtraWorkout.all.first?.id
+    @State private var workoutCardTick = 0
     @State private var loggedWeightKg: Double?
 
     private var usesSampleWeight: Bool { log.weeklyWeightChange == nil }
@@ -134,50 +135,50 @@ struct HomeView: View {
     }
 
     private var weekDays: some View {
-        let index = CGFloat(homeDays.firstIndex { $0.id == selectedDay } ?? 0)
-        return GeometryReader { geo in
-            HStack(spacing: 9) {
-                ForEach(homeDays) { day in
-                    Group {
-                        if day.id == selectedDay, let copy = dayCopy(for: day) {
-                            labeledDayChip(day, copy: copy)
-                        } else {
-                            dayDot(day)
-                                .frame(width: 36, height: 56)
+        GeometryReader { geo in
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 9) {
+                        ForEach(homeDays) { day in
+                            Group {
+                                if day.id == selectedDay, let copy = dayCopy(for: day) {
+                                    labeledDayChip(day, copy: copy)
+                                } else {
+                                    dayDot(day)
+                                        .frame(width: 36, height: 56)
+                                }
+                            }
+                            .id(day.id)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                var transaction = Transaction()
+                                transaction.disablesAnimations = true
+                                withTransaction(transaction) {
+                                    selectedDay = day.id
+                                    cardDrag = 0
+                                }
+                            }
+                            .accessibilityLabel(day.id == selectedDay ? "\(day.label) \(day.dayNumber), \(dayCopy(for: day) ?? "")" : "\(day.label) \(day.dayNumber)")
+                            .accessibilityAddTraits(day.id == selectedDay ? .isSelected : [])
+                            .accessibilityAddTraits(.isButton)
                         }
                     }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedDay = day.id
-                            dayStripRest = 0
-                            dayStripDrag = 0
-                            cardDrag = 0
-                        }
-                    }
-                    .accessibilityLabel(day.id == selectedDay ? "\(day.label) \(day.dayNumber), \(dayCopy(for: day) ?? "")" : "\(day.label) \(day.dayNumber)")
-                    .accessibilityAddTraits(day.id == selectedDay ? .isSelected : [])
-                    .accessibilityAddTraits(.isButton)
+                    .padding(.leading, 16)
+                    .padding(.trailing, geo.size.width)
                 }
+                .onAppear {
+                    proxy.scrollTo(selectedDay, anchor: .leading)
+                }
+                .onChange(of: selectedDay) { _, id in
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        proxy.scrollTo(id, anchor: .leading)
+                    }
+                }
+                .scrollTickHaptic(axis: .horizontal, step: 45)
             }
-            .padding(.trailing, geo.size.width)
-            .offset(x: 16 - index * 45 + dayStripRest + dayStripDrag)
-            .animation(.easeInOut(duration: 0.2), value: selectedDay)
-            .gesture(dayStripGesture)
         }
         .frame(height: 56)
         .clipped()
-    }
-
-    private var dayStripGesture: some Gesture {
-        DragGesture(minimumDistance: 12)
-            .onChanged { value in
-                dayStripDrag = value.translation.width
-            }
-            .onEnded { value in
-                dayStripRest += value.translation.width
-                dayStripDrag = 0
-            }
     }
 
     private func dayCopy(for day: HomeDay) -> String? {
@@ -200,11 +201,13 @@ struct HomeView: View {
 
     private var todayDay: String { Self.currentWeekdayId() }
 
-    /// Seven days before today, today, and the six days after.
+    /// 365 days before today, today, and 365 days after. Not a calendar year.
+    private static let dayHorizon = 365
+
     private var homeDays: [HomeDay] {
         let calendar = FitnessLog.calendar
         let today = calendar.startOfDay(for: Date())
-        return (-7...6).compactMap { offset in
+        return (-Self.dayHorizon...Self.dayHorizon).compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: offset, to: today) else { return nil }
             return HomeDay(
                 id: FitnessLog.key(for: date),
@@ -230,9 +233,16 @@ struct HomeView: View {
         switch offset {
         case -1: return "Yesterday"
         case 1: return "Tomorrow"
-        default: return "\(weekdayName(day.label)) \(day.dayNumber)"
+        default:
+            let month = Self.shortMonths[(calendar.component(.month, from: date) - 1 + 12) % 12]
+            return "\(weekdayName(day.label)) \(month) \(day.dayNumber)"
         }
     }
+
+    private static let shortMonths = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ]
 
     private func weekdayName(_ id: String) -> String {
         switch id {
@@ -247,15 +257,9 @@ struct HomeView: View {
         }
     }
 
-    private var nextDayId: String {
-        let ids = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-        guard let index = ids.firstIndex(of: todayDay) else { return "We" }
-        return ids[(index + 1) % ids.count]
-    }
-
     private var trainingDays: Set<String> {
         let saved = Set(trainingDaysRaw.split(separator: ",").map(String.init).filter { !$0.isEmpty })
-        var days = saved.isEmpty || saved == ["We", "Fr"]
+        var days = saved.isEmpty
             ? Set(Self.everyOtherTrainingDays(from: todayDay))
             : saved
         days.insert(todayDay)
@@ -272,13 +276,13 @@ struct HomeView: View {
 
     private func seedTrainingDaysIfNeeded() {
         let saved = Set(trainingDaysRaw.split(separator: ",").map(String.init).filter { !$0.isEmpty })
-        if saved.isEmpty || saved == ["We", "Fr"] {
+        if saved.isEmpty {
             trainingDaysRaw = Self.everyOtherTrainingDays(from: todayDay).joined(separator: ",")
         }
     }
 
     private func isFutureTraining(_ day: HomeDay) -> Bool {
-        !day.isPast && !day.isToday && trainingDays.contains(day.label) && day.label != nextDayId
+        !day.isPast && !day.isToday && trainingDays.contains(day.label)
     }
 
     private func isTrainingPage(_ day: HomeDay) -> Bool {
@@ -320,16 +324,17 @@ struct HomeView: View {
         GeometryReader { geo in
             let pageWidth = geo.size.width
             let index = homeDays.firstIndex { $0.id == selectedDay } ?? 0
-            HStack(spacing: 0) {
-                ForEach(homeDays) { day in
-                    dayPage(for: day, width: cardWidth)
+            let pages = (index - 1...index + 1).filter { homeDays.indices.contains($0) }
+            ZStack(alignment: .topLeading) {
+                ForEach(pages, id: \.self) { page in
+                    dayPage(for: homeDays[page], width: cardWidth)
                         .padding(.horizontal, Theme.Space.gutter)
-                        .frame(width: pageWidth)
+                        .frame(width: pageWidth, height: geo.size.height, alignment: .top)
                         .mask(Rectangle().padding(.vertical, -16))
+                        .offset(x: CGFloat(page - index) * pageWidth + cardDrag)
                 }
             }
-            .offset(x: -CGFloat(index) * pageWidth + cardDrag)
-            .frame(width: pageWidth, height: geo.size.height, alignment: .leading)
+            .frame(width: pageWidth, height: geo.size.height, alignment: .topLeading)
             .contentShape(Rectangle())
             .simultaneousGesture(cardSwipeGesture(pageWidth: pageWidth, index: index))
         }
@@ -357,11 +362,20 @@ struct HomeView: View {
                 if dx <= -threshold { next += 1 }
                 else if dx >= threshold { next -= 1 }
                 next = min(max(next, 0), homeDays.count - 1)
-                withAnimation(.easeInOut(duration: 0.35)) {
-                    cardDrag = 0
-                    selectedDay = homeDays[next].id
-                    dayStripRest = 0
-                    dayStripDrag = 0
+                if next == index {
+                    withAnimation(.easeInOut(duration: 0.35)) { cardDrag = 0 }
+                } else {
+                    let landed = homeDays[next].id
+                    withAnimation(.easeInOut(duration: 0.35)) {
+                        cardDrag = CGFloat(index - next) * pageWidth
+                    } completion: {
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            cardDrag = 0
+                            selectedDay = landed
+                        }
+                    }
                 }
                 if suppressWorkoutStart {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
@@ -437,7 +451,12 @@ struct HomeView: View {
             ChickenPrimaryButton(
                 title: live ? "Start" : "Open workout",
                 icon: live ? "IconStartArrow" : nil,
-                action: { startWorkout() }
+                action: {
+                    if live {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred(intensity: 1)
+                    }
+                    startWorkout()
+                }
             )
             .padding(24)
         }
@@ -580,11 +599,18 @@ struct HomeView: View {
                     ForEach(ExtraWorkout.all) { item in
                         extraWorkoutCard(item, width: cardWidth)
                             .padding(.horizontal, Theme.Space.gutter)
+                            .id(item.id)
                     }
                 }
                 .scrollTargetLayout()
             }
             .scrollTargetBehavior(.paging)
+            .scrollPosition(id: $workoutCardID, anchor: .leading)
+            .onChange(of: workoutCardID) { previous, next in
+                guard previous != nil, next != nil, previous != next else { return }
+                workoutCardTick += 1
+            }
+            .sensoryFeedback(.selection, trigger: workoutCardTick)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -682,8 +708,8 @@ struct HomeView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(maxWidth: .infinity)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
                             .padding(.horizontal, -Theme.Space.gutter)
-                            .padding(.bottom, -20)
                             .id("statsStreak")
                             .accessibilityLabel("Progress looks good on you!")
                     }
@@ -694,6 +720,7 @@ struct HomeView: View {
                 .onChange(of: scrollToStatsStreak) { _, go in
                     if go { jumpToStatsStreak(proxy) }
                 }
+                .scrollTickHaptic()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -811,6 +838,7 @@ struct HomeView: View {
                     .padding(.horizontal, Theme.Space.gutter)
                     .padding(.bottom, 32)
                 }
+                .scrollTickHaptic()
             }
         }
         .padding(.top, 4)
@@ -947,6 +975,7 @@ struct HomeView: View {
                 .padding(.horizontal, Theme.Space.gutter)
                 .padding(.bottom, 16)
             }
+            .scrollTickHaptic()
 
             Text("made by Lisa Pasichnyk")
                 .font(Theme.Text.callout)
@@ -1526,6 +1555,48 @@ private struct ExtraWorkout: Identifiable {
 private enum DayPageKind {
     case train(live: Bool, title: String, image: String)
     case rest(title: String)
+}
+
+private struct ScrollTickHaptic: ViewModifier {
+    var axis: Axis = .vertical
+    /// Distance between ticks. `nil` on a horizontal scroller means one tick per page.
+    var step: CGFloat? = nil
+    @State private var lastBucket: Int?
+    @State private var userScrolling = false
+    @State private var tick = 0
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            tracked(content)
+        } else {
+            content
+        }
+    }
+
+    @available(iOS 18.0, *)
+    private func tracked(_ content: Content) -> some View {
+        content
+            .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.5), trigger: tick)
+            .onScrollPhaseChange { _, phase in
+                userScrolling = phase != .idle && phase != .animating
+            }
+            .onScrollGeometryChange(for: Int.self) { geo in
+                let distance = axis == .horizontal ? geo.contentOffset.x : geo.contentOffset.y
+                let unit = step ?? (axis == .horizontal ? geo.containerSize.width : 48)
+                return Int((distance / max(unit, 1)).rounded(.down))
+            } action: { _, bucket in
+                let previous = lastBucket
+                lastBucket = bucket
+                guard userScrolling, let previous, previous != bucket else { return }
+                tick += 1
+            }
+    }
+}
+
+extension View {
+    fileprivate func scrollTickHaptic(axis: Axis = .vertical, step: CGFloat? = nil) -> some View {
+        modifier(ScrollTickHaptic(axis: axis, step: step))
+    }
 }
 
 private struct HomeDay: Identifiable {

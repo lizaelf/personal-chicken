@@ -474,18 +474,9 @@ struct ChickenTabBar: View {
             .animation(.easeOut(duration: 0.12), value: selected)
         }
         .ignoresSafeArea(edges: .bottom)
-        .background(alignment: .top) {
-            VStack(spacing: 0) {
-                LinearGradient(
-                    colors: [Theme.canvas.opacity(0), Theme.canvas],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: Theme.Space.tabTop)
-                Theme.canvas
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .ignoresSafeArea(edges: .bottom)
+        .background {
+            Theme.canvas
+                .ignoresSafeArea(edges: .bottom)
         }
         .accessibilityElement(children: .contain)
     }
@@ -648,7 +639,8 @@ private final class DrumColumn: UIScrollView, UIScrollViewDelegate {
     private var pendingIndex = 0
     private var placed = false
     private var lastIndex: Int?
-    private let selectionFeedback = UISelectionFeedbackGenerator()
+    private var lastStepTime: TimeInterval = 0
+    private let stepFeedback = UIImpactFeedbackGenerator(style: .medium)
     var onValue: ((Int) -> Void)?
 
     init(values: [Int]) {
@@ -697,7 +689,7 @@ private final class DrumColumn: UIScrollView, UIScrollViewDelegate {
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        selectionFeedback.prepare()
+        stepFeedback.prepare()
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -706,8 +698,12 @@ private final class DrumColumn: UIScrollView, UIScrollViewDelegate {
         let index = values.firstIndex(of: value)
         if let index, index != lastIndex {
             if lastIndex != nil {
-                selectionFeedback.selectionChanged()
-                selectionFeedback.prepare()
+                let now = CACurrentMediaTime()
+                if now - lastStepTime > 0.045 {
+                    stepFeedback.impactOccurred(intensity: 1)
+                    stepFeedback.prepare()
+                    lastStepTime = now
+                }
             }
             lastIndex = index
         }

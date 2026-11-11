@@ -116,18 +116,29 @@ private struct SplashView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background { PaperBackground() }
         .onAppear {
-            let pop = UIImpactFeedbackGenerator(style: .medium)
-            pop.prepare()
             withAnimation(.spring(duration: 0.7, bounce: 0.18)) {
                 popped = true
             }
-            Task {
-                try? await Task.sleep(for: .milliseconds(160))
-                pop.impactOccurred(intensity: 0.9)
-            }
         }
+        .task { await playOpenHaptic() }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Fit Coco")
+    }
+
+    /// Plays only after the app is active. Impacts in the first moments of launch are dropped.
+    private func playOpenHaptic() async {
+        while UIApplication.shared.applicationState != .active, !Task.isCancelled {
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        guard !Task.isCancelled else { return }
+        let opened = UIImpactFeedbackGenerator(style: .medium)
+        opened.prepare()
+        try? await Task.sleep(for: .milliseconds(350))
+        guard !Task.isCancelled, UIApplication.shared.applicationState == .active else { return }
+        opened.impactOccurred(intensity: 1)
+        try? await Task.sleep(for: .milliseconds(80))
+        guard !Task.isCancelled, UIApplication.shared.applicationState == .active else { return }
+        opened.impactOccurred(intensity: 0.75)
     }
 }
 

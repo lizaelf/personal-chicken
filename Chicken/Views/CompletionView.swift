@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct CompletionView: View {
     let onRestart: () -> Void
@@ -28,7 +29,10 @@ struct CompletionView: View {
 
                 HStack {
                     Spacer()
-                    ChickenCloseButton(size: 56 * scale, iconSize: 16 * scale, action: onRestart)
+                    ChickenCloseButton(size: 56 * scale, iconSize: 16 * scale) {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred(intensity: 1)
+                        onRestart()
+                    }
                 }
                 .padding(.top, 52 * scale)
                 .padding(.horizontal, 16 * scale)

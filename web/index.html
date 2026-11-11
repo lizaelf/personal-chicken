@@ -366,10 +366,18 @@
       white-space: nowrap;
     }
 
-    .today-chip.is-future .today-mo {
+    .today-chip.is-future .today-mo,
+    .today-chip.is-done .today-mo {
       background: transparent;
       color: var(--fg-secondary);
+    }
+
+    .today-chip.is-future .today-mo {
       box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg-secondary) 45%, transparent);
+    }
+
+    .today-chip.is-done .today-mo {
+      box-shadow: inset 0 0 0 1px var(--stroke-free);
     }
 
     .today-chip.is-rest .today-mo,
@@ -898,6 +906,7 @@
 
     .stats-pane {
       gap: 8px;
+      padding-bottom: 88px;
     }
 
     .st-card {
@@ -912,9 +921,11 @@
 
     .st-progress {
       display: block;
-      margin: 0 calc(-1 * var(--gutter)) -36px;
+      margin: 0 calc(-1 * var(--gutter)) 0;
       width: calc(100% + (var(--gutter) * 2));
       flex: 0 0 auto;
+      border-radius: var(--card-radius);
+      overflow: hidden;
     }
 
     .st-progress img {
@@ -1543,9 +1554,7 @@
       gap: 0;
       flex-shrink: 0;
       padding: var(--space-tab-top) 0 0;
-      background:
-        linear-gradient(to bottom, rgba(253, 246, 236, 0), var(--page)) top / 100% var(--space-tab-top) no-repeat,
-        var(--page);
+      background: var(--page);
     }
 
     .tab-bar-row {
@@ -2561,6 +2570,7 @@
         } catch (_) { /* unsupported */ }
       },
       selection() { this.play(8); },
+      tick() { this.play(4); },
       light() { this.play(12); },
       medium() { this.play(20); },
       rigid() { this.play(16); },
@@ -2579,8 +2589,9 @@
     const homeNow = new Date();
     const todayKey = dateKey(homeNow);
     const todayDay = weekdayLabels[homeNow.getDay()];
-    const homeDays = Array.from({ length: 14 }, (_, index) => {
-      const offset = index - 7;
+    const dayHorizon = 365;
+    const homeDays = Array.from({ length: dayHorizon * 2 + 1 }, (_, index) => {
+      const offset = index - dayHorizon;
       const date = addDays(homeNow, offset);
       return {
         id: dateKey(date),
@@ -2591,8 +2602,9 @@
         isPast: offset < 0,
       };
     });
+    const homeDayById = new Map(homeDays.map((day) => [day.id, day]));
     function dayRecord(id) {
-      return homeDays.find((day) => day.id === id);
+      return homeDayById.get(id);
     }
     function everyOtherTrainingDays() {
       const start = weekDays.indexOf(todayDay);
@@ -2603,8 +2615,7 @@
         const saved = JSON.parse(localStorage.getItem("trainingDays") || "null");
         if (Array.isArray(saved) && saved.length) {
           const days = saved.filter((day) => weekDays.includes(day));
-          const isLegacy = days.length === 2 && days.includes("We") && days.includes("Fr");
-          if (!isLegacy) return days;
+          if (days.length) return days;
         }
       } catch (_) {}
       return everyOtherTrainingDays();
@@ -2707,7 +2718,6 @@
       const day = dayRecord(id);
       if (!day) return "free";
       if (day.isToday) return "today";
-      if (day.offset === 1) return "free";
       if (trainingDays.has(day.label)) return day.isPast ? "past" : "future";
       return "free";
     }
@@ -2807,7 +2817,8 @@
         Sa: "Saturday",
         Su: "Sunday",
       };
-      return `${names[day.label] || day.label} ${day.dayNumber}`;
+      const month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(day.id.slice(5, 7)) - 1];
+      return `${names[day.label] || day.label} ${month} ${day.dayNumber}`;
     }
 
     function selectDay(day) {
@@ -2826,7 +2837,8 @@
         const isOn = day.id === selectedDay;
         const kind = dayKind(day.id);
         const isFuture = kind === "future";
-        const isFree = kind === "free" || kind === "past";
+        const isFree = kind === "free";
+        const isDone = kind === "past";
         const copy = day.isToday
           ? "Let’s worko-ko!"
           : kind === "past"
@@ -2844,6 +2856,7 @@
             "is-picked",
             day.isToday ? "is-today" : "",
             isFuture ? "is-future" : "",
+            isDone ? "is-done" : "",
             isFree ? "is-free" : "",
           ].filter(Boolean).join(" ");
           dayBtn.innerHTML = `<span class="today-mo">${day.label}</span><span class="today-copy">${copy}</span>`;
@@ -2916,6 +2929,7 @@
     function endDaysDrag() {
       daysDragX = null;
       daysScroller.classList.remove("is-dragging");
+      daysScroller._tickUser = false;
       scrollSelectedDayChip(true, true);
     }
     daysScroller.addEventListener("pointerup", endDaysDrag);
@@ -2925,6 +2939,66 @@
       daysScroller.scrollLeft += event.deltaY;
       event.preventDefault();
     }, { passive: false });
+
+    function bindScrollTicks(el, { axis = "y", step = 48 } = {}) {
+      if (!el) return;
+      let last = null;
+      const arm = () => { el._tickUser = true; };
+      el.addEventListener("pointerdown", arm);
+      el.addEventListener("wheel", arm, { capture: true, passive: true });
+      el.addEventListener("scrollend", () => {
+        el._tickUser = false;
+        last = null;
+      });
+      el.addEventListener("scroll", () => {
+        if (!el._tickUser) return;
+        const distance = axis === "x" ? el.scrollLeft : el.scrollTop;
+        const unit = typeof step === "function" ? step() : step;
+        const bucket = Math.round(distance / Math.max(unit, 1));
+        if (last == null) {
+          last = bucket;
+          return;
+        }
+        if (bucket === last) return;
+        last = bucket;
+        haptic.tick();
+      }, { passive: true });
+    }
+
+    bindScrollTicks(daysScroller, { axis: "x", step: 45 });
+    bindScrollTicks(document.getElementById("pane-stats"));
+    bindScrollTicks(document.getElementById("pane-settings"));
+    bindScrollTicks(document.getElementById("pane-notes"));
+    bindCardSwipeHaptic(document.getElementById("woRail"));
+
+    function bindCardSwipeHaptic(el) {
+      if (!el) return;
+      let last = null;
+      let user = false;
+      const page = () => {
+        const card = el.querySelector(".wo-card");
+        const gap = parseFloat(getComputedStyle(el).columnGap) || parseFloat(getComputedStyle(el).gap) || 0;
+        const step = (card?.offsetWidth || el.clientWidth) + gap;
+        return Math.round(el.scrollLeft / Math.max(step, 1));
+      };
+      const note = () => {
+        const index = page();
+        if (last == null) {
+          last = index;
+          return;
+        }
+        if (index === last) return;
+        last = index;
+        haptic.selection();
+      };
+      el.addEventListener("pointerdown", () => { user = true; });
+      el.addEventListener("wheel", () => { user = true; }, { capture: true, passive: true });
+      el.addEventListener("scroll", () => { if (user) note(); }, { passive: true });
+      el.addEventListener("scrollend", () => {
+        if (user) note();
+        user = false;
+      });
+    }
 
     let dragStartX = null;
     let dragFrom = 0;
@@ -3214,7 +3288,11 @@
         const i = wheelIndex(el);
         if (!el._lockHaptic && i !== el._wheelIndex) {
           el._wheelIndex = i;
-          haptic.selection();
+          const now = performance.now();
+          if (now - (el._hapticAt || 0) > 45) {
+            el._hapticAt = now;
+            haptic.medium();
+          }
         }
         window.clearTimeout(snapTimer);
         snapTimer = window.setTimeout(() => {
@@ -3579,20 +3657,21 @@
       }, 1000);
     }
 
-    document.querySelectorAll(".js-start").forEach((btn) => {
-      btn.addEventListener("click", () => beginCountdown());
+    dayStage.addEventListener("click", (event) => {
+      if (event.target.closest(".js-start")) {
+        haptic.medium();
+        beginCountdown();
+        return;
+      }
+      if (event.target.closest(".js-extra")) {
+        document.querySelector('#tabBar [data-tab="workouts"]')?.click();
+      }
     });
     document.getElementById("woRail").addEventListener("click", (event) => {
       const btn = event.target.closest(".js-open-move");
       if (!btn) return;
       const single = extraMoves[btn.dataset.move];
       if (single) beginCountdown(single);
-    });
-    document.querySelectorAll(".js-extra").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const tab = document.querySelector('#tabBar [data-tab="workouts"]');
-        tab?.click();
-      });
     });
 
     const notes = [];
@@ -3966,6 +4045,11 @@
     document.getElementById("nextBtn").addEventListener("click", next);
     document.getElementById("prevBtn").addEventListener("click", prev);
     document.getElementById("workoutClose").addEventListener("click", restart);
+    document.getElementById("closeBtn").addEventListener("click", (event) => {
+      event.stopPropagation();
+      haptic.medium();
+      restart();
+    });
     document.getElementById("complete").addEventListener("click", restart);
     window.goNext = next;
 
@@ -3987,10 +4071,8 @@
       splashChicken.src = seqAbs[homeFrame];
     }
     function paintHomeAbs() {
-      const src = seqAbs[homeAbsFrame];
-      document.querySelectorAll(".abs-preview-chicken").forEach((img) => {
-        img.src = src;
-      });
+      const img = document.querySelector(`.day-slide[data-slide="${selectedDay}"] .abs-preview-chicken`);
+      if (img) img.src = seqAbs[homeAbsFrame];
     }
     function advanceAbs(now) {
       const wait = absHolding ? absLoopPauseMs : 1000 / 10;
@@ -4054,9 +4136,8 @@
         if (now - lastFreeDayTick >= 1000 / 6) {
           lastFreeDayTick = now;
           freeDayFrame = (freeDayFrame + 1) % freeDayFrames.length;
-          document.querySelectorAll(".free-day-chicken").forEach((img) => {
-            img.src = freeDayFrames[freeDayFrame];
-          });
+          const img = document.querySelector(`.day-slide[data-slide="${selectedDay}"] .free-day-chicken`);
+          if (img) img.src = freeDayFrames[freeDayFrame];
         }
       }
       if (phase === "workout" && (!paused || announcing)) {
@@ -4089,7 +4170,7 @@
       }
     }, 250);
 
-    window.setTimeout(() => haptic.medium(), 160);
+    window.setTimeout(() => haptic.play([22, 80, 16]), 450);
     window.setTimeout(() => {
       haptic.light();
       splashOn = false;
